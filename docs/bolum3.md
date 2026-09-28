@@ -1,4 +1,4 @@
-# 3. Bölüm — Kül Gölü (tasarım)
+# 3. Bölüm — Kül Gölü
 
 Tasarım belgesindeki özetin (3.1–3.6, Seçim 3) adım adım hâli. Vurgu rengi **turkuaz** (su); bölüm sonunda tohum **Sarmaşık** evresine geçer. Yeni güç: **Nilüfer**. Görseller `docs/gorsel_tarifleri_bolum3.md`'de listelidir.
 
@@ -51,15 +51,15 @@ Aynı hareket sürer: tohum Lehim'in göğsünden sürüklenip bırakıldığı 
 - Makine dairesinde soğuk kazan ve pervane mili; köşede eski bir **çay ocağı** (çift katlı çaydanlık, basınç göstergesi, üç ağırlıklı emniyet kapağı).
 - Çaydanlığı doldurmak için kül değil su gerekir: **nilüfer** açılınca altındaki su cebinden çaydanlık doldurulur (vapurun dibindeki çatlak).
 - Ocağı ısıtmak: tohum ışığını ocağa sürükle (ısıtma, bedava).
-- Emniyet kapağının üç ağırlığı (küçük, orta, büyük) basıncı belirler; kazanın göstergesi yeşil bölgeye gelince çaydanlık öter. İpucu: kazanın yanındaki kazınmış çizim, göstergenin **ortada** olması gerektiğini gösterir. Çözüm: orta + küçük ağırlık.
+- Emniyet kapağının kolunda üç ağırlık asılıdır (küçük, orta, büyük); dokunulan ağırlık çıkar ya da geri takılır. Hepsi takılıyken ibre kırmızıdadır. İbre yukarıdaki **yeşil** bölgeye gelince çaydanlık öter. Çözüm: büyük ağırlığı çıkar (küçük + orta).
 - Basınç, kazana verilir → pervane döner, rüzgârı gölün külünü savurur, **batık makinelerin tepeleri** açılır. Işık +1.
 - Pervane dönünce kazanın arkasındaki tahta ayrılır: **lens parçası 2**.
 - Aynı çaydanlıktan **sıcak çay** alınabilir (yan görev için).
 
 ### 3.5 Kepçe'nin Korkusu — Seçim 3
-- Taş ocağının dibinde dev Kepçe karanlıkta donmuş, titrer; kepçesi yolu kapatır.
+- Taş ocağının dibinde dev Kepçe karanlıkta donmuş, titrer (sahnenin kendisine çizilidir; gözleri sönük yanar). Korkarken merdivene yaklaşan Lehim'e irkilip kepçesini sallar, geçit vermez.
 - **A: Işık ver.** Tohum ışığını Kepçe'ye sürükle: −1 Canlılık, Kepçe sakinleşir ve katılır.
-- **B: Tek başına geç.** Ocağın yan duvarındaki eski iskeleden uzun yoldan tırmanılır (ek kısa bir tırmanma bulmacası). Kepçe karanlıkta kalır; 4. Bölüm'deki işbirliği bulmacası daha zor olur.
+- **B: Tek başına geç.** Sağdaki eski iskeleye dokununca seçim ekranı çıkar; sağ taraf seçilirse Lehim iskeleden tek başına tırmanır. Kepçe karanlıkta kalır; 4. Bölüm'deki işbirliği bulmacası daha zor olur.
 - **Üçüncü yol: Fener zinciri.** Deniz fenerinin yedek lamba rafındaki **üç lamba**yı al, taş ocağının duvarındaki üç kancaya as, her birini tohum ışığıyla yak (bedava). Karanlık dağılınca Kepçe kendiliğinden ayağa kalkar ve katılır, Işık +2.
 
 ### 3.6 Göl Geçişi (Nilüfer + zamanlama)

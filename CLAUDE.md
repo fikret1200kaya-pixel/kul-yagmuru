@@ -36,10 +36,17 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 - Asansör Kulesi'ndeki iki dişli arka plandan kesilip `disli_kucuk` / `disli_buyuk` sprite'ı yapıldı; yerleri komşu dokuyla yamandı.
 - Test için `?bolum=2` başlıkta 2. Bölüm seçeneğini açar.
 
+## 3. Bölüm
+- Oynanabilir: 3a İskele, 3b Deniz Feneri, 3c Batık Vapur, 3d Taş Ocağı. Tasarım `docs/bolum3.md`, görseller `tools_bolum3.py` ile üretilir.
+- Nilüfer gücü: hedefin `nil()` işleyicisi varsa tohum orada yaprak açar (`openLily`, birkaç saniye sonra batar). Göl geçişi `crossStep`: fenerin gösterdiği sırayla batık makinelere nilüfer açılır, Lehim üstüne zıplar (`hopTo`); yanlış sıra ya da batan yaprak onu iskeleye geri yüzdürür (`fallIn`).
+- Kepçe taş ocağı arka planına çizilidir; korkarken bölgesi titretilir, sakinleşince gözleri yanar.
+- Alınan boyalı nesneler için arka plana yama basılır (`stamp`): `patch_varil`, `patch_lambalar`.
+- Yardımcılar bölümler arası `S.dost` içinde taşınır (Düdük, Pırpır, kurma anahtarı, Kepçe, su şişesi); Pırpır katıldıysa sonraki bölümlerde de Lehim'i izler.
+
 ## Sıradaki iş
 - Test sürümünde ipuçları sınırsız ve ücretsiz: `IPUCU_SINIRSIZ = true`. Yayından önce `false` yapılacak.
 - Test sürümünde devriyede iki kez yakalanınca Toplayıcı uyuklar (geçiş serbest). Oyuncu devriyeyi geçemedi: telefonda zamanlama ve saklanma yerleri gözden geçirilecek.
-- 3. Bölüm — Kül Gölü: tasarım `docs/bolum3.md`, ChatGPT tarifleri `docs/gorsel_tarifleri_bolum3.md`. Görseller `assets/raw/`'a gelince kodlanacak (yeni güç Nilüfer: tohum kül/su yüzeyine bırakılınca yaprak açar).
+- 4. Bölüm — Terk Edilmiş Lunapark: önce adım adım tasarım ve görsel tarifleri.
 - 1. Bölüm prototipini telefonda test etmek (GDD üretim planı aşama 4).
 - Bilinen eksik: körük alındıktan sonra duvardaki körük görseli arka planda kalıyor.
 

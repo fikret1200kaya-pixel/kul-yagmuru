@@ -48,7 +48,10 @@ const SRC = {
   cu_vana:'img/cu_vana.jpg', cu_montaj:'img/cu_montaj.jpg', cu_disliduvar:'img/cu_disliduvar.jpg', cin_ikiyaprak:'img/cin_ikiyaprak.jpg',
   cu_hafiza2:'img/cu_hafiza2.jpg', cu_hafiza3:'img/cu_hafiza3.jpg', cu_kivilcim:'img/cu_kivilcim.jpg',
   disli_kucuk:'img/disli_kucuk.png', disli_buyuk:'img/disli_buyuk.png',
-  ...(() => { const o = {}; [['duduk', 4], ['giseci', 3], ['kedi', 4], ['guvercin', 3], ['nine', 4], ['torun', 2], ['ikiz', 3], ['pirpir', 4], ['toplayici', 2]].forEach(([n, c]) => { for (let i = 1; i <= c; i++) o[n + i] = 'img/' + n + '_' + i + '.png'; }); return o; })(),
+  bg_3a:'img/bg_3a.jpg', bg_3b:'img/bg_3b.jpg', bg_3c:'img/bg_3c.jpg', bg_3d:'img/bg_3d.jpg',
+  patch_varil:'img/patch_varil.png', patch_lambalar:'img/patch_lambalar.png',
+  cu_isaret:'img/cu_isaret.jpg', cu_lens:'img/cu_lens.jpg', cu_cay:'img/cu_cay.jpg', cin_sarmasik:'img/cin_sarmasik.jpg', cu_hafiza4:'img/cu_hafiza4.jpg', cu_hafiza5:'img/cu_hafiza5.jpg',
+  ...(() => { const o = {}; [['duduk', 4], ['giseci', 3], ['kedi', 4], ['guvercin', 3], ['nine', 4], ['torun', 2], ['ikiz', 3], ['pirpir', 4], ['toplayici', 2], ['capa', 4], ['kepce', 4], ['nilufer', 3]].forEach(([n, c]) => { for (let i = 1; i <= c; i++) o[n + i] = 'img/' + n + '_' + i + '.png'; }); return o; })(),
   sd_head:'img/side_head.png', sd_body:'img/side_body.png', sd_armN:'img/side_armN.png', sd_armF:'img/side_armF.png', sd_legN:'img/side_legN.png', sd_legF:'img/side_legF.png', sd_scarf:'img/side_scarf.png', ...(() => { const o = {}; ['head','body','armL','armR','scarf','legL','legR'].forEach(p => { o['rA_' + p] = 'img/rig_lehim_1_' + p + '.png'; if (p !== 'armR') o['rB_' + p] = 'img/rig_lehim_1_tekkol_' + p + '.png'; }); return o; })(), avuc:'img/cin_avuc.jpg', kapak:'img/cin_kapak.jpg', b5:'img/b5_panel.jpg', lever:'img/lever.png'
 };
 const IMG = {}, GRAY = {};
@@ -116,7 +119,7 @@ function hornStop() { if (!horn) return; const { o, g } = horn, t = AC.currentTi
 const S = {
   mode: 'loading', t: 0, scene: 'pa', isik: 0, cark: 0, canlilik: 4,
   inv: [], f: {}, halos: { pa: [], pb: [] }, bubble: null, hint: null, overlay: null, cin: null, fade: 0, fadeTarget: 0,
-  bolum: 0, hafiza: 0, bought: {}, bakisAt: -1e9
+  bolum: 0, hafiza: 0, bought: {}, bakisAt: -1e9, dost: {}, lilies: []
 };
 const L = { x: 560, y: 600, tx: 560, ty: 600, face: 1, moving: false, arm: false, anim: null, animT: 0, then: null, alpha: 1 };
 const BG = {};
@@ -142,7 +145,9 @@ const GEO = {
   '1a': { x: [285, 1000], y: [566, 700], s: [.78, .3] }, '1b': { x: [245, 1030], y: [596, 705], s: [.84, .3] },
   '1c': { x: [130, 1150], y: [572, 705], s: [.78, .32] }, '1d': { x: [330, 1040], y: [578, 705], s: [.84, .34] },
   '2a': { x: [250, 1150], y: [585, 700], s: [.8, .3] }, '2b': { x: [230, 1110], y: [545, 700], s: [.85, .35] },
-  '2c': { x: [150, 1150], y: [548, 705], s: [.72, .36] }, '2d': { x: [150, 1150], y: [612, 705], s: [.9, .28] }
+  '2c': { x: [150, 1150], y: [548, 705], s: [.72, .36] }, '2d': { x: [150, 1150], y: [612, 705], s: [.9, .28] },
+  '3a': { x: [40, 1180], y: [514, 552], s: [.6, .08] }, '3b': { x: [240, 1200], y: [545, 700], s: [.8, .32] },
+  '3c': { x: [150, 1200], y: [548, 705], s: [.8, .32] }, '3d': { x: [120, 1160], y: [520, 705], s: [.62, .42] }
 };
 function walkBounds(x, y) { const g = GEO[S.scene]; return { x: clamp(x, g.x[0], g.x[1]), y: clamp(y, g.y[0], g.y[1]) }; }
 function scaleAt(y) { const g = GEO[S.scene]; return g.s[0] + g.s[1] * (y - g.y[0]) / (g.y[1] - g.y[0]); }
@@ -343,6 +348,7 @@ function openRitim() {
   if (S.f.duduk === 'warm') setTimeout(() => { S.f.dudukWhistleT = 0; whistle(.08); }, 700);
 }
 function bolum1Finish() {
+  S.dost = Object.assign({}, S.dost, { duduk: S.f.duduk === 'warm' ? S.f.dudukHow : 0 });
   S.f.gecit = 1; S.f.gecitT = 0; S.lock = true; musicBox();
   setTimeout(() => walkTo(640, 650, () => { L.alpha = 0; S.f.ride = 0; tone(98, 0, 3, .08, 'sawtooth'); }), 1600);
   setTimeout(() => { S.fadeTarget = 1; }, 5200);
@@ -451,9 +457,9 @@ const MIL = { y: [75, 250, 430], x: 548, need: ['orta', 'kucuk', 'buyuk'], r: { 
 // patrol in Hurdacı Sokağı: the collector rolls between these x, and these spots hide Lehim
 const DEVRIYE = { x0: 700, x1: 1150, y: 588, v: 105, zone: 430, gecit: [760, 552], saklan: [[515, 562], [880, 552]] };
 
-function saveB2() { try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 2, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza })); } catch (e) {} }
+function saveB2() { try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 2, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza, dost: S.dost })); } catch (e) {} }
 function startBolum2(fromSave) {
-  if (fromSave) { try { const s = JSON.parse(localStorage.getItem('ky_bolum') || '{}'); S.cark = s.cark || 0; S.isik = s.isik || 0; S.canlilik = s.canlilik || 4; S.hafiza = s.hafiza || 0; } catch (e) {} }
+  if (fromSave) { try { const s = JSON.parse(localStorage.getItem('ky_bolum') || '{}'); S.cark = s.cark || 0; S.isik = s.isik || 0; S.canlilik = s.canlilik || 4; S.hafiza = s.hafiza || 0; S.dost = s.dost || {}; } catch (e) {} }
   S.bolum = 2; S.f = { v: [0, 0, 0, 0, 0], mil: [null, null, null], guard: 'intro', gx: 1320 }; S.inv = ['dal']; S.overlay = null; S.bubble = null; S.hint = null;
   L.arm = true; L.alpha = 1; L.anim = null; L.moving = false; L.then = null; L.face = 1;
   S.scene = '2a'; L.x = L.tx = 300; L.y = L.ty = 650; colorDirty = true;
@@ -486,11 +492,12 @@ function drawRoot(dt) {
 // the collector: guard in the square, patrols in the alley
 function drawToplayici(x, y, h, pose, face, a = 1) { spr(pose === 2 ? 'toplayici2' : 'toplayici1', x, y, h, false, face, a); glowAt(x + face * h * .18, y - h * .72, 14, '255,210,140', .5); }
 function b2Finish() {
+  S.dost = Object.assign({}, S.dost, { pirpir: S.f.pirpir, kurma: S.f.kurma ? 1 : 0, ikiz: S.f.ikiz });
   S.f.bitti = 1; S.lock = true; musicBox(); tone(98, 0, 3, .06, 'sawtooth');
   walkTo(300, 640, () => { L.alpha = 0; S.f.ride = 0; });
   setTimeout(() => { S.fadeTarget = 1; }, 3800);
   setTimeout(() => { S.lock = false; S.mode = 'filiz'; S.filiz = { t: 0, img: 'cin_ikiyaprak', c: [291, 318, 120], s: [298, 326] }; S.fade = 0; S.fadeTarget = 0; S.overlay = null; musicBox();
-    try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 2, bitti: 1, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza, pirpir: S.f.pirpir })); } catch (e) {} }, 4800);
+    try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 2, bitti: 1, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza, dost: S.dost })); } catch (e) {} }, 4800);
 }
 function kivilcim() { // first suspicion: a flash of the furnace
   S.overlay = { type: 'kivilcim', t: 0 }; tone(80, 0, 1.2, .1, 'sawtooth'); tone(60, .1, 1.4, .08, 'sawtooth');
@@ -735,7 +742,8 @@ function gearSpr(g, x, y, r, rot, col) {
 }
 // Pırpır follows Lehim once he has joined
 function drawPirpir(dt) {
-  const f = S.f; if (f.pirpir !== 'joined' || (S.scene === '2a' && (f.pirpirT || 0) < .6)) return;
+  const f = S.f, joined = S.bolum === 2 ? f.pirpir === 'joined' : (S.dost || {}).pirpir === 'joined';
+  if (!joined || (S.scene === '2a' && (f.pirpirT || 0) < .6)) return;
   if (S.scene === '2d' && f.fetchT !== undefined && f.fetchT < 2.4) { // flies up for the hanging gear and back
     const u = f.fetchT / 2.4, k = Math.sin(u * Math.PI); const x = L.x + 60 + (937 - L.x - 60) * k, y = L.y - 210 + (100 - L.y + 210) * k;
     spr(u > .4 ? 'pirpir3' : 'pirpir1', x, y + 50, 70, true); return;
@@ -793,7 +801,408 @@ const DEFTER2 = {
   mil1: { idea: ['montaj', 'disli'], full: [['orta', 'ok', 'mil'], ['kucuk', 'ok', 'mil'], ['buyuk', 'ok', 'mil']] },
   kafes: { idea: ['kafes'], full: [['vana', 'arti', 'disli', 'ok', 'kafes']] }
 };
-const defterOf = id => DEFTER2[id] || DEFTER[id] || {};
+const defterOf = id => (S.bolum === 3 && DEFTER3[id]) || DEFTER2[id] || DEFTER[id] || {};
+
+// =====================================================================
+// 3. BÖLÜM — KÜL GÖLÜ
+// 3a İskele (merkez) · 3b Deniz Feneri · 3c Batık Vapur · 3d Taş Ocağı
+// =====================================================================
+Object.assign(COMBO, { 'tahta+varil': 'salgovde', 'ag+salgovde': 'sal' });
+// signal board: the lily row reads long, short, short, long
+const FENER_RIT = [1, 0, 0, 1];
+// sunken machine tops, in the order the lighthouse beam lights them: anchor, boiler, crane, bell, propeller
+const TOPS = [{ ic: 'capaIc', x: 385, y: 470 }, { ic: 'kubbeT', x: 832, y: 462 }, { ic: 'vinc', x: 705, y: 432 }, { ic: 'can', x: 540, y: 442 }, { ic: 'pervane', x: 990, y: 420 }];
+// tea stove weights: small 1, medium 2, large 4; the gauge sits in the green at 3
+const AGIRLIK = [{ v: 1, x: 462, y: 186, w: 44, h: 64 }, { v: 2, x: 500, y: 216, w: 50, h: 82 }, { v: 4, x: 546, y: 240, w: 56, h: 100 }];
+// lens gaps: angle of each missing wedge around the lens centre
+const LENS = { c: [300, 240], r0: 112, r1: 206, gaps: [-2.28, -.07, 1.64] };
+// Kepçe is painted into the quarry: the region we shake, his porthole eyes, and his bucket
+const KEPCE = { poly: [[405, 60], [900, 60], [965, 505], [400, 512]], eyes: [[661, 240], [775, 248]] };
+
+function saveB3() { try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 3, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza, dost: S.dost })); } catch (e) {} }
+function startBolum3(fromSave) {
+  if (fromSave) { try { const s = JSON.parse(localStorage.getItem('ky_bolum') || '{}'); S.cark = s.cark || 0; S.isik = s.isik || 0; S.canlilik = s.canlilik || 4; S.hafiza = s.hafiza || 0; S.dost = s.dost || {}; } catch (e) {} }
+  S.bolum = 3; S.f = { agir: [1, 1, 1], lens: [0, 0, 0], kanca: [0, 0, 0] }; S.inv = ['dal']; S.lilies = []; S.overlay = null; S.bubble = null; S.hint = null;
+  if (S.dost && S.dost.kurma) S.inv.push('anahtar');
+  L.arm = true; L.alpha = 1; L.anim = null; L.moving = false; L.then = null; L.face = 1; L.onLake = 0;
+  S.scene = '3a'; L.x = L.tx = 420; L.y = L.ty = 540; colorDirty = true;
+  saveB3(); S.mode = 'card'; S.card = { t: 0, n: 3 }; S.fade = 0; S.fadeTarget = 0;
+}
+ENTER['3a'] = () => {
+  const f = S.f;
+  if (!f.intro3) { f.intro3 = 1; setTimeout(() => say(['su', 'soru'], 2.6), 900); }
+  if (f.pervane && !f.blowT) f.blowT = 0.001; // first look after the propeller: ash blows off the sunken machines
+};
+
+// ---- nilüfer ----
+// a lily opens at (x, y); life in seconds, then it sinks
+function openLily(x, y, life = 4, then) {
+  const [cx, cy] = chestPos(); tone(523, 0, .5, .05, 'triangle'); tone(784, .15, .6, .04, 'triangle');
+  S.spark = { x0: cx, y0: cy, x1: x, y1: y, t: 0 };
+  const lily = { x, y, t: -.35, life, sink: 0 }; S.lilies.push(lily);
+  setTimeout(() => then && then(lily), 380);
+  return lily;
+}
+function drawLilies(dt) {
+  if (S.spark) { const s = S.spark; s.t += dt; const u = Math.min(1, s.t / .35); glowAt(s.x0 + (s.x1 - s.x0) * u, s.y0 + (s.y1 - s.y0) * u - Math.sin(u * Math.PI) * 60, 16, '170,235,110', .8); if (u >= 1) S.spark = null; }
+  S.lilies.forEach(l => {
+    l.t += dt; if (l.t < 0) return;
+    const sinking = l.t > l.life, u = sinking ? Math.min(1, (l.t - l.life) / .7) : 0;
+    const key = l.t < .2 ? 'nilufer1' : l.t < .4 ? 'nilufer2' : 'nilufer3', h = (key === 'nilufer3' ? 46 : 40) * scaleAt(l.y) / .6 * (1 - u * .6);
+    // an ash-dark ring where it breaks the surface
+    X.fillStyle = `rgba(60,58,54,${.35 * (1 - u)})`; X.beginPath(); X.ellipse(l.x, l.y - 2, h * 1.1, h * .28, 0, 0, 7); X.fill();
+    spr(key, l.x, l.y + 6, h, true, 1, 1 - u);
+    if (!sinking && l.life - l.t < 1.2) glowAt(l.x, l.y - 6, 30, '120,200,120', .2 * Math.sin(S.t * 14)); // about to sink: flickers
+    if (u >= 1) l.gone = true;
+    if (sinking && L.lily === l && !l.dunked) { l.dunked = true; fallIn(); }
+  });
+  S.lilies = S.lilies.filter(l => !l.gone);
+}
+function learnNilufer(x, y) {
+  const f = S.f; if (f.nilufer) return;
+  f.nilufer = 1; openLily(x, y, 9, () => { halo(x, y, 220); tone(392, 0, 1.2, .05); tone(523, .3, 1.2, .05); tone(659, .6, 1.4, .05); say(['tohum', 'ok', 'nilufer'], 3); });
+}
+// ---- lake crossing ----
+function hopTo(x, y, then) {
+  L.hop = { x0: L.x, y0: L.y, x1: x, y1: y, t: 0, then }; play('slip', .55); L.moving = false; L.then = null;
+  tone(440, 0, .15, .05, 'triangle');
+}
+function fallIn() {
+  const f = S.f; S.lock = true; L.hop = null;
+  for (let i = 0; i < 5; i++) tone(180 - i * 20, i * .06, .25, .04, 'sine');
+  say(['x'], 1.4); play('leave', .8);
+  setTimeout(() => { S.fadeTarget = 1; }, 600);
+  setTimeout(() => { L.onLake = 0; L.lily = null; f.step = 0; L.x = L.tx = 1010; L.y = L.ty = 540; L.alpha = 1; L.anim = null; S.fadeTarget = 0; S.lock = false; }, 1200);
+}
+function crossStep(i) {
+  const f = S.f, t = TOPS[i], expected = f.step || 0;
+  const lx = t.x - 44, ly = t.y + 14;
+  if (i !== expected) { openLily(lx, ly, .5, () => { bad(); }); if (L.onLake) setTimeout(fallIn, 500); return; }
+  openLily(lx, ly, 4, lily => {
+    hopTo(lx, ly, () => {
+      L.onLake = 1; L.lily = lily; f.step = expected + 1;
+      if (f.step === TOPS.length) {
+        f.gecti3 = 1; lily.life = 99; chime(); halo(t.x, t.y, 220);
+        setTimeout(() => { L.onLake = 0; L.lily = null; goScene('3d', [220, 650]); }, 900);
+      }
+    });
+  });
+}
+
+// ---- quarry ----
+function kepceCalm(how) {
+  const f = S.f; if (f.kepce) return;
+  f.kepce = how; f.kepceT = 0; S.lock = true;
+  tone(110, 0, 1.6, .07, 'triangle'); tone(147, .4, 1.6, .06, 'triangle');
+  setTimeout(() => { halo(680, 300, 380); if (how === 'fener') setTimeout(() => halo(200, 200, 220), 500); }, 700);
+  setTimeout(() => { S.lock = false; say(['kepce', 'unlem'], 2.4, [680, 200]); }, 2600);
+}
+function b3Finish(how) {
+  const f = S.f; f.bitti = how; S.lock = true; musicBox();
+  S.dost = Object.assign({}, S.dost, { kepce: f.kepce || 0, capa: f.balik ? 1 : 0, su: S.inv.includes('sise') ? 1 : 0 });
+  const [x, y] = how === 'iskele' ? [1080, 520] : [360, 520];
+  walkTo(x, y, () => play(how === 'iskele' ? 'climb' : 'leave', 1.6));
+  setTimeout(() => { S.fadeTarget = 1; }, 2600);
+  setTimeout(() => { S.lock = false; S.mode = 'filiz'; S.filiz = { t: 0, img: 'cin_sarmasik', c: [289, 320, 124], s: [300, 330] }; S.fade = 0; S.fadeTarget = 0; S.overlay = null; musicBox();
+    try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 3, bitti: 1, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza, dost: S.dost })); } catch (e) {} }, 3600);
+}
+
+HS['3a'] = [
+  { id: 'toFener', to: '3b', spawn: [300, 650], r: [1135, 335, 75, 150], stand: [1170, 520] },
+  { id: 'kayik', r: [90, 355, 80, 155], stand: [210, 530], on: () => !S.f.tahta, tap() { S.f.tahta = 1; clank(); tone(120, .2, .3, .08, 'square'); addItem('tahta'); } },
+  { id: 'varil', r: [190, 590, 170, 80], stand: [300, 540], on: () => !S.f.varil, tap() { say(['varil', 'kol', 'x']); },
+    kok() { S.f.varil = 1; clank(); stamp('3a', 'patch_varil', 186, 588); addItem('varil'); } },
+  { id: 'ag', r: [372, 418, 136, 96], stand: [430, 530], on: () => !S.f.agAlindi, tap() {
+      S.f.agAlindi = 1; addItem('ag'); say(['ag', 'unlem'], 1.8, [640, 400]); } },
+  { id: 'capa', r: [575, 380, 120, 145], stand: [540, 540], tap() {
+      const f = S.f; if (f.balik) { say(['balik', 'unlem'], 2, [640, 400]); return; }
+      f.sadT = 0; say(['balik', 'soru'], 2.6, [640, 400]); },
+    use: { cay() { takeItem('cay'); S.f.cayVerildi = 1; S.f.cayT = 0; halo(630, 470, 180); tone(1319, 0, .3, .04); } } },
+  { id: 'olta', r: [680, 420, 110, 60], stand: [720, 540], on: () => !S.f.balik, tap() { say(['balik', 'soru']); },
+    nil() {
+      const f = S.f; if (f.balik) return;
+      openLily(730, 452, 7, () => {
+        f.balik = 1; f.balikT = 0; halo(730, 452, 200); tone(1175, .3, .25, .05); tone(1568, .5, .35, .05);
+        setTimeout(() => { addItem('sise'); say(['sise', 'unlem'], 2.2, [640, 400]); }, 2600);
+        setTimeout(() => { S.hafiza++; S.overlay = { type: 'hafiza', t: 0, img: 'cu_hafiza4' }; }, 4000);
+      }); } },
+  { id: 'islak', r: [500, 630, 130, 60], stand: [560, 548], tap() { say(S.f.nilufer ? ['nilufer'] : ['goz', 'su']); if (!S.f.nilufer) { S.f.teach = 2.4; S.f.teachTo = [565, 660]; } },
+    light() { learnNilufer(565, 660); }, nil() { openLily(565, 660, 4); } },
+  { id: 'merdiven', r: [35, 530, 135, 120], stand: [110, 540], tap() {
+      const f = S.f; if (f.sal) { goScene('3c', [200, 650]); return; }
+      say(['sal', 'soru']); },
+    use: { sal() { takeItem('sal'); S.f.sal = 1; clank(); halo(110, 640, 160); } } },
+  { id: 'kedi3', r: [105, 222, 90, 50], stand: [210, 530], on: () => !S.f.kediUp, tap() { S.f.kediUp = 1; S.f.kediT = 0; purr(); S.cark++; chime(); } },
+  // crossing: drop the seed next to each sunken top, in the beam's order
+  ...TOPS.map((t, i) => ({ id: 't_' + t.ic, r: [t.x - 60, t.y - 40, 120, 70], stand: [t.x, 540], noWalk: true, on: () => S.f.pervane && !S.f.gecti3,
+    tap() { say(['nilufer', 'soru']); }, nil() { crossStep(i); } })),
+  { id: 'gol', r: [300, 395, 760, 100], stand: [1000, 540], on: () => S.f.gecti3, tap() {
+      // once found, the path is remembered: Lehim hops across on fresh lilies
+      S.lock = true; let k = 0;
+      const next = () => { if (k >= TOPS.length) { S.lock = false; goScene('3d', [220, 650]); return; }
+        const t = TOPS[k++]; openLily(t.x - 44, t.y + 14, 2, () => hopTo(t.x - 44, t.y + 14, next)); };
+      next(); } }
+];
+HS['3b'] = [
+  { id: 'toIskele', to: '3a', spawn: [1150, 522], r: [0, 250, 190, 470], stand: [250, 650] },
+  { id: 'lens', r: [490, 15, 320, 310], stand: [640, 600], tap() { S.overlay = { type: 'lens', t: 0 }; },
+    use: { lens1: () => lensPut(0, 'lens1'), lens2: () => lensPut(1, 'lens2'), lens3: () => lensPut(2, 'lens3') } },
+  { id: 'toz', r: [180, 330, 110, 50], stand: [330, 600], on: () => !S.f.lens1Alindi, tap() { S.f.lens1Alindi = 1; addItem('lens1'); clank(); } },
+  { id: 'lambalar', r: [100, 170, 190, 90], stand: [330, 600], on: () => !S.f.lambalarAlindi, tap() { S.f.lambalarAlindi = 1; stamp('3b', 'patch_lambalar', 106, 168); addItem('lambalar'); clank(); } },
+  { id: 'cark4', r: [230, 460, 70, 50], stand: [330, 610], on: () => !S.f.cark4, tap() { S.f.cark4 = 1; S.cark++; chime(); } },
+  { id: 'basamak', r: [20, 450, 190, 90], stand: [270, 640], on: () => !S.f.lens3Alindi, tap() { play('strain', 1); say(['lensparca', 'kol', 'x']); },
+    kok() { S.f.lens3Alindi = 1; clank(); addItem('lens3'); } },
+  { id: 'tablo', r: [1030, 95, 220, 300], stand: [1000, 600], tap() { S.overlay = { type: 'isaret', t: 0 }; } },
+  { id: 'kol', r: [735, 330, 80, 150], stand: [830, 600], tap() {
+      if (!S.f.lensTamam) { play('strain', .8); say(['lensparca', 'soru']); return; }
+      S.overlay = { type: 'ritim', t: 0, seq: [], press: null, up: true, lamps: [], ok: false, pat: FENER_RIT, done: fenerDone }; } },
+  { id: 'guvercin3', r: [850, 60, 90, 90], stand: [860, 600], on: () => !S.f.guvercin, tap() { say(['guvercin', 'kok']); },
+    kok() { S.f.guvercin = 1; S.f.guvT = 0; tone(988, .2, .3, .05); tone(1175, .45, .3, .05);
+      setTimeout(() => { S.hafiza++; halo(895, 105, 200); S.overlay = { type: 'hafiza', t: 0, img: 'cu_hafiza5' }; }, 2200); } }
+];
+function lensPut(i, item) {
+  const f = S.f; takeItem(item); f.lens[i] = 1; clank(); tone(1568, .1, .3, .04);
+  S.overlay = { type: 'lens', t: 0, flash: i };
+  if (f.lens.every(Boolean)) { f.lensTamam = 1; setTimeout(() => { chime(); halo(650, 170, 260); }, 600); }
+}
+function fenerDone() { const f = S.f; f.fenerSira = 1; f.beamT = 0; halo(650, 170, 320); tone(392, 0, 2, .06); say(['nilufer', 'ok', 'ray'], 2.4); }
+HS['3c'] = [
+  { id: 'toIskele3', to: '3a', spawn: [120, 540], r: [0, 560, 140, 160], stand: [180, 660] },
+  { id: 'catlak3', r: [20, 350, 150, 190], stand: [220, 630], on: () => !S.f.su, tap() { say(S.f.nilufer ? ['nilufer', 'su'] : ['su', 'soru']); },
+    nil() { openLily(95, 520, 8, () => { S.f.su = 1; halo(95, 480, 180); say(['su', 'unlem']); }); } },
+  { id: 'ocak', r: [235, 225, 130, 290], stand: [390, 600], tap() {
+      const f = S.f;
+      if (f.basinc) { if (!f.cayAlindi) { f.cayAlindi = 1; addItem('cay'); tone(1319, 0, .3, .04); } else say(['cay']); return; }
+      if (!f.dolu) { if (!f.su) { say(['caydanlik', 'su', 'soru']); return; } f.dolu = 1; clank(); tone(300, 0, .6, .04, 'sine'); say(['caydanlik', 'unlem']); return; }
+      if (!f.ocak) { say(['ates', 'soru']); return; }
+      S.overlay = { type: 'cay', t: 0 }; },
+    light() { const f = S.f; if (!f.dolu) { say(['caydanlik', 'soru']); return; } if (f.ocak) return; f.ocak = 1; tone(200, 0, .8, .05, 'triangle'); halo(300, 450, 140); } },
+  { id: 'kazan', r: [420, 230, 380, 280], stand: [600, 600], tap() { say(S.f.pervane ? ['pervane', 'unlem'] : ['ates', 'soru']); } },
+  { id: 'tahta3', r: [850, 150, 110, 210], stand: [880, 600], on: () => S.f.pervane && !S.f.lens2Alindi, tap() { S.f.lens2Alindi = 1; addItem('lens2'); clank(); } }
+];
+HS['3d'] = [
+  { id: 'toIskele4', to: '3a', spawn: [1010, 540], r: [0, 560, 110, 160], stand: [150, 660] },
+  { id: 'kepce', r: [400, 70, 560, 430], stand: [560, 560], tap() {
+      const f = S.f; if (f.kepce) { say(['kepce'], 1.6, [680, 200]); return; }
+      say(['karanlik', 'soguk'], 2.4, [680, 200]); },
+    light() {
+      const f = S.f; if (f.kepce) return;
+      seedDrain(); setTimeout(() => kepceCalm('isik'), 900); } },
+  ...[0, 1, 2].map(i => ({ id: 'kanca' + (i + 1), r: [[40, 50, 100, 120], [150, 170, 90, 100], [235, 255, 80, 90]][i], stand: [300, 600],
+    tap() { say(S.f.kanca[i] ? ['tohum', 'ok', 'lamba'] : ['lamba', 'soru']); },
+    use: { lambalar() { const f = S.f; if (f.kanca[i]) return; f.kanca[i] = 1; clank(); if (f.kanca.every(Boolean)) takeItem('lambalar'); } },
+    light() { const f = S.f; if (f.kanca[i] !== 1) { say(['lamba', 'soru']); return; } f.kanca[i] = 2; tone(523 + i * 120, 0, .8, .05); if (f.kanca.every(v => v === 2)) kepceCalm('fener'); } })),
+  { id: 'rampa', r: [250, 270, 200, 210], stand: [360, 560], tap() {
+      if (S.f.kepce) { b3Finish('rampa'); return; }
+      S.f.lash = 0; bad(); play('slip', .9); say(['kepce', 'karanlik', 'x']); } },
+  { id: 'iskele3', r: [960, 150, 240, 350], stand: [1000, 560], tap() {
+      if (S.f.kepce) { b3Finish('rampa'); return; }
+      S.overlay = { type: 'secim3', t: 0 }; } },
+  { id: 'kutuk', r: [30, 520, 180, 160], stand: [230, 640], tap() { play('shrug', 1.2); say(['kutuk', 'ates', 'soru'], 2.6); } },
+  { id: 'vagon', r: [1120, 450, 160, 120], stand: [1080, 620], on: () => !S.f.cark5, tap() { S.f.cark5 = 1; S.cark++; chime(); } }
+];
+
+DRAW1['3a'] = function (dt) {
+  const f = S.f;
+  // lighthouse lamp; once the lens is whole, its beam sweeps the lake and lights the sunken tops in order
+  lamp(1145, 95, 70, '255,210,140', f.fenerSira ? .6 : .35);
+  // sunken tops, uncovered by the propeller's wind
+  if (f.pervane) {
+    let k = 1; if (f.blowT !== undefined && f.blowT < 3) { f.blowT += dt; k = Math.min(1, f.blowT / 2.5); for (let i = 0; i < 6; i++) glowAt(300 + i * 140 + f.blowT * 90, 440 - i % 2 * 30, 90, '220,218,212', .35 * (1 - f.blowT / 3)); }
+    TOPS.forEach(t => { X.save(); X.globalAlpha = k;
+      X.fillStyle = 'rgba(70,66,60,.55)'; X.beginPath(); X.ellipse(t.x, t.y + 10, 44, 10, 0, 0, 7); X.fill();
+      if (t.ic !== 'kubbeT') icon(t.ic, t.x, t.y - 8, 52, '#4b3a2b');
+      X.restore(); });
+  }
+  if (f.fenerSira) {
+    const per = 8, u = (S.t % per) / per, ang = Math.PI * (.9 + u * .5);
+    X.save(); X.globalCompositeOperation = 'lighter';
+    const g = X.createLinearGradient(1145, 95, 1145 + Math.cos(ang) * 1000, 95 + Math.sin(ang) * 1000); g.addColorStop(0, 'rgba(255,230,170,.28)'); g.addColorStop(1, 'rgba(255,230,170,0)');
+    X.fillStyle = g; X.beginPath(); X.moveTo(1145, 95); X.lineTo(1145 + Math.cos(ang - .06) * 1100, 95 + Math.sin(ang - .06) * 1100); X.lineTo(1145 + Math.cos(ang + .06) * 1100, 95 + Math.sin(ang + .06) * 1100); X.closePath(); X.fill(); X.restore();
+    // every cycle the tops flash one by one in the crossing order
+    const idx = Math.floor(((S.t % 7.5) - 1.5) / 1.1); if (idx >= 0 && idx < TOPS.length && f.pervane) { const t = TOPS[idx]; glowAt(t.x, t.y - 4, 60, '255,230,160', .7); }
+  }
+  // raft at the foot of the steps
+  if (f.sal) dq(700, () => { // door planks on a barrel, lashed with Çapa's net, bobbing on the ash
+    X.save(); X.translate(118, 668 + Math.sin(S.t * 1.6) * 1.5); X.rotate(Math.sin(S.t * 1.1) * .02);
+    X.fillStyle = 'rgba(60,58,54,.35)'; X.beginPath(); X.ellipse(0, 10, 70, 10, 0, 0, 7); X.fill();
+    X.fillStyle = '#5b4a3a'; X.beginPath(); X.ellipse(0, 0, 26, 12, 0, 0, 7); X.fill(); X.strokeStyle = '#3a2d22'; X.lineWidth = 2; X.stroke();
+    for (let i = 0; i < 5; i++) { X.fillStyle = i % 2 ? '#8a7258' : '#7b6450'; X.fillRect(-62 + i * 25, -16, 24, 12); X.strokeStyle = '#3a2d22'; X.lineWidth = 1.5; X.strokeRect(-62 + i * 25, -16, 24, 12); }
+    X.strokeStyle = 'rgba(200,185,150,.8)'; X.lineWidth = 1; for (let i = -60; i < 64; i += 10) { X.beginPath(); X.moveTo(i, -16); X.lineTo(i + 8, -4); X.moveTo(i + 8, -16); X.lineTo(i, -4); X.stroke(); }
+    X.restore(); });
+  if (!f.nilufer) glowAt(565, 662, 30 + Math.sin(S.t * 2) * 4, '90,110,120', .35);
+  // Çapa: fishing; sad with a tin fish; jumping with a real one; handing over the bottle
+  const cp = f.balik ? (f.balikT < 2.4 ? 'capa3' : f.balikT < 4.5 ? 'capa4' : 'capa1') : f.sadT !== undefined && f.sadT < 2.2 ? 'capa2' : 'capa1';
+  if (f.balik) f.balikT += dt; if (f.sadT !== undefined) f.sadT += dt;
+  dq(522, () => {
+    if (cp === 'capa1') { X.strokeStyle = 'rgba(40,34,28,.7)'; X.lineWidth = 1.2; X.beginPath(); X.moveTo(668, 392); X.quadraticCurveTo(720, 410, 730, 452 + Math.sin(S.t * 2) * 2); X.stroke(); }
+    spr(cp, 630, 524 + (cp === 'capa3' ? -Math.abs(Math.sin(S.t * 8)) * 10 : 0), cp === 'capa1' ? 125 : 140, !!f.balik);
+    if (f.cayVerildi) { f.cayT += dt; glowAt(600, 470, 10, '200,90,60', .5); }
+  });
+  if (!f.kediUp) spr('kedi1', 150, 262, 40); else { f.kediT += dt; if (f.kediT < 1.6) spr('kedi3', 150, 262, 58); }
+  drawLilies(dt);
+};
+DRAW1['3b'] = function (dt) {
+  const f = S.f;
+  // placed lens pieces glint in the frame; the whole lens glows once lit
+  const n = f.lens.filter(Boolean).length;
+  if (f.lensTamam) glowAt(650, 170, 170, '255,220,150', f.fenerSira ? .45 + .15 * Math.sin(S.t * 3) : .25);
+  else if (n) glowAt(650, 170, 60 + n * 20, '255,220,150', .15);
+  if (!f.lens1Alindi) glowAt(235, 355, 14 + Math.sin(S.t * 5) * 3, '230,240,245', .6);
+  if (!f.lens3Alindi) glowAt(100, 490, 12 + Math.sin(S.t * 4) * 3, '230,240,245', .5);
+  if (!f.cark4) gear(262, 488, 11 + Math.sin(S.t * 4), '#d9c48e');
+  if (!f.guvercin) spr('guvercin1', 895 + Math.sin(S.t * 14) * (Math.sin(S.t * .8) > .5 ? 2 : 0), 140, 70);
+  else { f.guvT += dt; const u = f.guvT; if (u < 2.4) spr(u < 1.4 ? 'guvercin2' : 'guvercin3', 895 + u * 140, 140 - u * 30 + (u > 1.4 ? (u - 1.4) * 200 : 0), 80, true); }
+};
+DRAW1['3c'] = function (dt) {
+  const f = S.f;
+  // water seeping through the crack; a lily sits on it once opened
+  for (let i = 0; i < 5; i++) { const u = ((S.t * .7 + i / 5) % 1); X.fillStyle = `rgba(210,225,230,${.6 * (1 - u)})`; X.beginPath(); X.arc(60 + i * 14, 400 + u * 130, 2.2, 0, 7); X.fill(); }
+  if (f.ocak) { glowAt(300, 455, 50 + Math.sin(S.t * 9) * 5, '255,150,60', .6); }
+  if (f.dolu && f.ocak) { const u = (S.t % 1.6) / 1.6; glowAt(262, 240 - u * 60, 12 + u * 20, '230,230,226', .4 * (1 - u)); }
+  if (f.pervane) {
+    // the propeller shaft turns: flange bolts orbit
+    [[960, 410, 62], [1180, 410, 50]].forEach(([cx, cy, r]) => { for (let i = 0; i < 8; i++) { const a = S.t * 3 + i * Math.PI / 4; X.fillStyle = 'rgba(60,44,30,.9)'; X.beginPath(); X.arc(cx + Math.cos(a) * r * .75, cy + Math.sin(a) * r * .75, 4, 0, 7); X.fill(); } });
+    glowAt(640, 380, 220, '255,190,110', .12 + .04 * Math.sin(S.t * 3));
+  }
+  if (f.pervane && !f.lens2Alindi) { X.fillStyle = 'rgba(38,28,20,.85)'; X.fillRect(858, 160, 96, 200); glowAt(905, 260, 14 + Math.sin(S.t * 5) * 3, '230,240,245', .7); }
+  drawLilies(dt);
+};
+DRAW1['3d'] = function (dt) {
+  const f = S.f;
+  const bg = BG['3d']; if (!bg) return;
+  const calm = f.kepce ? Math.min(1, (f.kepceT += dt) / 2) : 0;
+  // Kepçe shivers until he calms down
+  if (!f.kepce || calm < 1) {
+    if (f.lash !== undefined && f.lash < .8) f.lash += dt;
+    const j = (1 - calm) * Math.sin(S.t * 38) * (f.lash < .8 ? 9 : 1.8);
+    X.save(); X.beginPath(); KEPCE.poly.forEach(([x, y], i) => i ? X.lineTo(x, y) : X.moveTo(x, y)); X.closePath(); X.clip();
+    X.drawImage(bg.gry, j, 0); X.drawImage(colorLayer, j, 0); X.restore();
+  }
+  KEPCE.eyes.forEach(([x, y]) => glowAt(x, y, calm ? 40 : 14, '255,200,110', calm ? .75 : .25 + .15 * Math.sin(S.t * 2)));
+  // hanging lanterns on the hooks
+  [[92, 150], [196, 262], [277, 338]].forEach(([x, y], i) => { const k = f.kanca[i]; if (!k) return;
+    X.fillStyle = '#6b5540'; X.fillRect(x - 9, y - 16, 18, 24); X.fillStyle = '#3a2d22'; X.fillRect(x - 11, y - 20, 22, 5);
+    if (k === 2) { glowAt(x, y - 4, 70, '255,200,120', .55); lamp(x, y - 4, 26, '255,230,170', .6); } });
+  // after calming, Kepçe draws a little flower in the ash with the tip of his bucket
+  if (f.kepce && f.kepceT > 3) { const u = Math.min(1, (f.kepceT - 3) / 3); X.save(); X.strokeStyle = 'rgba(40,32,26,.7)'; X.lineWidth = 3; X.lineCap = 'round';
+    for (let p = 0; p < 5 * u; p++) { const a = p / 5 * Math.PI * 2; X.beginPath(); X.ellipse(610 + Math.cos(a) * 14, 560 + Math.sin(a) * 7, 10, 5, a, 0, Math.PI * 2 * Math.min(1, 5 * u - p)); X.stroke(); }
+    X.restore(); }
+  if (!f.cark5) gear(1200, 470, 12 + Math.sin(S.t * 4), '#d9c48e');
+};
+
+// ---- 3. bölüm overlays ----
+function drawOverlayB3(o, dt) {
+  const img = k => GRAY[k], f = S.f;
+  if (o.type === 'isaret') { const im = img('cu_isaret'); im && X.drawImage(im, CU.x, CU.y, CU.s, CU.s);
+    // the lily row is the one that matters: it glows faintly
+    glowAt(CU.x + 390, CU.y + 478, 150, '140,220,140', .12 + .06 * Math.sin(S.t * 2)); return true; }
+  if (o.type === 'lens') {
+    const im = img('cu_lens'); im && X.drawImage(im, CU.x, CU.y, CU.s, CU.s);
+    const [cx, cy] = LENS.c;
+    LENS.gaps.forEach((a, i) => { if (!f.lens[i]) return;
+      X.save(); X.translate(CU.x + cx, CU.y + cy); X.beginPath(); X.arc(0, 0, LENS.r1, a - .5, a + .5); X.arc(0, 0, LENS.r0, a + .5, a - .5, true); X.closePath();
+      const g = X.createRadialGradient(0, 0, LENS.r0, 0, 0, LENS.r1); g.addColorStop(0, 'rgba(225,232,228,.85)'); g.addColorStop(1, 'rgba(190,205,200,.8)'); X.fillStyle = g; X.fill();
+      X.clip(); X.strokeStyle = 'rgba(120,130,128,.5)'; X.lineWidth = 2; for (let r = LENS.r0 + 12; r < LENS.r1; r += 16) { X.beginPath(); X.arc(0, 0, r, 0, 7); X.stroke(); }
+      X.restore();
+      if (o.flash === i && o.t < 1) glowAt(CU.x + cx + Math.cos(a) * 170, CU.y + cy + Math.sin(a) * 170, 80, '255,240,200', .6 * (1 - o.t)); });
+    if (f.lensTamam) glowAt(CU.x + cx, CU.y + cy, 240, '255,230,170', .25 + .1 * Math.sin(S.t * 3));
+    return true;
+  }
+  if (o.type === 'cay') {
+    const im = img('cu_cay'); im && X.drawImage(im, CU.x, CU.y, CU.s, CU.s);
+    const sum = AGIRLIK.reduce((s, w, i) => s + f.agir[i] * w.v, 0);
+    AGIRLIK.forEach((w, i) => { if (f.agir[i]) return; X.fillStyle = 'rgba(236,226,206,.93)'; X.fillRect(CU.x + w.x - w.w / 2, CU.y + w.y - 10, w.w, w.h + 16); X.strokeStyle = 'rgba(80,60,40,.35)'; X.setLineDash([4, 4]); X.strokeRect(CU.x + w.x - w.w / 2 + 4, CU.y + w.y + 18, w.w - 8, w.h - 22); X.setLineDash([]); });
+    // gauge: 0 rad = straight up = green
+    const gx = CU.x + 418, gy = CU.y + 258, target = clamp((sum - 3) * .42, -1.9, 1.5);
+    o.nd = o.nd === undefined ? target : o.nd + (target - o.nd) * Math.min(1, dt * 4);
+    // repaint the dial face with its three zones, then a live needle
+    X.fillStyle = 'rgba(232,226,212,1)'; X.beginPath(); X.arc(gx, gy, 36, 0, 7); X.fill();
+    [[-2.3, -.45, 'rgba(200,190,120,.55)'], [-.45, .45, 'rgba(120,170,100,.6)'], [.45, 1.6, 'rgba(200,110,80,.55)']].forEach(([a0, a1, c]) => { X.strokeStyle = c; X.lineWidth = 8; X.beginPath(); X.arc(gx, gy, 28, a0 - Math.PI / 2, a1 - Math.PI / 2); X.stroke(); });
+    X.save(); X.translate(gx, gy); X.rotate(o.nd + Math.sin(S.t * 25) * .02); X.fillStyle = '#2b2520'; X.beginPath(); X.moveTo(-3, 4); X.lineTo(0, -30); X.lineTo(3, 4); X.closePath(); X.fill(); X.restore();
+    X.fillStyle = '#2b2520'; X.beginPath(); X.arc(gx, gy, 4, 0, 7); X.fill();
+    if (o.solved) { o.solveT += dt; X.globalAlpha = Math.min(1, o.solveT); IMG.cu_cay && X.drawImage(IMG.cu_cay, CU.x, CU.y, CU.s, CU.s); X.globalAlpha = 1; glowAt(CU.x + 170, CU.y + 60, 80, '240,240,236', .5); }
+    X.font = '600 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.textAlign = 'center'; X.fillText('×', CU.x + CU.s + 30, CU.y + 20);
+    return true;
+  }
+  if (o.type === 'secim3') {
+    // left: stay and help the frightened giant · right: climb the scaffolding alone
+    const pulse = .5 + .5 * Math.sin(S.t * 2);
+    X.strokeStyle = 'rgba(216,207,191,.5)'; X.lineWidth = 3;
+    [[W / 2 - 250, 'rgba(120,150,190,'], [W / 2 + 250, 'rgba(200,160,100,']].forEach(([cx, c]) => { X.fillStyle = c + (.12 + .08 * pulse) + ')'; X.beginPath(); X.arc(cx, H / 2, 190, 0, 7); X.fill(); X.stroke(); });
+    spr('kepce1', W / 2 - 250, H / 2 + 130, 250, false);
+    icon('karanlik', W / 2 - 140, H / 2 - 120, 40, '#dfe6ec');
+    icon('merdiven', W / 2 + 250, H / 2 - 10, 140, '#d8cfbf');
+    X.globalAlpha = .9; icon('soru', W / 2, H / 2, 60, '#d8cfbf'); X.globalAlpha = 1;
+    return true;
+  }
+  return false;
+}
+function overlayDownB3(p) {
+  const o = S.overlay, f = S.f;
+  if (o.type === 'cay') {
+    if (o.solved) return true;
+    if (!inCU(p)) { S.overlay = null; return true; }
+    AGIRLIK.forEach((w, i) => {
+      if (Math.abs(p.x - CU.x - w.x) > w.w / 2 + 8 || p.y < CU.y + w.y - 20 || p.y > CU.y + w.y + w.h + 10) return;
+      f.agir[i] = f.agir[i] ? 0 : 1; clank();
+      const sum = AGIRLIK.reduce((s, ww, k) => s + f.agir[k] * ww.v, 0);
+      if (sum === 3) { o.solved = true; o.solveT = 0; held(1400, .3, 1.2, .05); held(1860, .3, 1.2, .025);
+        setTimeout(() => { S.overlay = null; f.basinc = 1; tone(98, 0, 2, .08, 'sawtooth'); setTimeout(() => { f.pervane = 1; halo(640, 380, 320); say(['pervane', 'unlem']); }, 900); }, 1700); }
+    });
+    return true;
+  }
+  if (o.type === 'secim3') {
+    if (p.x < W / 2) { S.overlay = null; say(['kepce', 'karanlik'], 2.4); }
+    else { S.overlay = null; f.yalniz = 1; tone(196, 0, 1.4, .06); b3Finish('iskele'); }
+    return true;
+  }
+  return false;
+}
+
+// ---- 3. bölüm hints ----
+function hintB3() {
+  const f = S.f, has = i => S.inv.includes(i);
+  if (!f.nilufer) return ['3a', 'islak'];
+  if (!f.sal) {
+    if (has('sal')) return ['3a', 'merdiven'];
+    if (has('salgovde') && has('ag')) return ['inv', 'sal'];
+    if (has('tahta') && has('varil')) return ['inv', 'salgovde'];
+    if (!f.agAlindi) return ['3a', 'ag']; if (!f.tahta) return ['3a', 'kayik']; return ['3a', 'varil'];
+  }
+  if (!f.pervane) { if (!f.su) return ['3c', 'catlak3']; return ['3c', 'ocak']; }
+  if (!f.lens2Alindi) return ['3c', 'tahta3'];
+  if (!f.lensTamam) { if (!f.lens1Alindi) return ['3b', 'toz']; if (!f.lens3Alindi) return ['3b', 'basamak']; return ['3b', 'lens']; }
+  if (!f.fenerSira) return ['3b', 'kol'];
+  if (!f.gecti3) return ['3a', 't_capaIc'];
+  if (!f.kepce) {
+    if (!f.lambalarAlindi) return ['3d', 'kepce'];
+    const i = f.kanca.findIndex(v => v !== 2); return ['3d', 'kanca' + (i + 1)];
+  }
+  return ['3d', 'rampa'];
+}
+const DEFTER3 = {
+  islak: { idea: ['tohum', 'ok', 'su'], full: [['tohum', 'ok', 'su'], ['nilufer']] },
+  ag: { idea: ['ag', 'sal'], full: [['varil', 'arti', 'tahta', 'arti', 'ag', 'ok', 'sal']] },
+  kayik: { idea: ['tahta', 'sal'], full: [['varil', 'arti', 'tahta', 'arti', 'ag', 'ok', 'sal']] },
+  varil: { idea: ['kok', 'varil'], full: [['tohum', 'ok', 'varil'], ['kok', 'ok', 'varil']] },
+  salgovde: { idea: ['varil', 'arti', 'tahta'], full: [['varil', 'arti', 'tahta', 'ok', 'sal']] },
+  sal: { idea: ['sal', 'arti', 'ag'], full: [['sal', 'arti', 'ag', 'ok', 'sal']] },
+  merdiven: { idea: ['sal', 'merdiven'], full: [['sal', 'ok', 'merdiven'], ['merdiven', 'ok', 'kubbeT']] },
+  catlak3: { idea: ['nilufer', 'catlak'], full: [['tohum', 'ok', 'catlak'], ['nilufer', 'ok', 'su']] },
+  ocak: { idea: ['caydanlik', 'ates'], full: [['su', 'ok', 'caydanlik'], ['tohum', 'ok', 'ates'], ['ag1', 'arti', 'ag2', 'ok', 'pervane']] },
+  tahta3: { idea: ['pervane', 'lensparca'], full: [['tahta', 'ok', 'lensparca']] },
+  toz: { idea: ['goz', 'lensparca'], full: [['lensparca', 'arti', 'lensparca', 'arti', 'lensparca', 'ok', 'fener']] },
+  basamak: { idea: ['kok', 'lensparca'], full: [['tohum', 'ok', 'merdiven'], ['kok', 'ok', 'lensparca']] },
+  lens: { idea: ['lensparca', 'ok', 'fener'], full: [['lensparca', 'arti', 'lensparca', 'arti', 'lensparca', 'ok', 'fener']] },
+  kol: { idea: ['afis', 'nilufer'], full: [['uzun', 'kisa', 'kisa', 'uzun']] },
+  t_capaIc: { idea: ['fener', 'nilufer'], full: [['capaIc', 'ok', 'kubbeT', 'ok', 'vinc'], ['vinc', 'ok', 'can', 'ok', 'pervane']] },
+  kepce: { idea: ['lamba', 'kanca'], full: [['tohum', 'ok', 'kepce', 'x'], ['lamba', 'arti', 'lamba', 'arti', 'lamba', 'ok', 'kanca'], ['merdiven', 'ok', 'x']] },
+  kanca1: { idea: ['lamba', 'ok', 'kanca'], full: [['lamba', 'ok', 'kanca'], ['tohum', 'ok', 'lamba']] },
+  kanca2: { idea: ['lamba', 'ok', 'kanca'], full: [['lamba', 'ok', 'kanca'], ['tohum', 'ok', 'lamba']] },
+  kanca3: { idea: ['lamba', 'ok', 'kanca'], full: [['lamba', 'ok', 'kanca'], ['tohum', 'ok', 'lamba']] },
+  rampa: { idea: ['kepce', 'merdiven'], full: [['kepce', 'ok', 'merdiven']] }
+};
 
 // the seed-light drag gesture teaches itself toward a target
 function teachTarget() { return S.f.teachTo || [1180, 620]; }
@@ -820,9 +1229,9 @@ function hintB1() {
   }
   return ['1c', 'drezin'];
 }
-const currentGoal = () => S.bolum === 2 ? hintB2() : hintB1();
+const currentGoal = () => S.bolum === 3 ? hintB3() : S.bolum === 2 ? hintB2() : hintB1();
 function showHintB1() {
-  const [sc, id] = currentGoal(), hub = S.bolum === 2 ? '2a' : '1a';
+  const [sc, id] = currentGoal(), hub = ['', '1a', '2a', '3a'][S.bolum];
   if (sc === 'inv') { say(defterOf(id).idea || ['soru'], 3); return; }
   let target = id;
   // another scene: point at the exit that leads there (through the hub)
@@ -832,6 +1241,8 @@ function showHintB1() {
     if (!ex && S.scene === '2c' && sc === '2d') ex = HS['2c'].find(h => h.id === 'gecit');
     if (!ex && S.scene === '2a' && sc === '2b') ex = HS['2a'].find(h => h.id === 'kapi');
     if (!ex && S.scene === '2a' && sc === '2d') ex = HS['2a'].find(h => h.to === '2c');
+    if (!ex && S.scene === '3a' && sc === '3c') ex = HS['3a'].find(h => h.id === 'merdiven');
+    if (!ex && S.scene === '3a' && sc === '3d') ex = HS['3a'].find(h => h.id === (S.f.gecti3 ? 'gol' : 't_capaIc'));
     target = ex ? ex.id : null;
   }
   if (target) S.hint = { id: target, t: 3.2 };
@@ -974,6 +1385,36 @@ function icon(name, x, y, s, col = '#2b2520') {
     case 'mil': g.beginPath(); g.arc(0, 0, 10, 0, 7); g.stroke(); g.fillRect(-3, -3, 6, 6); break;
     case 'nine': g.beginPath(); g.arc(0, -4, 11, 0, 7); g.stroke(); g.beginPath(); g.moveTo(0, -4); g.lineTo(0, -11); g.moveTo(0, -4); g.lineTo(5, -2); g.stroke(); g.beginPath(); g.moveTo(-12, 16); g.lineTo(-8, 7); g.lineTo(8, 7); g.lineTo(12, 16); g.stroke(); break;
     case 'ag': g.lineWidth = 2; g.beginPath(); g.moveTo(0, -16); g.lineTo(-12, 8); g.lineTo(0, 16); g.lineTo(12, 8); g.closePath(); g.moveTo(-6, -4); g.lineTo(6, 12); g.moveTo(6, -4); g.lineTo(-6, 12); g.stroke(); break;
+    case 'nilufer': g.fillStyle = '#6fae4a'; g.beginPath(); g.ellipse(0, 4, 16, 8, 0, .25, Math.PI * 2 - .25); g.lineTo(0, 4); g.closePath(); g.fill();
+      g.fillStyle = '#cfe8ef'; g.beginPath(); g.arc(-3, 3, 2.6, 0, 7); g.fill(); break;
+    case 'su': g.beginPath(); g.moveTo(0, -15); g.bezierCurveTo(10, -2, 11, 5, 0, 13); g.bezierCurveTo(-11, 5, -10, -2, 0, -15); g.stroke(); break;
+    case 'sise': g.beginPath(); g.moveTo(-4, -16); g.lineTo(4, -16); g.lineTo(4, -8); g.quadraticCurveTo(11, -4, 11, 4); g.lineTo(11, 15); g.lineTo(-11, 15); g.lineTo(-11, 4); g.quadraticCurveTo(-11, -4, -4, -8); g.closePath(); g.stroke();
+      g.globalAlpha = .5; g.beginPath(); g.rect(-9, 4, 18, 9); g.fill(); g.globalAlpha = 1; break;
+    case 'varil': g.beginPath(); g.ellipse(0, -11, 11, 4, 0, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-11, -11); g.lineTo(-11, 12); g.ellipse(0, 12, 11, 4, 0, Math.PI, 0, true); g.lineTo(11, -11); g.stroke();
+      g.beginPath(); g.moveTo(-11, 0); g.lineTo(11, 0); g.stroke(); break;
+    case 'tahta': g.strokeRect(-7, -16, 14, 32); g.beginPath(); g.moveTo(-7, -5); g.lineTo(7, -5); g.moveTo(-7, 6); g.lineTo(7, 6); g.stroke(); g.beginPath(); g.arc(4, 0, 1.6, 0, 7); g.fill(); break;
+    case 'salgovde': case 'sal': [-10, 0, 10].forEach(v => g.strokeRect(v - 4, -4, 8, 16)); g.beginPath(); g.ellipse(0, -8, 10, 5, 0, 0, 7); g.stroke();
+      if (name === 'sal') { g.lineWidth = 1.5; g.beginPath(); g.moveTo(-15, 12); g.lineTo(15, -2); g.moveTo(-15, 2); g.lineTo(15, 12); g.stroke(); } break;
+    case 'caydanlik': g.beginPath(); g.arc(0, 6, 10, 0, 7); g.stroke(); g.beginPath(); g.arc(0, -8, 6, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-10, 4); g.lineTo(-17, -2); g.moveTo(9, -9); g.quadraticCurveTo(15, -8, 10, 2); g.stroke(); break;
+    case 'cay': g.beginPath(); g.moveTo(-7, -13); g.quadraticCurveTo(-3, -2, -6, 4); g.quadraticCurveTo(-8, 12, -4, 13); g.lineTo(4, 13); g.quadraticCurveTo(8, 12, 6, 4); g.quadraticCurveTo(3, -2, 7, -13); g.stroke();
+      g.fillStyle = '#b5562e'; g.beginPath(); g.moveTo(-5, -5); g.lineTo(5, -5); g.quadraticCurveTo(7, 10, 3, 12); g.lineTo(-3, 12); g.quadraticCurveTo(-7, 10, -5, -5); g.fill(); g.beginPath(); g.ellipse(0, 16, 12, 3, 0, 0, 7); g.stroke(); break;
+    case 'lensparca': case 'lens1': case 'lens2': case 'lens3': g.beginPath(); g.arc(-14, 14, 30, -1.2, -.35); g.arc(-14, 14, 12, -.35, -1.2, true); g.closePath(); g.stroke();
+      g.lineWidth = 1.2; g.beginPath(); g.arc(-14, 14, 18, -1.1, -.45); g.stroke(); g.beginPath(); g.arc(-14, 14, 24, -1.1, -.45); g.stroke(); break;
+    case 'fener': g.strokeRect(-7, -8, 14, 16); g.beginPath(); g.moveTo(-9, -8); g.lineTo(0, -15); g.lineTo(9, -8); g.stroke(); g.fillRect(-9, 8, 18, 4);
+      g.lineWidth = 1.5; g.beginPath(); g.moveTo(8, -3); g.lineTo(17, -6); g.moveTo(8, 1); g.lineTo(17, 3); g.stroke(); break;
+    case 'lambalar': [-9, 9, 0].forEach((v, i) => { const y = i === 2 ? -6 : 0; g.strokeRect(v - 5, y - 4, 10, 14); g.beginPath(); g.moveTo(v - 6, y - 4); g.lineTo(v, y - 10); g.lineTo(v + 6, y - 4); g.stroke(); }); break;
+    case 'balik': g.beginPath(); g.moveTo(-14, 0); g.quadraticCurveTo(0, -11, 10, 0); g.quadraticCurveTo(0, 11, -14, 0); g.stroke(); g.beginPath(); g.moveTo(10, 0); g.lineTo(17, -7); g.lineTo(17, 7); g.closePath(); g.stroke(); g.beginPath(); g.arc(-7, -2, 1.8, 0, 7); g.fill(); break;
+    case 'kepce': g.beginPath(); g.arc(-3, -6, 9, 0, 7); g.stroke(); g.beginPath(); g.arc(-6, -6, 2.4, 0, 7); g.arc(0, -6, 2.4, 0, 7); g.fill(); g.strokeRect(-12, 4, 18, 8);
+      g.beginPath(); g.moveTo(6, -2); g.lineTo(14, -12); g.lineTo(18, -2); g.lineTo(12, 2); g.stroke(); break;
+    case 'kanca': g.beginPath(); g.moveTo(-12, -14); g.lineTo(6, -14); g.lineTo(6, 2); g.stroke(); g.beginPath(); g.arc(3, 8, 6, -Math.PI * .1, Math.PI * 1.2); g.stroke(); break;
+    case 'kutuk': g.beginPath(); g.moveTo(-10, 14); g.lineTo(-8, -2); g.lineTo(-11, -10); g.lineTo(-4, -4); g.lineTo(-1, -14); g.lineTo(3, -4); g.lineTo(9, -9); g.lineTo(8, 2); g.lineTo(11, 14); g.closePath(); g.fill(); break;
+    case 'capaIc': g.lineWidth = 4; g.beginPath(); g.arc(0, -12, 4, 0, 7); g.moveTo(0, -8); g.lineTo(0, 13); g.moveTo(-8, -3); g.lineTo(8, -3); g.stroke();
+      g.beginPath(); g.arc(0, 2, 13, .3, Math.PI - .3); g.stroke(); break;
+    case 'kubbeT': g.beginPath(); g.arc(0, 6, 13, Math.PI, 0); g.closePath(); g.stroke(); g.beginPath(); g.arc(0, -6, 3, 0, 7); g.fill(); break;
+    case 'vinc': g.lineWidth = 4; g.beginPath(); g.moveTo(-12, 14); g.lineTo(-6, -14); g.lineTo(14, -10); g.stroke(); g.lineWidth = 2; g.beginPath(); g.moveTo(12, -10); g.lineTo(12, 4); g.stroke(); g.beginPath(); g.arc(9, 7, 4, -1, 3); g.stroke(); break;
+    case 'can': g.beginPath(); g.moveTo(-12, 8); g.quadraticCurveTo(-10, -12, 0, -12); g.quadraticCurveTo(10, -12, 12, 8); g.closePath(); g.stroke(); g.beginPath(); g.arc(0, 11, 3, 0, 7); g.fill(); g.beginPath(); g.moveTo(0, -12); g.lineTo(0, -16); g.stroke(); break;
+    case 'pervane': for (let i = 0; i < 3; i++) { g.save(); g.rotate(i * Math.PI * 2 / 3); g.beginPath(); g.ellipse(0, -9, 5, 9, 0, 0, 7); g.stroke(); g.restore(); } g.beginPath(); g.arc(0, 0, 3, 0, 7); g.fill(); break;
+    case 'ag1': case 'ag2': case 'ag3': { const k = { ag1: .6, ag2: .8, ag3: 1 }[name]; g.beginPath(); g.moveTo(0, -16); g.lineTo(0, -16 + 8 * k); g.stroke(); g.strokeRect(-8 * k, -8 * k, 16 * k, 22 * k); break; }
     case 'yol': g.lineWidth = 1.5; for (let i = 0; i <= 3; i++) { g.beginPath(); g.moveTo(-15 + i * 10, -15); g.lineTo(-15 + i * 10, 15); g.moveTo(-15, -15 + i * 10); g.lineTo(15, -15 + i * 10); g.stroke(); }
       g.lineWidth = 4; g.beginPath(); g.moveTo(-19, 10); g.lineTo(-10, 10); g.quadraticCurveTo(-10, 0, -5, 0); g.lineTo(5, 0); g.quadraticCurveTo(10, 0, 10, -10); g.lineTo(19, -10); g.stroke(); break;
   }
@@ -1058,20 +1499,22 @@ function hsAt(p) { return (HS[S.scene] || []).find(h => (!h.on || h.on()) && inR
 C.addEventListener('pointerdown', e => {
   e.preventDefault(); const p = pt(e); audioStart();
   if (S.mode === 'title') {
-    if (S.saved && p.y > 575 && p.y < 622) { startBolum1(true); return; }
-    if (S.saved >= 2 && p.y >= 622 && p.y < 672) { startBolum2(true); return; }
+    if (S.saved && p.y > 588 && p.y < 630) { startBolum1(true); return; }
+    if (S.saved >= 2 && p.y >= 630 && p.y < 670) { startBolum2(true); return; }
+    if (S.saved >= 3 && p.y >= 670) { startBolum3(true); return; }
     S.mode = 'cin'; S.cin = { t: 0 }; musicBox(); return;
   }
   if (S.mode === 'cin') { S.cin.t = Math.max(S.cin.t, 9.2); return; }
   if (S.mode === 'card') { S.card.t = Math.max(S.card.t, 3.2); return; }
   if (S.mode === 'filiz') { S.filiz.t = Math.max(S.filiz.t, 7); return; }
   if (S.mode === 'end1') { if (S.t > 2.5) startBolum2(); return; }
-  if (S.mode === 'end' || S.mode === 'end2') { if (S.t > 2.5) location.href = location.pathname; return; }
+  if (S.mode === 'end2') { if (S.t > 2.5) startBolum3(); return; }
+  if (S.mode === 'end' || S.mode === 'end3') { if (S.t > 2.5) location.href = location.pathname; return; }
   if (S.mode !== 'play' || S.fade > .2) return;
   if (S.overlay) { overlayDown(p); return; }
   if (inRect(p, [10, 10, 78, 78])) { showHint(); return; }
   for (let i = 0; i < S.inv.length; i++) if (inRect(p, slotRect(i))) { drag = { item: S.inv[i], x: p.x, y: p.y, x0: p.x, y0: p.y }; return; }
-  if (L.anim || S.lock) return;
+  if (L.anim || S.lock || L.hop) return;
   if (inRect(p, lehimBox())) { drag = { light: true, x: p.x, y: p.y, x0: p.x, y0: p.y }; return; }
   down = p;
 });
@@ -1092,8 +1535,10 @@ C.addEventListener('pointerup', e => {
       }
       if (S.f.bez) { say(['bez', 'x'], 1.6); return; }
       const h = hsAt(p);
-      // one gesture: the seed becomes a root on cracks, grates and weights, light elsewhere
-      if (h && h.kok && S.f.kok) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); growRoot(h.r[0] + h.r[2] / 2, h.r[1] + h.r[3] / 2, () => h.kok()); });
+      // one gesture: the seed becomes a root on cracks, grates and weights, a lily on ash and water, light elsewhere
+      if (h && h.nil && S.f.nilufer) { if (h.noWalk || L.onLake) { faceTo(h); h.nil(); } else walkTo(h.stand[0], h.stand[1], () => { faceTo(h); h.nil(); }); }
+      else if (L.onLake) say(['nilufer', 'soru'], 1.4);
+      else if (h && h.kok && (S.f.kok || S.bolum >= 3)) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); growRoot(h.r[0] + h.r[2] / 2, h.r[1] + h.r[3] / 2, () => h.kok()); });
       else if (h && h.light) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); h.light(); });
       else if (h && h.kok) say(['tohum', 'soru'], 1.6);
       else { say(['goz', 'soru'], 1.6); }
@@ -1114,6 +1559,7 @@ C.addEventListener('pointerup', e => {
     return;
   }
   if (!down) return; down = null;
+  if (L.onLake) return; // standing on a lily: only the seed can move him on
   const h = hsAt(p);
   if (h) walkTo(h.stand[0], h.stand[1], () => h.to ? goScene(h.to, h.spawn) : reach(h, () => h.tap()));
   else walkTo(p.x, p.y);
@@ -1156,6 +1602,7 @@ function mkTrace() { // follow the rails from the west edge of the bottom-left t
 }
 function overlayDownB1(p) {
   const o = S.overlay;
+  if (overlayDownB3(p)) return;
   if (o.type === 'saat') {
     if (o.solved) return;
     if (!inCU(p)) { S.overlay = null; return; }
@@ -1270,13 +1717,15 @@ function overlayUp(p) {
   if (o.type === 'ritim' && o.press !== null) {
     const d = S.t - o.press; o.press = null; hornStop();
     const b = d < .32 ? 0 : 1, i = o.seq.length; o.seq.push(b);
-    if (b !== RIT[i]) { o.lamps = o.seq.slice(); o.fail = .6; setTimeout(() => { bad(); o.seq = []; o.lamps = []; }, 350); return; }
+    const pat = o.pat || RIT;
+    if (b !== pat[i]) { o.lamps = o.seq.slice(); o.fail = .6; setTimeout(() => { bad(); o.seq = []; o.lamps = []; }, 350); return; }
     o.lamps = o.seq.slice();
-    if (o.seq.length === RIT.length) { o.ok = true; chime(); setTimeout(() => { S.overlay = null; bolum1Finish(); }, 1300); }
+    if (o.seq.length === pat.length) { o.ok = true; chime(); setTimeout(() => { S.overlay = null; (o.done || bolum1Finish)(); }, 1300); }
   }
 }
 function drawOverlayB1(o, dt) {
   const img = k => GRAY[k];
+  if (drawOverlayB3(o, dt)) return;
   if (o.type === 'defter') { drawDefter(o, dt); return; }
   if (o.type === 'vana') {
     const im = img('cu_vana'); if (!im) return; X.drawImage(im, CU.x, CU.y, CU.s, CU.s);
@@ -1364,7 +1813,7 @@ function drawOverlayB1(o, dt) {
   if (o.type === 'ritim') {
     // close-up of the drezin pump lever; the signal lamps count Düdük's rhythm
     X.fillStyle = 'rgba(30,26,22,.9)'; X.beginPath(); X.roundRect(W / 2 - 330, 80, 660, 580, 30); X.fill();
-    RIT.forEach((b, i) => { const x = W / 2 - 150 + i * 100, y = 160, v = o.lamps[i], wrong = o.fail > 0 && i === o.lamps.length - 1;
+    (o.pat || RIT).forEach((b, i) => { const x = W / 2 - 150 + i * 100, y = 160, v = o.lamps[i], wrong = o.fail > 0 && i === o.lamps.length - 1;
       X.fillStyle = 'rgba(60,52,44,1)'; X.beginPath(); X.arc(x, y, 26, 0, 7); X.fill();
       if (v !== undefined) glowAt(x, y, 40, wrong ? '220,80,60' : '255,190,90', .95);
       if (v !== undefined) icon(v ? 'uzun' : 'kisa', x, y, 30, '#2b2520'); });
@@ -1612,7 +2061,7 @@ function drawScene(dt) {
   // depth: scene props, characters and Lehim sorted by where their feet touch the floor
   (FG[sc] || []).forEach(o => DEPTHQ.push({ y: o.y, draw: () => drawOccluder(o.poly) }));
   DEPTHQ.push({ y: L.y, draw: () => drawLehimLit(dt) });
-  if (S.bolum === 2) DEPTHQ.push({ y: L.y + 1, draw: () => drawPirpir(dt) });
+  if (S.bolum >= 2) DEPTHQ.push({ y: L.y + 1, draw: () => drawPirpir(dt) });
   DEPTHQ.sort((a, b) => a.y - b.y).forEach(d => d.draw());
   drawRoot(dt);
   drawAmbientFront(sc, dt);
@@ -1681,7 +2130,16 @@ const FG = {
          { y: 606, poly: [[1050, 378], [1195, 375], [1198, 606], [1052, 606]] },
          { y: FAR, poly: [[1160, 440], [1280, 430], [1280, 720], [1110, 640]] },
          { y: FAR, poly: [[0, 440], [80, 470], [160, 520], [230, 552], [0, 562]] }],
-  '2d': [{ y: FAR, poly: [[0, 440], [110, 440], [115, 600], [0, 610]] }]
+  '2d': [{ y: FAR, poly: [[0, 440], [110, 440], [115, 600], [0, 610]] }],
+  // pier: the front row of posts stands before the deck
+  '3a': [[248, 292], [455, 505], [750, 802], [1035, 1092]].map(([a, b]) => ({ y: FAR, poly: [[a, 515], [b, 515], [b, 720], [a, 720]] })),
+  '3b': [{ y: FAR, poly: [[0, 250], [140, 330], [210, 420], [230, 560], [300, 720], [0, 720]] },
+         { y: 548, poly: [[540, 330], [800, 330], [800, 548], [540, 548]] }],
+  '3c': [{ y: FAR, poly: [[0, 570], [120, 580], [230, 640], [230, 720], [0, 720]] }],
+  '3d': [{ y: FAR, poly: [[20, 540], [140, 520], [170, 640], [150, 720], [0, 720], [0, 560]] },
+         { y: FAR, poly: [[930, 600], [1060, 595], [1090, 720], [920, 720]] },
+         { y: FAR, poly: [[1100, 620], [1260, 620], [1260, 720], [1100, 720]] },
+         { y: 575, poly: [[1118, 450], [1280, 450], [1280, 578], [1118, 578]] }]
 };
 function drawOccluder(poly) {
   const bg = BG[S.scene]; if (!bg) return;
@@ -1701,6 +2159,10 @@ function lehimTint() {
   if (sc === '2b') return 'rgba(210,150,90,.12)';
   if (sc === '2c') return 'rgba(140,118,96,.12)';
   if (sc === '2d') return 'rgba(130,120,110,.1)';
+  if (sc === '3a') return 'rgba(175,188,192,.1)';
+  if (sc === '3b') return 'rgba(235,185,115,.1)';
+  if (sc === '3c') return 'rgba(205,145,85,.1)';
+  if (sc === '3d') return f.kepce ? 'rgba(160,120,80,.12)' : 'rgba(60,50,40,.1)';
   return null;
 }
 let LC = null;
@@ -1740,7 +2202,13 @@ const EMIT = {
   '2c': [{ x: 662, y: 40, rate: 1.4, vx: 10, vy: -14, sp: 6, s: 9, g: 18, life: 4, rgb: '140,136,130', a: .3 },
          { x: 720, y: 20, rate: 1, vx: 8, vy: -12, sp: 6, s: 9, g: 18, life: 4, rgb: '140,136,130', a: .25 },
          { x: 1110, y: 95, rate: 1, vx: -3, vy: -16, sp: 3, s: 5, g: 10, life: 2.4, rgb: '225,225,220', a: .25 }],
-  '2d': [{ x: 70, y: 120, rate: 2.2, vx: 18, vy: -10, sp: 6, s: 8, g: 20, life: 2.6, rgb: '235,235,232', a: .35, on: () => S.f.vanalar }]
+  '2d': [{ x: 70, y: 120, rate: 2.2, vx: 18, vy: -10, sp: 6, s: 8, g: 20, life: 2.6, rgb: '235,235,232', a: .35, on: () => S.f.vanalar }],
+  '3a': [{ x: 30, y: 140, rate: .8, vx: 6, vy: -12, sp: 3, s: 6, g: 12, life: 3, rgb: '200,198,194', a: .22 },
+         { x: 102, y: 158, rate: .6, vx: 6, vy: -12, sp: 3, s: 6, g: 12, life: 3, rgb: '200,198,194', a: .2 }],
+  '3c': [{ x: 268, y: 150, rate: 1.4, vx: 3, vy: -18, sp: 4, s: 6, g: 14, life: 2.6, rgb: '235,235,232', a: .3 },
+         { x: 600, y: 40, rate: 1.6, vx: 4, vy: -20, sp: 5, s: 7, g: 16, life: 2.6, rgb: '235,235,232', a: .3 },
+         { x: 525, y: 130, rate: 1.2, vx: 3, vy: -16, sp: 4, s: 6, g: 14, life: 2.4, rgb: '235,235,232', a: .28 },
+         { x: 700, y: 30, rate: 2.2, vx: 6, vy: -22, sp: 6, s: 8, g: 18, life: 2.6, rgb: '235,235,232', a: .35, on: () => S.f.basinc }]
 };
 function puffs(sc, dt, list) {
   const P = PART[sc] = PART[sc] || [];
@@ -1792,6 +2260,11 @@ function drawAmbient(sc, dt) {
     // the grandfather clock's pendulum still swings, and the wall clocks tick
     if ((S.t % 1) < dt && S.scene === '2b') tone(2400, 0, .03, .012, 'square'); }
   if (sc === '2c') { lamp(281, 96, 55, '255,200,120', .4); lamp(886, 236, 50, '255,200,120', .35); mist(380, 120, 7, .12); }
+  if (sc === '3a') { lamp(247, 300, 45, '255,200,120', .35); lamp(1245, 340, 45, '255,200,120', .35); mist(380, 140, 10, .12); mist(300, 100, -6, .08); }
+  if (sc === '3b') { [[55, 150], [135, 200], [195, 225], [250, 235], [400, 230], [975, 200], [1120, 90]].forEach(([x, y], i) => { if (i < 4 && i > 0 && S.f.lambalarAlindi) return; lamp(x, y, 40, '255,200,120', .35); });
+    windowSnow([[90, 60, 250, 340], [420, 90, 120, 340], [800, 70, 170, 380]], dt); }
+  if (sc === '3c') { lamp(1085, 165, 60, '255,200,120', .4); }
+  if (sc === '3d') { [[910, 192], [1020, 268], [1090, 258], [1130, 420], [1090, 70]].forEach(([x, y]) => lamp(x, y, 36, '255,200,120', .35)); mist(460, 140, 7, .1); }
   if (sc === '2d') { lamp(148, 182, 40, '255,200,120', .35); lamp(206, 386, 38, '255,200,120', .35); lamp(386, 382, 38, '255,200,120', .35); lamp(1200, 150, 40, '255,200,120', .3); lamp(1166, 486, 30, '255,200,120', .3);
     motes(900, 0, 700, 600, 400, .35); }
 }
@@ -1809,6 +2282,11 @@ function drawAmbientFront(sc, dt) {
     if (!f.benchLit || f.litT < 1.5) { let a = .8; if (f.benchLit) { f.litT += dt; a = .8 * (1 - f.litT / 1.5); }
       const g = X.createRadialGradient(384, 590, 10, 384, 590, 150); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(1, 'rgba(0,0,0,0)'); X.fillStyle = g; X.fillRect(230, 440, 310, 250); }
     if (f.benchLit && !f.ampul) { glowAt(384, 600, 40, '150,220,100', .3); icon('ampul', 384, 600, 28, '#d8cfbf'); }
+  }
+  if (sc === '3d' && (!f.kepce || f.kepceT < 2)) {
+    const a = f.kepce ? .55 * (1 - f.kepceT / 2) : .55; X.fillStyle = `rgba(6,5,4,${a})`; X.fillRect(0, 0, W, H); dark = true;
+    KEPCE.eyes.forEach(([x, y]) => glowAt(x, y, 14, '255,200,110', f.kepce ? .75 : .3));
+    [[92, 150], [196, 262], [277, 338]].forEach(([x, y], i) => { if (f.kanca[i] === 2) glowAt(x, y - 4, 90, '255,200,120', .45); });
   }
   if (dark && L.alpha > 0) { const k = 190 * scaleAt(L.y) / 279; glowAt(L.x + L.face * (165 - 119) * k, L.y - (279 - 187) * k, 60 * k, '170,235,110', .35); }
   // Düdük's frosty breath while he is cold
@@ -1829,8 +2307,9 @@ function drawTitle(dt) {
   X.save(); X.textAlign = 'center'; X.fillStyle = '#e9e2d4';
   X.font = '700 96px "Cormorant Garamond", Georgia, serif'; X.fillText('KÜL YAĞMURU', W / 2, 300);
   X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('Son Tohumun Yolculuğu · Prolog', W / 2, 350);
-  if (S.saved) { X.font = '600 26px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf'; X.fillText('1. Bölüm: Durmuş Saatler İstasyonu ›', W / 2, 605);
-    if (S.saved >= 2) X.fillText('2. Bölüm: Borular Mahallesi ›', W / 2, 652); }
+  if (S.saved) { X.font = '600 25px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf'; X.fillText('1. Bölüm: Durmuş Saatler İstasyonu ›', W / 2, 615);
+    if (S.saved >= 2) X.fillText('2. Bölüm: Borular Mahallesi ›', W / 2, 655);
+    if (S.saved >= 3) X.fillText('3. Bölüm: Kül Gölü ›', W / 2, 695); }
   const p = .7 + .3 * Math.sin(S.t * 3); X.globalAlpha = p;
   const g = X.createRadialGradient(W / 2, 470, 2, W / 2, 470, 60); g.addColorStop(0, 'rgba(180,240,120,.9)'); g.addColorStop(1, 'rgba(120,200,80,0)');
   X.fillStyle = g; X.beginPath(); X.arc(W / 2, 470, 60, 0, 7); X.fill();
@@ -1854,11 +2333,12 @@ function drawCard(dt) {
   const c = S.card; c.t += dt; const t = c.t, a = Math.max(0, Math.min(1, t / .8, (3.6 - t) / .6));
   X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .6);
   X.save(); X.globalAlpha = a; X.textAlign = 'center';
-  const b2 = c.n === 2; // accent colour per chapter: amber lamp light, then copper
-  X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText(b2 ? '2. Bölüm' : '1. Bölüm', W / 2, 300);
-  X.font = '700 72px "Cormorant Garamond", Georgia, serif'; X.fillStyle = b2 ? '#d49a6a' : '#e9c98a'; X.fillText(b2 ? 'Borular Mahallesi' : 'Durmuş Saatler İstasyonu', W / 2, 380);
+  // accent colour per chapter: amber lamp light, copper, turquoise water
+  const n = c.n || 1, CARD = [null, ['Durmuş Saatler İstasyonu', '#e9c98a'], ['Borular Mahallesi', '#d49a6a'], ['Kül Gölü', '#8cc4bc']][n];
+  X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText(n + '. Bölüm', W / 2, 300);
+  X.font = '700 72px "Cormorant Garamond", Georgia, serif'; X.fillStyle = CARD[1]; X.fillText(CARD[0], W / 2, 380);
   X.restore();
-  if (t > 3.6) { S.mode = 'play'; S.fade = 1; S.fadeTarget = 0; if (b2) ENTER['2a'](); else setTimeout(() => say(['saat', 'soru'], 2.6), 900); }
+  if (t > 3.6) { S.mode = 'play'; S.fade = 1; S.fadeTarget = 0; if (n > 1) ENTER[n + 'a'](); else setTimeout(() => say(['saat', 'soru'], 2.6), 900); }
 }
 function drawFiliz(dt) {
   // the seed grows in Lehim's chest window at the end of a chapter (Tohum → Filiz → İki yaprak)
@@ -1870,7 +2350,25 @@ function drawFiliz(dt) {
     X.globalAlpha = a * g; X.save(); X.beginPath(); X.arc(cx - 320, cy - 320, cr, 0, 7); X.clip(); IMG[key] && X.drawImage(IMG[key], -320, -320, 640, 640); X.restore();
     glowAt(sx - 320, sy - 320, 70 + 30 * g, '170,235,110', .3 + .4 * g);
     X.restore(); }
-  if (t > 8) { S.mode = S.bolum === 2 ? 'end2' : 'end1'; S.t = 0; }
+  if (t > 8) { S.mode = 'end' + S.bolum; S.t = 0; }
+}
+function drawEnd3(dt) {
+  X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .7);
+  const a = Math.min(1, S.t / 1.5), f = S.f; X.save(); X.globalAlpha = a; X.textAlign = 'center';
+  X.fillStyle = '#e9e2d4'; X.font = '700 76px "Cormorant Garamond", Georgia, serif'; X.fillText('KÜL YAĞMURU', W / 2, 210);
+  X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('3. Bölüm tamamlandı. Tohum sarmaşık uzattı.', W / 2, 265);
+  X.font = '700 28px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf';
+  gear(W / 2 - 230, 350, 15, '#d8cfbf'); X.fillText('× ' + S.cark, W / 2 - 185, 360);
+  X.fillStyle = 'rgba(160,215,120,.95)'; X.beginPath(); X.arc(W / 2 - 80, 350, 9, 0, 7); X.fill(); X.fillStyle = '#d8cfbf'; X.fillText('× ' + S.isik, W / 2 - 40, 360);
+  for (let i = 0; i < 5; i++) { X.fillStyle = i < S.canlilik ? 'rgba(160,215,120,.95)' : 'rgba(90,85,78,.8)'; X.beginPath(); X.ellipse(W / 2 + 60 + i * 26, 352, 8, 5.5, -.4, 0, 7); X.fill(); }
+  X.strokeStyle = '#d8cfbf'; X.lineWidth = 2; X.strokeRect(W / 2 + 205, 338, 20, 24); X.fillStyle = '#d8cfbf'; X.fillText('× ' + S.hafiza, W / 2 + 255, 360);
+  X.font = '500 25px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#b8b0a2';
+  X.fillText(f.kepce === 'fener' ? 'Kepçe fener zincirinin ışığında ayağa kalktı ve yanında.' : f.kepce === 'isik' ? 'Kepçe tohumun ışığıyla sakinleşti ve yanında.' : 'Kepçe taş ocağının karanlığında kaldı.', W / 2, 425);
+  X.fillText(f.balik ? 'Çapa ilk gerçek balığını tuttu; bir şişe temiz su verdi.' : 'Çapa hâlâ metal balık tutuyor.', W / 2, 462);
+  X.fillText(f.cayVerildi ? 'Çapa ile bir bardak çay içtiniz.' : '', W / 2, 499);
+  if (S.t > 2.5) { X.font = '500 24px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#6f685e'; X.fillText('4. Bölüm: Terk Edilmiş Lunapark yakında.', W / 2, 570);
+    X.font = '500 22px "Cormorant Garamond", Georgia, serif'; X.fillText('Başa dönmek için dokunun', W / 2, 620); }
+  X.restore();
 }
 function drawEnd2(dt) {
   X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .7);
@@ -1886,8 +2384,7 @@ function drawEnd2(dt) {
   X.fillText(f.pirpir === 'joined' ? (f.pirpirHow === 'yaprak' ? 'Pırpır sahte yaprakla sessizce kurtuldu ve yanında.' : 'Pırpır kökle kurtuldu ama alarm çaldı.') : 'Pırpır Fırın\'a götürüldü.', W / 2, 425);
   X.fillText(f.ikiz === 'bacak' ? 'Vida ile Somun ortak bacaklarıyla birlikte yürüyor.' : f.ikiz === 'ayir' ? 'Vida ile Somun ayrıldı; Somun durdu.' : '', W / 2, 462);
   X.fillText(f.kurma ? 'Nine Saat kurma anahtarını sana verdi.' : '', W / 2, 499);
-  X.font = '500 24px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#6f685e'; X.fillText('3. Bölüm: Kül Gölü yakında.', W / 2, 560);
-  if (S.t > 2.5) { X.font = '500 22px "Cormorant Garamond", Georgia, serif'; X.fillText('Başa dönmek için dokunun', W / 2, 620); }
+  if (S.t > 2.5) { X.font = '500 24px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf'; X.fillText('3. Bölüm: Kül Gölü için dokunun ›', W / 2, 620); }
   X.restore();
 }
 function drawEnd1(dt) {
@@ -1938,6 +2435,7 @@ function step(dt) {
   else if (S.mode === 'filiz') drawFiliz(dt);
   else if (S.mode === 'end1') drawEnd1(dt);
   else if (S.mode === 'end2') drawEnd2(dt);
+  else if (S.mode === 'end3') drawEnd3(dt);
   else {
     // movement
     if (L.moving) {
@@ -1945,6 +2443,8 @@ function step(dt) {
       if (d <= sp) { L.x = L.tx; L.y = L.ty; L.moving = false; const t = L.then; L.then = null; t && t(); }
       else { L.x += dx / d * sp; L.y += dy / d * sp; }
     }
+    if (L.hop) { const h = L.hop; h.t += dt; const u = Math.min(1, h.t / .55); L.x = L.tx = h.x0 + (h.x1 - h.x0) * u; L.y = L.ty = h.y0 + (h.y1 - h.y0) * u;
+      if (u >= 1) { L.hop = null; tone(330, 0, .12, .04, 'triangle'); h.then && h.then(); } }
     if (L.anim) { L.animT -= dt; if (L.animT <= 0) { const t = L.animThen; L.anim = null; L.animThen = null; if (L.alpha > 0 && S.scene !== 'pb') L.alpha = 1; t && t(); } }
     if (S.bubble) { S.bubble.t -= dt; if (S.bubble.t <= 0) S.bubble = null; }
     drawScene(dt);
@@ -1960,9 +2460,9 @@ Promise.all(Object.entries(SRC).map(([k, src]) => new Promise(res => { const i =
     BG.pa = { col: canvasOf(IMG.bg_pa), gry: gray(IMG.bg_pa, .12) };
     BG.pb = { col: canvasOf(IMG.bg_pb), gry: gray(IMG.bg_pb, .12) };
     ['1a', '1b', '1c', '1d'].forEach(k => { const im = IMG['bg_' + k]; if (im) BG[k] = { col: canvasOf(im), gry: GRAY['bg_' + k] }; });
-    ['2a', '2b', '2c', '2d'].forEach(k => { const im = IMG['bg_' + k]; if (im) BG[k] = { col: canvasOf(im), gry: GRAY['bg_' + k] }; });
+    ['2a', '2b', '2c', '2d', '3a', '3b', '3c', '3d'].forEach(k => { const im = IMG['bg_' + k]; if (im) BG[k] = { col: canvasOf(im), gry: GRAY['bg_' + k] }; });
     // saved: 0 nothing, 1 chapter 1 reachable, 2 chapter 2 reachable
-    try { const s = JSON.parse(localStorage.getItem('ky_bolum') || 'null'); S.saved = !s ? 0 : s.bolum >= 2 || s.bitti ? 2 : 1; } catch (e) { S.saved = 0; }
+    try { const s = JSON.parse(localStorage.getItem('ky_bolum') || 'null'); S.saved = !s ? 0 : Math.min(3, s.bitti ? s.bolum + 1 : s.bolum); } catch (e) { S.saved = 0; }
     const q = (location.search.match(/[?&]bolum=(\d)/) || [])[1]; if (q) S.saved = Math.max(S.saved, +q);
     colorLayer = document.createElement('canvas'); colorLayer.width = W; colorLayer.height = H;
     maskC = document.createElement('canvas'); maskC.width = W; maskC.height = H;
@@ -1970,7 +2470,7 @@ Promise.all(Object.entries(SRC).map(([k, src]) => new Promise(res => { const i =
     S.mode = 'title';
   });
 // test hook: ?debug exposes the state for automated play-throughs
-if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, goScene, startBolum1, startBolum2, hintB2, openDefter };
+if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, goScene, startBolum1, startBolum2, startBolum3, hintB2, hintB3, openDefter, TOPS };
 })();
 </script>
 
