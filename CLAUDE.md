@@ -52,7 +52,7 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 ## Sıradaki iş
 - Test sürümünde ipuçları sınırsız ve ücretsiz: `IPUCU_SINIRSIZ = true`. Yayından önce `false` yapılacak.
 - Test sürümünde devriyede iki kez yakalanınca Toplayıcı uyuklar (geçiş serbest). Oyuncu devriyeyi geçemedi: telefonda zamanlama ve saklanma yerleri gözden geçirilecek.
-- 5. Bölüm — Büyük Fırın: önce adım adım tasarım ve görsel tarifleri.
+- 5. Bölüm — Büyük Fırın: tasarım `docs/bolum5.md`, ChatGPT tarifleri `docs/gorsel_tarifleri_bolum5.md`. Görseller `assets/raw/`'a gelince kodlanacak (yeni güç Polen: Toplayıcıları çeker).
 - 1. Bölüm prototipini telefonda test etmek (GDD üretim planı aşama 4).
 - Bilinen eksik: körük alındıktan sonra duvardaki körük görseli arka planda kalıyor.
 
