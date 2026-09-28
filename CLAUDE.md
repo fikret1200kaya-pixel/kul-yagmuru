@@ -3,7 +3,7 @@
 Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil oyun. Yayıncı: EFKA Games. Tüm yanıtlar Türkçe olmalı.
 
 ## Durum
-- `game/index.html`: tek dosyalık HTML5 canvas oyunu (kütüphanesiz). Oynanabilir: Prolog (Hurda Çukuru P-A, Hurdalık Kapısı P-B) , 1. Bölüm — Durmuş Saatler İstasyonu (1a Peron, 1b Bekleme Salonu, 1c Makas Kulübesi, 1d Vagon İçi; bulmacalar 1.1–1.6, Seçim 1'in üç yolu, Posta Güvercini yan görevi, 3 gizli çark) ve 2. Bölüm — Borular Mahallesi (aşağıda).
+- `game/index.html`: tek dosyalık HTML5 canvas oyunu (kütüphanesiz). Oynanabilir: Prolog (Hurda Çukuru P-A, Hurdalık Kapısı P-B) , 1. Bölüm — Durmuş Saatler İstasyonu (1a Peron, 1b Bekleme Salonu, 1c Makas Kulübesi, 1d Vagon İçi; bulmacalar 1.1–1.6, Seçim 1'in üç yolu, Posta Güvercini yan görevi, 3 gizli çark) ve 2.–5. Bölümler (aşağıda).
 - 1. Bölüm'ün adım adım çözümü ve tasarım kararları: `docs/bolum1.md`.
 - `game/img/`: oyunda kullanılan işlenmiş görseller (arka planlar 1280x720 `bg_*`, yakın çekimler `cu_*`, kesilmiş sprite'lar, Lehim'in önden `rig_*` ve yandan `side_*` parça animasyonu).
 - `assets/raw/`: ChatGPT/ElevenLabs ile üretilen orijinal görseller (A = arka plan, B = yakın çekim, C = karakter sayfası, D = ek görsel).
@@ -49,10 +49,16 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 - Pist bulmacası `PIST0` (Kepçe ile 6, onsuz 12 hamle; `pistNext` en kısa yolu arar, Pırpır ipucu için). Ayna labirenti `aynaTrace`.
 - Gölge oyununun son kuklası Lehim'in kendi görseliyle çizilir (`drawKukla`).
 
+## 5. Bölüm
+- Oynanabilir: 5a Ateşçi Kapısı, 5b Kömür Bandı, 5c Körük Salonu, 5d Ocakbaşı Salonu. Tasarım `docs/bolum5.md`, görseller `tools_bolum5.py` (`clear_feet` ayak altındaki kâğıt gölgesini siler).
+- Polen gücü: hedefin `pol()` işleyicisi varsa tohum orada polen bulutu saçar (`pollen`), Toplayıcılar buluta yürür.
+- Bulmaca tabloları: `ATKILIT` (kilit 0-4-7), `BANT` (makas zamanlaması), `BORU` (ısı hattı; `boruTrace` yolu izler), `PLATES` (projeksiyon sırası; `openProj`, `rememberPlate`).
+- Bölümler arası seçimler `S.dost` içinde: `bant`, `firin`, `ikna`, `plates`, `dudukKaldi`.
+
 ## Sıradaki iş
 - Test sürümünde ipuçları sınırsız ve ücretsiz: `IPUCU_SINIRSIZ = true`. Yayından önce `false` yapılacak.
 - Test sürümünde devriyede iki kez yakalanınca Toplayıcı uyuklar (geçiş serbest). Oyuncu devriyeyi geçemedi: telefonda zamanlama ve saklanma yerleri gözden geçirilecek.
-- 5. Bölüm — Büyük Fırın: tasarım `docs/bolum5.md`, ChatGPT tarifleri `docs/gorsel_tarifleri_bolum5.md`. Görseller `assets/raw/`'a gelince kodlanacak (yeni güç Polen: Toplayıcıları çeker).
+- 6. Bölüm — Seranın Kalbi ve Epilog: tasarım ve ChatGPT tarifleri yazılacak (finalin ışığı ve dostları 5. Bölüm seçimlerinden gelir).
 - 1. Bölüm prototipini telefonda test etmek (GDD üretim planı aşama 4).
 - Bilinen eksik: körük alındıktan sonra duvardaki körük görseli arka planda kalıyor.
 

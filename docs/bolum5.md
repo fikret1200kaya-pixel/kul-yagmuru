@@ -36,6 +36,7 @@ Polen, havalandırma ızgarasına ya da açık bir havaya bırakılınca altın 
 - Ateşçiler sırayla göğüs kapaklarını kilide dayar ve kapı açılır. Lehim dayayınca kilit reddeder: cam kapaklı göğsü tanınmaz.
 - Lehim göğüs kapağını açar (kendine dokun) ve iç yüzünde kazılı çentikleri görür: **4 çentik, 7 çentik** (Prolog'daki kömür kapağındaki 47 işareti). Sayaçlar **0, 4, 7** yapılır.
 - Kapı açılır. Işık yok: bu an bir kazanç değil, bir ağırlıktır; Lehim bir an göğsünü tutar.
+- Oyunda: sayaçlar 3-1-5'ten başlar, çentik davullarına dokunuldukça bir artar. Kilit reddettikten sonra Lehim'e dokununca göğüs kapağının içi (`cu_gogus`) açılır.
 
 ### 5.2 Koku Sensörü (Polen öğretici)
 - Kapının hemen ardındaki koridorda bir Toplayıcı nöbet tutar, hortumunu havada gezdirir; tohumu koklar ve Lehim'e döner.
@@ -47,6 +48,7 @@ Polen, havalandırma ızgarasına ya da açık bir havaya bırakılınca altın 
 - **A: Bandı kökle durdur.** Tohumu dişli motora sürükle: −1 Canlılık, alarm çalar, bant durur, her şey kurtulur ama Körük Salonu'nda iki Toplayıcı bekler.
 - **B: Geçip git.** Bant akmaya devam eder; bu sahne kalıcı olarak gri kalır, Işık kaybedilir. (Pırpır kafesteyse kaybedilir.)
 - **Üçüncü yol: Makası zamanla.** Bandın üstündeki her canlı şey (yeşil kırıntı, kırık makine, Pırpır'ın kafesi) makasa geldiği anda kolu çek; hepsi atık kanalına kayar. Kömür gelirken çekersen kömür de kanala düşer ve makas birkaç saniye tutukluk yapar (ceza yok, yeniden dene). Pırpır yanındaysa kolu o çeker; oyuncu sadece zamanı söyler (kola dokunur, Pırpır tepeden iner).
+- Oyunda: bantta beş canlı şey (ve varsa Pırpır'ın kafesi) kömürlerin arasında gelir. Kaçırılan canlı şey bandın başına döner, yeniden gelir; ceza yoktur. Pırpır yanındaysa makas bölgesi biraz daha geniştir. Seçim kartı (A/B) Körük Salonu kapısına yürüyünce çıkar.
 
 ### Düdük ve yeşil tren (anlatı)
 - Bandın arkasındaki raylarda, boyası solmuş yeşil bir tren durur; vagonlarında boş cam fide kasaları vardır.
@@ -63,11 +65,13 @@ Polen, havalandırma ızgarasına ya da açık bir havaya bırakılınca altın 
 - Oyuncunun topladığı her **hafıza çizimi** bir cam levhadır (1. Bölüm'den bu yana en fazla 7). Levhalar çerçevelere hikâyenin sırasıyla dizilir: seranın açılışı → bahçıvanlar ve son tohum treni → liman günleri → lunapark → ormanların kesilip taşınması → ateşçiler.
 - Eksik çerçeveler için Ocakbaşı'nın masasındaki **boş levhalar** kullanılır; boş levhaya tohumla dokununca, önceki ve sonraki çizime bakılarak mantıkla tamamlanan bir eskiz belirir. Ne kadar çok çizim varsa o kadar az boş levha gerekir.
 - Nota kurulduysa, levhalar dizilirken seranın açılış şarkısını çalar ve Ocakbaşı ilk levhada durur.
+- Oyunda: tepside oyuncunun sahip olduğu levhalar ve yalnızca eksik çerçeveler kadar boş levha bulunur. Boş levha, o çerçevenin çizimi eksikse ve yanında dolu bir çerçeve varsa (ya da uçtaysa) kabul edilir. Nota ilk çerçeveyi kendisi doldurur (levha varsa gerçeğiyle, yoksa eskizle).
 - Doğru sırada dizilince projeksiyon oynar; Ocakbaşı yıllardır yaktığı şeyin bahçeler olduğunu görür ve çöker. Işık +2. Ocakbaşı "ikna edildi" sayılır.
 
 ### 5.6 Isı Hattı (büyük mekanizma, Seçim 6'nın üçüncü yolu)
 - Ocakbaşı ikna edildiyse, salonun duvarındaki eski boru panosunu açar: Fırın'ın ısısını şehirden kesip seraya yönlendirecek bir boru ızgarası.
 - 5x5 boru ızgarası: parçalar dokunuldukça döner; Fırın'dan çıkan sıcak hattı seraya bağlanmalıdır. Yol üzerinde bir **ağır vana** vardır; Kepçe yanındaysa onu çevirir, değilse vana etrafından dolanılan daha uzun bir yol gerekir.
+- Oyunda: ızgara `BORU` (vana ortada, 2,2). Her boru tek yönde döndüğü için yol bir hücreden bir kez geçer; Kepçe ile en kısa yol 9, onsuz 15 borudur.
 
 ### Seçim 6 — Fırın'ın kaderi
 - **A: Söndür.** Ocakbaşı'nın büyük koluna tohumla kök sal ve indir. Fırın söner; şehir kararır, makineler yavaşlar (finalin ışık kaynağı zayıflar).

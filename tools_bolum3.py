@@ -7,20 +7,28 @@ from tools_bolum1 import bg, square, sprites, RAW, OUT, PROC
 from tools_cut import cut_cells
 
 
-def sprites_at(name, cuts, out, height, **kw):
-    """Like sprites(), but with hand-picked column borders (fractions of the width) for sheets whose poses overlap equal cells."""
+def sprites_at(name, cuts, out, height, blank=None, **kw):
+    """Like sprites(), but with hand-picked column borders (fractions of the width) for sheets whose poses overlap equal cells.
+    blank: {pose index: [(x0, y0, x1, y1), ...]} fractions of the sheet painted over with paper before that pose is cut
+    (for a neighbour's arm reaching into the pose's column)."""
     import numpy as np
     im = Image.open(f'{RAW}/{name}.webp').convert('RGB')
     w, h = im.size
     a0 = np.array(im)
     paper = tuple(int(v) for v in np.median(np.concatenate([a0[:8].reshape(-1, 3), a0[-8:].reshape(-1, 3)]), axis=0))
     for f in glob.glob(f'{PROC}/{out}_*.png'): os.remove(f)
-    for i, (a, b) in enumerate(zip(cuts, cuts[1:]), 1):
+    pairs = cuts if isinstance(cuts[0], tuple) else list(zip(cuts, cuts[1:]))  # borders, or explicit (from, to) per pose
+    for i, (a, b) in enumerate(pairs, 1):
         # the pose on a clean sheet of paper, so the background touches every edge
         tmp = f'{PROC}/_cell.png'
         x0, x1 = int(a * w), int(b * w)
         sheet = Image.new('RGB', (x1 - x0 + 40, h + 40), paper)
-        sheet.paste(im.crop((x0, 0, x1, h)), (20, 20))
+        src = im
+        if blank and i in blank:
+            from PIL import ImageDraw
+            src = im.copy(); d = ImageDraw.Draw(src)
+            for bx0, by0, bx1, by1 in blank[i]: d.rectangle((int(bx0 * w), int(by0 * h), int(bx1 * w), int(by1 * h)), fill=paper)
+        sheet.paste(src.crop((x0, 0, x1, h)), (20, 20))
         sheet.save(tmp)
         cut_cells(tmp, 1, 1, f'_{out}', **kw)
         os.replace(f'{PROC}/_{out}_1.png', f'{PROC}/{out}_{i}.png')
