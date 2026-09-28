@@ -686,14 +686,18 @@ DRAW1['2c'] = function (dt) {
     const hidden = !L.moving && DEVRIYE.saklan.some(([hx, hy]) => Math.hypot(L.x - hx, L.y - hy) < 30);
     if (!f.caught && !L.anim) L.alpha = hidden ? .55 : 1;
     DEVRIYE.saklan.forEach(([hx, hy]) => { if (!hidden && L.x < hx + 200) glowAt(hx, hy - 20, 26, '20,16,12', .35); });
-    if (!S.lock && L.alpha > 0 && L.x > DEVRIYE.zone && !f.caught) {
+    // TEST: after two catches the collector dozes off so the rest of the chapter can be checked
+    const dozing = IPUCU_SINIRSIZ && (f.caughtN || 0) >= 2;
+    if (dozing && Math.sin(S.t * 1.1) > .6) { X.fillStyle = 'rgba(230,225,215,.7)'; X.font = '600 22px Georgia'; X.fillText('z', f.cols[0].x + 20, DEVRIYE.y - 200 - (S.t % 2) * 8); }
+    if (dozing) f.pt -= dt; // stands still
+    if (!dozing && !S.lock && L.alpha > 0 && L.x > DEVRIYE.zone && !f.caught) {
       const seen = !hidden && f.cols.some(c => { const dx = L.x - c.x; return (Math.sign(dx) === c.face && Math.abs(dx) < 380) || (!f.bez && Math.abs(dx) < 520); });
       if (seen) caught();
     }
   }
 };
 function caught() {
-  const f = S.f; f.caught = 1; S.lock = true; L.moving = false; L.then = null; tone(660, 0, .2, .07, 'square'); tone(880, .15, .3, .07, 'square');
+  const f = S.f; f.caught = 1; f.caughtN = (f.caughtN || 0) + 1; S.lock = true; L.moving = false; L.then = null; tone(660, 0, .2, .07, 'square'); tone(880, .15, .3, .07, 'square');
   say(f.bez ? ['toplayici', 'unlem'] : ['toplayici', 'tohum', 'unlem'], 2);
   setTimeout(() => { for (let i = 0; i < 6; i++) tone(200 - i * 20, i * .05, .3, .03, 'sawtooth'); play('slip', 1.1); }, 500);
   setTimeout(() => { S.fadeTarget = 1; }, 1300);

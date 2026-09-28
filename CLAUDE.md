@@ -38,7 +38,8 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 
 ## Sıradaki iş
 - Test sürümünde ipuçları sınırsız ve ücretsiz: `IPUCU_SINIRSIZ = true`. Yayından önce `false` yapılacak.
-- 3. Bölüm — Kül Gölü: önce adım adım tasarım ve görsel tarifleri.
+- Test sürümünde devriyede iki kez yakalanınca Toplayıcı uyuklar (geçiş serbest). Oyuncu devriyeyi geçemedi: telefonda zamanlama ve saklanma yerleri gözden geçirilecek.
+- 3. Bölüm — Kül Gölü: tasarım `docs/bolum3.md`, ChatGPT tarifleri `docs/gorsel_tarifleri_bolum3.md`. Görseller `assets/raw/`'a gelince kodlanacak (yeni güç Nilüfer: tohum kül/su yüzeyine bırakılınca yaprak açar).
 - 1. Bölüm prototipini telefonda test etmek (GDD üretim planı aşama 4).
 - Bilinen eksik: körük alındıktan sonra duvardaki körük görseli arka planda kalıyor.
 
