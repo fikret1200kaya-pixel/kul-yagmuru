@@ -111,7 +111,7 @@ function hornStop() { if (!horn) return; const { o, g } = horn, t = AC.currentTi
 const S = {
   mode: 'loading', t: 0, scene: 'pa', isik: 0, cark: 0, canlilik: 4,
   inv: [], f: {}, halos: { pa: [], pb: [] }, bubble: null, hint: null, overlay: null, cin: null, fade: 0, fadeTarget: 0,
-  bolum: 0, hafiza: 0
+  bolum: 0, hafiza: 0, bought: {}, bakisAt: -1e9
 };
 const L = { x: 560, y: 600, tx: 560, ty: 600, face: 1, moving: false, arm: false, anim: null, animT: 0, then: null, alpha: 1 };
 const BG = {};
@@ -470,6 +470,35 @@ function showHintB1() {
 }
 function f_benchLit() { return !!S.f.benchLit; }
 
+// Tamir Defteri, three levels (GDD): 1 Bakış free every 5 min, 2 Fikir 1 Çark, 3 Tam çözüm 3 Çark.
+// idea: one sketch of the solution's idea; full: step rows, 'ok' draws an arrow
+const DEFTER = {
+  bench: { idea: ['tohum', 'ok', 'karanlik'], full: [['tohum', 'ok', 'karanlik'], ['goz', 'ampul']] },
+  lamba: { idea: ['ampul', 'ok', 'lamba'], full: [['ampul', 'ok', 'lamba'], ['lamba', 'ok', 'goz']] },
+  hopar: { idea: ['hoparlor', 'miknatis'], full: [['hoparlor', 'ok', 'miknatis']] },
+  bavul: { idea: ['bavul', 'tel'], full: [['bavul', 'ok', 'tel']] },
+  olta: { idea: ['miknatis', 'arti', 'tel'], full: [['miknatis', 'arti', 'tel', 'ok', 'olta']] },
+  boru: { idea: ['olta', 'boru'], full: [['olta', 'ok', 'boru'], ['boru', 'ok', 'disli']] },
+  afis: { idea: ['afis', 'goz'], full: [['afis', 'ok', 'tren']] },
+  direk: { idea: ['afis', 'arti', 'afis'], full: [['afis', 'ok', 'tren', 'saat410']] },
+  saat: { idea: ['tren', 'saat'], full: [['disli', 'ok', 'saat'], ['tren', 'ok', 'saat410']] },
+  kedi: { idea: ['kedi', 'jeton'], full: [['kedi', 'ok', 'jeton']] },
+  gise: { idea: ['jeton', 'bilet'], full: [['jeton', 'ok', 'bilet'], ['bilet', 'ok', 'goz']] },
+  koruk: { idea: ['koruk', 'ates'], full: [['koruk']] },
+  panel: { idea: ['bilet', 'ray'], full: [['bilet', 'ok', 'yol']] },
+  briket: { idea: ['briket', 'soba'], full: [['briket', 'ok', 'soba']] },
+  soba: { idea: ['soba', 'ates', 'duduk'], full: [['briket', 'ok', 'soba'], ['tohum', 'ok', 'soba'], ['koruk', 'ok', 'ates']] },
+  duduk: { idea: ['ates', 'duduk'], full: [['duduk', 'ok', 'drezin']] },
+  drezin: { idea: ['duduk', 'ray'], full: [['kisa', 'kisa', 'uzun', 'kisa']] }
+};
+const BAKIS_BEKLE = 300;
+function openDefter() { S.overlay = { type: 'defter', t: 0, goal: hintB1()[1] }; }
+function defterBuy(level) {
+  const o = S.overlay, key = o.goal, cost = level === 2 ? 1 : 3, have = S.bought[key] || 0;
+  if (have >= level) return;
+  if (S.cark < cost) { o.shake = .4; o.shakeBtn = level; bad(); return; }
+  S.cark -= cost; S.bought[key] = level; chime();
+}
 // ---------- icons for thought bubbles ----------
 function icon(name, x, y, s, col = '#2b2520') {
   const g = X; g.save(); g.translate(x, y); g.scale(s / 40, s / 40);
@@ -524,6 +553,21 @@ function icon(name, x, y, s, col = '#2b2520') {
     case 'bilet': g.strokeRect(-11, -15, 22, 30); g.beginPath(); g.moveTo(-7, 8); g.bezierCurveTo(-2, 8, -2, -6, 7, -6); g.stroke(); break;
     case 'guvercin': g.beginPath(); g.ellipse(-2, 4, 12, 8, 0, 0, 7); g.stroke(); g.beginPath(); g.arc(9, -6, 6, 0, 7); g.stroke();
       g.beginPath(); g.moveTo(15, -6); g.lineTo(20, -4); g.lineTo(15, -3); g.fill(); g.beginPath(); g.moveTo(-6, 0); g.lineTo(-16, -12); g.lineTo(2, -3); g.stroke(); break;
+    case 'ok': g.beginPath(); g.moveTo(-14, 0); g.lineTo(12, 0); g.moveTo(5, -7); g.lineTo(13, 0); g.lineTo(5, 7); g.stroke(); break;
+    case 'arti': g.beginPath(); g.moveTo(-9, 0); g.lineTo(9, 0); g.moveTo(0, -9); g.lineTo(0, 9); g.stroke(); break;
+    case 'lamba': g.beginPath(); g.moveTo(0, -18); g.lineTo(0, -8); g.stroke(); g.beginPath(); g.moveTo(-6, -8); g.lineTo(6, -8); g.lineTo(12, 6); g.lineTo(-12, 6); g.closePath(); g.stroke();
+      g.beginPath(); g.arc(0, 10, 5, 0, Math.PI); g.stroke(); break;
+    case 'hoparlor': g.beginPath(); g.moveTo(-14, -4); g.lineTo(-6, -4); g.lineTo(12, -14); g.lineTo(12, 14); g.lineTo(-6, 4); g.lineTo(-14, 4); g.closePath(); g.stroke(); break;
+    case 'bavul': g.strokeRect(-15, -8, 30, 20); g.beginPath(); g.moveTo(-6, -8); g.lineTo(-6, -13); g.lineTo(6, -13); g.lineTo(6, -8); g.stroke(); g.beginPath(); g.moveTo(-15, 1); g.lineTo(15, 1); g.stroke(); break;
+    case 'boru': g.beginPath(); g.moveTo(-16, -7); g.lineTo(12, -7); g.moveTo(-16, 7); g.lineTo(12, 7); g.stroke(); g.beginPath(); g.ellipse(12, 0, 4, 7, 0, 0, 7); g.stroke(); g.beginPath(); g.ellipse(-16, 0, 4, 7, 0, 0, 7); g.stroke(); break;
+    case 'soba': g.strokeRect(-12, -10, 24, 22); g.beginPath(); g.moveTo(0, -10); g.lineTo(0, -18); g.stroke(); g.strokeRect(-7, -3, 14, 9); g.beginPath(); g.moveTo(-10, 12); g.lineTo(-12, 17); g.moveTo(10, 12); g.lineTo(12, 17); g.stroke(); break;
+    case 'drezin': g.beginPath(); g.moveTo(-16, 4); g.lineTo(16, 4); g.stroke(); [-9, 9].forEach(v => { g.beginPath(); g.arc(v, 10, 5, 0, 7); g.stroke(); });
+      g.beginPath(); g.moveTo(0, 4); g.lineTo(0, -6); g.moveTo(-12, -12); g.lineTo(12, -2); g.stroke(); break;
+    case 'saat410': g.beginPath(); g.arc(0, 0, 15, 0, 7); g.stroke();
+      g.lineWidth = 3.5; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.sin(Math.PI * 4 / 6 + .09) * 8, -Math.cos(Math.PI * 4 / 6 + .09) * 8); g.stroke();
+      g.lineWidth = 2.5; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.sin(Math.PI / 3) * 12, -Math.cos(Math.PI / 3) * 12); g.stroke(); break;
+    case 'yol': g.lineWidth = 1.5; for (let i = 0; i <= 3; i++) { g.beginPath(); g.moveTo(-15 + i * 10, -15); g.lineTo(-15 + i * 10, 15); g.moveTo(-15, -15 + i * 10); g.lineTo(15, -15 + i * 10); g.stroke(); }
+      g.lineWidth = 4; g.beginPath(); g.moveTo(-19, 10); g.lineTo(-10, 10); g.quadraticCurveTo(-10, 0, -5, 0); g.lineTo(5, 0); g.quadraticCurveTo(10, 0, 10, -10); g.lineTo(19, -10); g.stroke(); break;
   }
   g.restore();
 }
@@ -594,7 +638,7 @@ function currentHint() {
   if (!f.pitSeen) return 'pit'; if (!f.gateOpen) return 'panel'; return 'gate';
 }
 function showHint() {
-  if (S.bolum === 1) { showHintB1(); return; }
+  if (S.bolum === 1) { openDefter(); return; }
   const id = currentHint(); S.hint = { id, t: 3.2 };
   if (id === 'corner' || (id === 'lehim' && !S.f.vidaTaken)) say(['goz', 'karanlik']);
 }
@@ -720,7 +764,49 @@ function overlayDownB1(p) {
     o.press = S.t; hornStart(); clank();
     return;
   }
+  if (o.type === 'defter') {
+    if (!inRect(p, [DEF.x, DEF.y, DEF.w, DEF.h])) { S.overlay = null; return; }
+    DEF.btn.forEach(([bx, level]) => {
+      if (Math.hypot(p.x - bx, p.y - DEF.by) > 50) return;
+      if (level === 1) {
+        if (S.t - S.bakisAt < BAKIS_BEKLE) { o.shake = .4; o.shakeBtn = 1; bad(); return; }
+        S.bakisAt = S.t; S.overlay = null; showHintB1();
+      } else defterBuy(level);
+    });
+    return;
+  }
   S.overlay = null; // tarife, bilet, hafiza: tap to close
+}
+const DEF = { x: 300, y: 70, w: 680, h: 580, by: 575, btn: [[470, 1], [640, 2], [810, 3]] };
+function drawDefter(o, dt) {
+  let sx = 0; if (o.shake > 0) { o.shake -= dt; sx = Math.sin(o.t * 60) * 6; }
+  const { x, y, w, h } = DEF;
+  // notebook page with a ring binding
+  X.fillStyle = '#e6dcc6'; X.beginPath(); X.roundRect(x, y, w, h, 14); X.fill();
+  X.strokeStyle = 'rgba(120,100,80,.25)'; X.lineWidth = 1.5; for (let ly = y + 60; ly < y + h - 110; ly += 36) { X.beginPath(); X.moveTo(x + 50, ly); X.lineTo(x + w - 30, ly); X.stroke(); }
+  X.strokeStyle = 'rgba(150,60,40,.35)'; X.beginPath(); X.moveTo(x + 70, y + 20); X.lineTo(x + 70, y + h - 110); X.stroke();
+  X.fillStyle = '#2b2520'; for (let i = 0; i < 9; i++) { X.beginPath(); X.arc(x + 22, y + 40 + i * 52, 7, 0, 7); X.fill(); }
+  const d = DEFTER[o.goal] || {}, lvl = S.bought[o.goal] || 0, col = '#3a2f26';
+  const row = (icons, cy, s) => { const gap = s * 1.25, x0 = x + w / 2 + 20 - (icons.length - 1) * gap / 2; icons.forEach((ic, i) => icon(ic, x0 + i * gap, cy, s, col)); };
+  if (lvl >= 3 && d.full) {
+    d.full.forEach((r, i) => { X.fillStyle = 'rgba(58,47,38,.5)'; X.font = '700 22px "Cormorant Garamond", Georgia, serif'; X.textAlign = 'center'; X.fillText(String(i + 1), x + 100, y + 95 + i * 115); row(r, y + 88 + i * 115, 56); });
+  } else if (lvl >= 2 && d.idea) row(d.idea, y + 230, 76);
+  else { X.globalAlpha = .18; icon('soru', x + w / 2 + 20, y + 220, 150, col); X.globalAlpha = 1; }
+  // three levels along the bottom
+  X.strokeStyle = 'rgba(58,47,38,.3)'; X.beginPath(); X.moveTo(x + 40, y + h - 100); X.lineTo(x + w - 40, y + h - 100); X.stroke();
+  DEF.btn.forEach(([bx, level]) => {
+    const dx = o.shakeBtn === level && o.shake > 0 ? sx : 0, cx = bx + dx, cy = DEF.by;
+    const owned = level > 1 && (S.bought[o.goal] || 0) >= level, cost = level === 2 ? 1 : 3;
+    const ok = level === 1 ? S.t - S.bakisAt >= BAKIS_BEKLE : owned || S.cark >= cost;
+    X.fillStyle = ok ? 'rgba(58,47,38,.12)' : 'rgba(58,47,38,.05)'; X.beginPath(); X.arc(cx, cy, 44, 0, 7); X.fill();
+    X.globalAlpha = ok ? 1 : .35;
+    icon(level === 1 ? 'goz' : level === 2 ? 'ampul' : 'yol', cx, cy - 6, 40, col);
+    X.globalAlpha = 1;
+    if (level === 1) { // refill ring
+      const k = Math.min(1, (S.t - S.bakisAt) / BAKIS_BEKLE);
+      if (k < 1) { X.strokeStyle = '#8a6a3a'; X.lineWidth = 4; X.beginPath(); X.arc(cx, cy, 44, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); X.stroke(); }
+    } else if (!owned) { gear(cx - 14, cy + 28, 9, ok ? '#6a5236' : 'rgba(106,82,54,.4)'); X.fillStyle = ok ? '#3a2f26' : 'rgba(58,47,38,.4)'; X.font = '700 20px "Cormorant Garamond", Georgia, serif'; X.textAlign = 'left'; X.fillText('×' + cost, cx - 2, cy + 35); }
+  });
 }
 function overlayMove(p) {
   const o = S.overlay;
@@ -746,6 +832,7 @@ function overlayUp(p) {
 }
 function drawOverlayB1(o, dt) {
   const img = k => GRAY[k];
+  if (o.type === 'defter') { drawDefter(o, dt); return; }
   if (o.type === 'saat') {
     img('cu_saat') && X.drawImage(img('cu_saat'), CU.x, CU.y, CU.s, CU.s);
     if (o.solved) { o.solveT += dt; X.globalAlpha = Math.min(1, o.solveT); IMG.cu_saat && X.drawImage(IMG.cu_saat, CU.x, CU.y, CU.s, CU.s); X.globalAlpha = 1; }

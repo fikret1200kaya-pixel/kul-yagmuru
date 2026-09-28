@@ -18,12 +18,13 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 ## Kod yapısı (index.html)
 - Sahneler `HS[sahne]` dizisindeki etkin alanlardır: `r` dokunma dikdörtgeni, `stand` Lehim'in durduğu nokta, `tap`/`use[eşya]`/`light` işleyicileri, `to` sahne çıkışı.
 - `GEO` her sahnenin yürünebilir zeminini ve Lehim'in ölçeğini, `DRAW1` 1. Bölüm sahnelerinin kodla çizilen katmanlarını, `drawOverlayB1` yakın çekimleri tutar.
-- İpuçları (Tamir Defteri) `hintB1` sırasıyla verilir; başka sahnedeki hedef için o sahneye giden çıkış vurgulanır.
+- Tamir Defteri üç seviyelidir (GDD): Bakış ücretsiz ve 5 dakikada bir dolar (hedefi, başka sahnedeyse o sahnenin çıkışını vurgular), Fikir 1 Çark (tek eskiz), Tam çözüm 3 Çark (adım adım satırlar). Hedef sırası `hintB1`, eskizler `DEFTER` tablosundadır; satın alınan seviye o hedef için kalıcıdır.
 - İlerleme `localStorage` `ky_bolum` anahtarında tutulur; başlık ekranında "1. Bölüm" seçeneği çıkar. `?bolum=1` bu seçeneği her zaman gösterir, `?debug` durumu `window.KY` olarak açar (otomatik test için).
 
 ## Sıradaki iş
-- 1. Bölüm prototipini telefonda test etmek (GDD üretim planı aşama 4), sonra 2. Bölüm — Borular Mahallesi.
-- Eksikler: Tamir Defteri'nin Çark karşılığı 2. ve 3. seviye ipuçları; körük alındıktan sonra duvardaki körük görseli arka planda kalıyor.
+- 2. Bölüm — Borular Mahallesi: adım adım tasarım `docs/bolum2.md`, ChatGPT görsel tarifleri `docs/gorsel_tarifleri_bolum2.md`. Görseller `assets/raw/`'a gelince bölüm kodlanacak (yeni güç Kök: tohum sürüklemesi hedefe göre ışık ya da kök olur).
+- 1. Bölüm prototipini telefonda test etmek (GDD üretim planı aşama 4).
+- Bilinen eksik: körük alındıktan sonra duvardaki körük görseli arka planda kalıyor.
 
 ## Çalıştırma
 `cd game && python3 -m http.server 8000` ve tarayıcıda http://localhost:8000 (doğrudan 1. Bölüm için http://localhost:8000/?bolum=1)
