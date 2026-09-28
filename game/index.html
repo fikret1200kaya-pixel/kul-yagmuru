@@ -51,10 +51,11 @@ const SRC = {
   bg_3a:'img/bg_3a.jpg', bg_3b:'img/bg_3b.jpg', bg_3c:'img/bg_3c.jpg', bg_3d:'img/bg_3d.jpg',
   patch_varil:'img/patch_varil.png', patch_lambalar:'img/patch_lambalar.png',
   bg_5a:'img/bg_5a.jpg', bg_5b:'img/bg_5b.jpg', bg_5c:'img/bg_5c.jpg', bg_5d:'img/bg_5d.jpg', cu_atkilit:'img/cu_atkilit.jpg', cu_gogus:'img/cu_gogus.jpg', cu_hafiza7:'img/cu_hafiza7.jpg',
+  bg_6a:'img/bg_6a.jpg', bg_6b:'img/bg_6b.jpg', cu_melodi:'img/cu_melodi.jpg', cu_toprak:'img/cu_toprak.jpg', cin_cicek:'img/cin_cicek.jpg', cu_hafiza8:'img/cu_hafiza8.jpg',
   bg_4a:'img/bg_4a.jpg', bg_4b:'img/bg_4b.jpg', bg_4c:'img/bg_4c.jpg', bg_4d:'img/bg_4d.jpg',
   cu_kilit:'img/cu_kilit.jpg', cu_afisler:'img/cu_afisler.jpg', cin_tomurcuk:'img/cin_tomurcuk.jpg', cu_parilti:'img/cu_parilti.jpg', cu_hafiza6:'img/cu_hafiza6.jpg',
   cu_isaret:'img/cu_isaret.jpg', cu_lens:'img/cu_lens.jpg', cu_cay:'img/cu_cay.jpg', cin_sarmasik:'img/cin_sarmasik.jpg', cu_hafiza4:'img/cu_hafiza4.jpg', cu_hafiza5:'img/cu_hafiza5.jpg',
-  ...(() => { const o = {}; [['duduk', 4], ['giseci', 3], ['kedi', 4], ['guvercin', 3], ['nine', 4], ['torun', 2], ['ikiz', 3], ['pirpir', 4], ['toplayici', 2], ['capa', 4], ['kepce', 4], ['nilufer', 3], ['nota', 4], ['kuklaci', 3], ['kukla', 3], ['ocakbasi', 4], ['atesci', 3]].forEach(([n, c]) => { for (let i = 1; i <= c; i++) o[n + i] = 'img/' + n + '_' + i + '.png'; }); return o; })(),
+  ...(() => { const o = {}; [['duduk', 4], ['giseci', 3], ['kedi', 4], ['guvercin', 3], ['nine', 4], ['torun', 2], ['ikiz', 3], ['pirpir', 4], ['toplayici', 2], ['capa', 4], ['kepce', 4], ['nilufer', 3], ['nota', 4], ['kuklaci', 3], ['kukla', 3], ['ocakbasi', 4], ['atesci', 3], ['cicek', 3]].forEach(([n, c]) => { for (let i = 1; i <= c; i++) o[n + i] = 'img/' + n + '_' + i + '.png'; }); return o; })(),
   sd_head:'img/side_head.png', sd_body:'img/side_body.png', sd_armN:'img/side_armN.png', sd_armF:'img/side_armF.png', sd_legN:'img/side_legN.png', sd_legF:'img/side_legF.png', sd_scarf:'img/side_scarf.png', ...(() => { const o = {}; ['head','body','armL','armR','scarf','legL','legR'].forEach(p => { o['rA_' + p] = 'img/rig_lehim_1_' + p + '.png'; if (p !== 'armR') o['rB_' + p] = 'img/rig_lehim_1_tekkol_' + p + '.png'; }); return o; })(), avuc:'img/cin_avuc.jpg', kapak:'img/cin_kapak.jpg', b5:'img/b5_panel.jpg', lever:'img/lever.png'
 };
 const IMG = {}, GRAYC = {};
@@ -171,10 +172,11 @@ const GEO = {
   '4a': { x: [120, 1180], y: [545, 705], s: [.72, .36] }, '4b': { x: [60, 1220], y: [650, 705], s: [.9, .16] },
   '4c': { x: [150, 1180], y: [525, 705], s: [.72, .38] }, '4d': { x: [120, 1180], y: [580, 705], s: [.8, .3] },
   '5a': { x: [140, 1180], y: [560, 705], s: [.78, .3] }, '5b': { x: [120, 1180], y: [585, 690], s: [.8, .2] },
-  '5c': { x: [250, 1030], y: [545, 705], s: [.72, .38] }, '5d': { x: [300, 1180], y: [590, 705], s: [.8, .28] }
+  '5c': { x: [250, 1030], y: [545, 705], s: [.72, .38] }, '5d': { x: [300, 1180], y: [590, 705], s: [.8, .28] },
+  '6a': { x: [440, 1240], y: [590, 705], s: [.62, .3] }, '6b': { x: [60, 1240], y: [625, 705], s: [.76, .26] }
 };
 function walkBounds(x, y) { const g = GEO[S.scene]; return { x: clamp(x, g.x[0], g.x[1]), y: clamp(y, g.y[0], g.y[1]) }; }
-function scaleAt(y) { const g = GEO[S.scene]; return g.s[0] + g.s[1] * (y - g.y[0]) / (g.y[1] - g.y[0]); }
+function scaleAt(y) { if (L.climbS && y === L.y) return L.climbS; const g = GEO[S.scene]; return g.s[0] + g.s[1] * (y - g.y[0]) / (g.y[1] - g.y[0]); }
 function walkTo(x, y, then) {
   const p = walkBounds(x, y); L.tx = p.x; L.ty = p.y; L.then = then || null;
   if (Math.hypot(L.tx - L.x, L.ty - L.y) < 4) { L.moving = false; const t = L.then; L.then = null; t && t(); return; }
@@ -770,11 +772,19 @@ function gearSpr(g, x, y, r, rot, col) {
 function drawPirpir(dt) {
   const f = S.f, joined = S.bolum === 2 ? f.pirpir === 'joined' : (S.dost || {}).pirpir === 'joined';
   if (!joined || (S.scene === '2a' && (f.pirpirT || 0) < .6)) return;
+  if (S.scene === '6b' && f.kalp && f.kalpT > 4) return;
+  if (S.bolum === 6 && (S.dost || {}).firin === 'acik') return;
   if (S.scene === '2d' && f.fetchT !== undefined && f.fetchT < 2.4) { // flies up for the hanging gear and back
     const u = f.fetchT / 2.4, k = Math.sin(u * Math.PI); const x = L.x + 60 + (937 - L.x - 60) * k, y = L.y - 210 + (100 - L.y + 210) * k;
     spr(u > .4 ? 'pirpir3' : 'pirpir1', x, y + 50, 70, true); return;
   }
-  const bx = L.x + L.face * 70 + Math.sin(S.t * 1.7) * 20, by = L.y - 200 * scaleAt(L.y) + Math.sin(S.t * 3.1) * 8;
+  let bx = L.x + L.face * 70 + Math.sin(S.t * 1.7) * 20, by = L.y - 200 * scaleAt(L.y) + Math.sin(S.t * 3.1) * 8;
+  if (f.pirFly) { // flies off to a spot and back, doing the job at the far end
+    const q = f.pirFly; q.t += dt; const u = Math.min(1, q.t / q.dur), k = Math.sin(u * Math.PI);
+    if (u > .5 && !q.fired) { q.fired = 1; q.then && q.then(); }
+    bx += (q.x - bx) * k; by += (q.y - by) * k; if (u >= 1) f.pirFly = null;
+    spr(u > .4 && u < .6 ? 'pirpir3' : 'pirpir1', bx, by + 20, 62, true); return;
+  }
   spr('pirpir1', bx, by, 62, true, -L.face);
   if (Math.sin(S.t * 30) > 0) { X.fillStyle = 'rgba(240,235,220,.25)'; X.beginPath(); X.ellipse(bx - 8, by - 44, 12, 5, -.4, 0, 7); X.fill(); }
 }
@@ -827,7 +837,7 @@ const DEFTER2 = {
   mil1: { idea: ['montaj', 'disli'], full: [['orta', 'ok', 'mil'], ['kucuk', 'ok', 'mil'], ['buyuk', 'ok', 'mil']] },
   kafes: { idea: ['kafes'], full: [['vana', 'arti', 'disli', 'ok', 'kafes']] }
 };
-const defterOf = id => (S.bolum === 5 && DEFTER5[id]) || (S.bolum === 4 && DEFTER4[id]) || (S.bolum === 3 && DEFTER3[id]) || DEFTER2[id] || DEFTER[id] || {};
+const defterOf = id => (S.bolum === 6 && DEFTER6[id]) || (S.bolum === 5 && DEFTER5[id]) || (S.bolum === 4 && DEFTER4[id]) || (S.bolum === 3 && DEFTER3[id]) || DEFTER2[id] || DEFTER[id] || {};
 
 // =====================================================================
 // 3. BÖLÜM — KÜL GÖLÜ
@@ -2143,6 +2153,488 @@ const DEFTER5 = {
   cati: { idea: ['merdiven', 'kubbe'], full: [['merdiven', 'ok', 'kubbe']] }
 };
 
+// =====================================================================
+// 6. BÖLÜM — SERANIN KALBİ ve EPİLOG
+// 6a Kubbenin Dışı (tırmanış, Melodi Kapısı) · 6b Seranın Kalbi
+// =====================================================================
+// dome climb: Lehim hops from rib to rib; a swinging glass panel spans each gap once the vine ties it down.
+// way: [x, y, scale] of the footholds (0 is the roof walk); pan: hinge point, size and swing of each panel
+const KUBBE = {
+  way: [[470, 600, .62], [600, 452, .44], [760, 352, .38], [935, 262, .33]],
+  pan: [{ x: 535, y: 440, w: 70, h: 110, sp: 1.25, amp: .75 }, { x: 690, y: 330, w: 64, h: 100, sp: 1.7, amp: .85 }, { x: 855, y: 240, w: 58, h: 92, sp: 2.7, amp: 1 }]
+};
+// the door's five bell-pipes, left to right (very long .. very short), in the close-up's coordinates; the song is
+// Nota's two opening notes then the fair's bells: medium, small, medium, small, large
+const BORULAR = { x: [155, 230, 315, 393, 465], y: [265, 255, 255, 262, 285], f: [392, 523, 784, 1046, 1318], song: [2, 3, 2, 3, 1] };
+// dome mirrors: A left, B middle (highest), C right. The sun's ray hits C first; C → B → A → basin when each is turned right
+const AYNA6 = { c: [[365, 110], [595, 95], [820, 115]], need: [3, 2, 1], sun: [900, -10], basin: [575, 560],
+  // where a wrongly turned mirror throws the light instead (per state)
+  wall: [[[180, 330], [300, 420], [250, 40], [470, 20]], [[430, 300], [720, 20], [300, 180], [770, 330]], [[1040, 330], [1000, 60], [960, 420], [1180, 250]]] };
+// glass leaves on the iron tree, lit one by one when the heart wakes
+const YAPRAK = [[392, 332], [412, 382], [440, 300], [470, 396], [500, 332], [520, 252], [545, 172], [580, 212], [612, 162], [640, 282], [666, 402], [690, 332], [702, 252], [726, 360], [766, 382], [660, 182], [620, 412], [480, 192], [432, 262], [752, 300], [560, 300], [598, 360], [520, 410], [672, 230]];
+// chapter Işık goals for the Epilogue panorama: a chapter reaching its goal comes back in full colour
+const ISIK_HEDEF = { 1: 9, 2: 7, 3: 6, 4: 6, 5: 7, 6: 6 };
+
+function saveB6() { try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 6, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza, dost: S.dost })); } catch (e) {} }
+// the ending cinematics are large; they load only when the last chapter starts
+function loadSonlar() { for (let i = 1; i <= 5; i++) { const k = 'son_' + i; if (IMG[k]) continue; const im = new Image(); im.onload = () => { IMG[k] = im; }; im.src = 'img/' + k + '.jpg'; } }
+function startBolum6(fromSave) {
+  freeScenes('6'); loadSonlar();
+  if (fromSave) { try { const s = JSON.parse(localStorage.getItem('ky_bolum') || '{}'); S.cark = s.cark || 0; S.isik = s.isik || 0; S.canlilik = s.canlilik || 4; S.hafiza = s.hafiza || 0; S.dost = s.dost || {}; } catch (e) {} }
+  S.bolum = 6; S.lilies = []; S.overlay = null; S.bubble = null; S.hint = null; S.cloud = null;
+  S.f = { pan: [0, 0, 0], ayna: [0, 0, 0], olk: [0, 0, 1], komur: 0, melodi: [] };
+  S.inv = ['dal']; if ((S.dost || {}).su) S.inv.push('sise');
+  L.arm = true; L.alpha = 1; L.anim = null; L.moving = false; L.then = null; L.face = 1; L.onLake = 0; L.climb = 0; L.climbS = null;
+  S.scene = '6a'; L.x = L.tx = 560; L.y = L.ty = 650; colorDirty = true;
+  saveB6(); S.mode = 'card'; S.card = { t: 0, n: 6 }; S.fade = 0; S.fadeTarget = 0;
+}
+ENTER['6a'] = () => { const f = S.f; if (!f.intro6) { f.intro6 = 1; setTimeout(() => say(['kubbe', 'unlem'], 2.6), 900); } };
+ENTER['6b'] = () => {
+  const f = S.f; L.climb = 0; L.climbS = null;
+  if (!f.intro6b) { f.intro6b = 1; setTimeout(() => say(['su', 'arti', 'gunes', 'arti', 'ates', 'soru'], 3.4), 1000); }
+  // the furnace's heat arrives by the pipe on its own
+  if ((S.dost || {}).firin === 'sera' && !f.isi) setTimeout(() => { if (!f.isi) isiDone('firin'); }, 2200);
+};
+
+// ---- climbing ----
+function panAng(i) {
+  const p = KUBBE.pan[i]; if (S.f.pan[i]) return 0;
+  // the top panel swings fast, but the wind drops for a moment every few swings
+  if (i === 2 && (S.t % 4.4) > 3.1) return .04 * Math.sin(S.t * 3);
+  return p.amp * Math.sin(S.t * p.sp + i * 1.3);
+}
+function climbHop(i, then) {
+  const [x, y, s] = KUBBE.way[i], s0 = L.climbS || scaleAt(L.y);
+  L.hop = { x0: L.x, y0: L.y, x1: x, y1: y, t: 0, s0, s1: s, then: () => { L.climb = i; if (!i) L.climbS = null; then && then(); } };
+  play('slip', .55); L.moving = false; L.then = null; tone(440, 0, .15, .05, 'triangle');
+}
+// up through every panel already tied, one foothold at a time
+function climbUp(to, then) { const next = (L.climb || 0) + 1; if (next > to || !S.f.pan[next - 1]) { then && then(); return; } climbHop(next, () => climbUp(to, then)); }
+function climbDown(then) { const i = (L.climb || 0) - 1; if (i < 0) { then && then(); return; } climbHop(i, () => climbDown(then)); }
+function panTie(i) {
+  const f = S.f, p = KUBBE.pan[i];
+  S.vine = { x0: KUBBE.way[i][0], y0: KUBBE.way[i][1] - 40 * KUBBE.way[i][2] / .4, x1: p.x, y1: p.y + p.h * .8, t: 0 };
+  if (Math.abs(panAng(i)) > .14) { setTimeout(() => { bad(); say(['sarmasik', 'x'], 1.4); }, 500); S.vine.miss = 1; return; }
+  f.pan[i] = 1; tone(523, .2, .6, .05); tone(659, .4, .7, .05); clank();
+  setTimeout(() => { halo(p.x, p.y + p.h / 2, 150); climbHop(i + 1); }, 700);
+}
+function drawVine(dt) {
+  const v = S.vine; if (!v) return; v.t += dt; const u = Math.min(1, v.t / .5), back = v.miss && v.t > .8 ? Math.min(1, (v.t - .8) / .4) : 0, k = u * (1 - back);
+  X.save(); X.strokeStyle = '#6f9a4a'; X.lineWidth = 3; X.lineCap = 'round'; X.beginPath(); X.moveTo(v.x0, v.y0);
+  for (let i = 1; i <= 20; i++) { const t = i / 20 * k; X.lineTo(v.x0 + (v.x1 - v.x0) * t + Math.sin(t * 14) * 5, v.y0 + (v.y1 - v.y0) * t - Math.sin(t * Math.PI) * 30); } X.stroke();
+  X.fillStyle = '#8fc36a'; for (let i = 2; i < 20 * k; i += 4) { const t = i / 20; X.beginPath(); X.ellipse(v.x0 + (v.x1 - v.x0) * t + 6, v.y0 + (v.y1 - v.y0) * t - Math.sin(t * Math.PI) * 30, 5, 3, .6, 0, 7); X.fill(); }
+  X.restore(); if ((v.miss && back >= 1) || (!v.miss && v.t > 1.2)) S.vine = null;
+}
+// ---- the melody door ----
+function melodiDone() {
+  const f = S.f; f.kapi6 = 1; f.kapiT = 0; S.overlay = null; tone(98, .2, 2.4, .1, 'sawtooth'); musicBox();
+  setTimeout(() => { halo(1105, 450, 330); climbDown(() => walkTo(1060, 620)); }, 900);
+}
+function melodiPlay(i) {
+  const o = S.overlay, f = S.f; tone(BORULAR.f[i], 0, 1.1, .08); tone(BORULAR.f[i] * 2, 0, .5, .02); o.hit = { i, t: 0 };
+  f.melodi.push(i); const n = f.melodi.length;
+  if (BORULAR.song[n - 1] !== i) { o.fail = .6; setTimeout(() => { bad(); f.melodi = []; }, 400); return; }
+  if (n === BORULAR.song.length) { o.solved = true; setTimeout(melodiDone, 1200); }
+}
+// with the furnace left burning, Lehim goes to the greenhouse with only the seed: the friends stay behind
+function yanimda(k) { const d = S.dost || {}; return d.firin !== 'acik' && (k === 'pirpir' ? d.pirpir === 'joined' : !!d[k]); }
+function notaCalar() { const n = (S.dost || {}).nota; return yanimda('nota') && (n === 'anahtar' || n === 'isik'); }
+function openMelodi() {
+  S.overlay = { type: 'melodi', t: 0 }; S.f.melodi = [];
+  // Nota knows the greenhouse's opening song and plays it herself
+  if (notaCalar()) { S.overlay.auto = 1; BORULAR.song.forEach((i, k) => setTimeout(() => { if (S.overlay && S.overlay.type === 'melodi') melodiPlay(i); }, 900 + k * 560)); }
+}
+// ---- the three sources ----
+function heartCheck() {
+  const f = S.f; if (!(f.su && f.isik6 && f.isi) || f.cicekCin) return;
+  f.cicekCin = 1; setTimeout(() => { S.overlay = { type: 'cicekCin', t: 0 }; musicBox(); }, 1600);
+}
+function suDone(how) { const f = S.f; if (f.su) return; f.su = how; f.suT = 0; tone(700, 0, .3, .04, 'sine'); tone(880, .2, .4, .04, 'sine'); setTimeout(() => { halo(330, 540, 220); heartCheck(); }, 1200); }
+function isikDone() { const f = S.f; if (f.isik6) return; f.isik6 = 1; chime(); setTimeout(() => { halo(575, 520, 240); heartCheck(); }, 700); }
+function isiDone(how) { const f = S.f; if (f.isi) return; f.isi = how; f.isiT = 0; tone(98, 0, 1.6, .07, 'sawtooth'); setTimeout(() => { halo(how === 'firin' ? 910 : 1020, 480, 220); heartCheck(); }, 900); }
+// the light's path from the sun through the mirrors; each wrong mirror throws it at the wall
+function aynaYol() {
+  const f = S.f, pts = [AYNA6.sun];
+  for (const i of [2, 1, 0]) { pts.push(AYNA6.c[i]); if (f.ayna[i] !== AYNA6.need[i]) { pts.push(AYNA6.wall[i][f.ayna[i]]); return { pts, hit: false }; } }
+  pts.push(AYNA6.basin); return { pts, hit: true };
+}
+function aynaCevir(i) {
+  const f = S.f; if (f.isik6) return;
+  f.ayna[i] = (f.ayna[i] + 1) % 4; f.aynaT = f.aynaT || [0, 0, 0]; f.aynaT[i] = .4; clank(); tone(1319 - i * 200, 0, .15, .03);
+  if (aynaYol().hit) isikDone();
+}
+// the hanging chain of a side mirror is just within reach once Lehim stretches up
+function aynaTap(i) {
+  const f = S.f;
+  if (i !== 1) { aynaCevir(i); return; }
+  if (yanimda('pirpir')) { f.pirFly = { x: AYNA6.c[1][0], y: AYNA6.c[1][1] + 20, t: 0, dur: 1.6, then: () => aynaCevir(1) }; tone(1175, 0, .2, .04); return; }
+  if (f.sarB) { aynaCevir(1); return; }
+  play('strain', .9); say(['ayna', 'kol', 'x'], 2);
+}
+// the old boiler: Kepçe fills it with his bucket, or Lehim finds three lumps of coal
+function kazanTap() {
+  const f = S.f;
+  if (f.isi) { say(['ates'], 1.6); return; }
+  if (f.kazanDolu) { say(['tohum', 'ok', 'ates'], 2.2); return; }
+  if (yanimda('kepce') && f.kepceDoldur === undefined) {
+    f.kepceDoldur = 0; tone(110, 0, 1.4, .07, 'triangle'); setTimeout(() => { f.kazanDolu = 1; clank(); say(['kepce', 'unlem'], 2, [1180, 380]); }, 2600); return; }
+  say(['kutuk', 'soru'], 2);
+}
+function komurKoy(k) { const f = S.f; takeItem(k); f.komur++; clank(); if (f.komur >= 3) { f.kazanDolu = 1; say(['ates', 'soru'], 2); } }
+function kalpUyan() {
+  const f = S.f; if (f.kalp) return;
+  f.kalp = 1; f.kalpT = 0; S.lock = true; S.isik += 2; tone(262, 0, 2.4, .06); tone(392, .3, 2.4, .05); tone(523, .6, 2.6, .05);
+  // colour spreads from the tree to the whole greenhouse (halos without extra Işık: the heart gives its own)
+  const hs = S.halos['6b'] = S.halos['6b'] || [];
+  [[575, 330, 360], [300, 300, 380], [880, 300, 380], [150, 450, 300], [1100, 450, 320], [640, 620, 420], [640, 80, 420]].forEach(([x, y, r], i) => setTimeout(() => { hs.push({ x, y, r, t: 0 }); colorDirty = true; }, 600 + i * 450));
+  setTimeout(() => { S.lock = false; orchestra(); say(['tohum', 'ok', 'havuz'], 3); }, 4200);
+}
+// ---- final ----
+// friends saved on the way: helpers and side characters (GDD: 6 or more is "çok dost")
+function dostlar() {
+  const d = S.dost || {}, f = S.f, L6 = [];
+  if (d.duduk) L6.push('duduk'); if (d.pirpir === 'joined') L6.push('pirpir'); if (d.kepce) L6.push('kepce');
+  if (d.nota === 'anahtar' || d.nota === 'isik') L6.push('nota'); if (d.kurma) L6.push('nine'); if (d.ikiz) L6.push('ikiz');
+  if (d.capa) L6.push('balik'); if (d.ikna) L6.push('ocakbasi'); if (f.guvercin) L6.push('guvercin');
+  return L6;
+}
+// 1 Yeşil Sabah · 2 Yalnız Bahçe · 3 Tek Yaprak · 4 Son Kıvılcım; the furnace left burning always means few friends
+function sonHesap() { const yuksek = S.canlilik >= 3, cok = dostlar().length >= 6 && (S.dost || {}).firin !== 'acik'; return yuksek ? (cok ? 1 : 2) : (cok ? 3 : 4); }
+const SONLAR = [null, ['Yeşil Sabah', 'Tohum çiçek açtı, dostlar serada toplandı. Renk seradan tüm şehre yayılıyor.'], ['Yalnız Bahçe', 'Sera yeşerdi ama şehir gri kaldı. Lehim bahçeye tek başına bakıyor.'],
+  ['Tek Yaprak', 'Lehim kendi çekirdeğini tohuma verdi. Dostlar, göğsünden büyüyen bahçeye bakıyor.'], ['Son Kıvılcım', 'Tohum zor filizlendi, kül yağmaya sürüyor. Ama bir yaprak açtı.']];
+function recIsik(n) {
+  const d = S.dost = S.dost || {}, b = d.isikB = d.isikB || {};
+  let prev = 0; for (let k = 1; k < n; k++) prev += b[k] || 0;
+  if (b[n] === undefined) b[n] = Math.max(0, S.isik - prev);
+}
+function ekimBitti() {
+  const f = S.f; recIsik(6); const n = sonHesap(), rain = n === 1 && S.hafiza >= 9 && (S.dost || {}).firin === 'sera';
+  S.dost.son = n; try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 6, bitti: 1, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza, dost: S.dost })); } catch (e) {}
+  S.fadeTarget = 1;
+  setTimeout(() => { S.overlay = null; S.mode = 'final'; S.fin = { t: 0, n, rain, stage: 'son' }; S.fade = 1; S.fadeTarget = 0; orchestra(); }, 900);
+}
+// the main theme with the whole orchestra: music box on top, strings and a low bass underneath
+function orchestra() {
+  THEME.forEach((fq, i) => { tone(fq, i * .42, 1.8, .07); tone(fq * 2, i * .42, .7, .02); held(fq / 2, i * .42, .5, .03, 'sine'); });
+  [[262, 330, 392], [294, 370, 440], [262, 330, 392]].forEach((ch, k) => ch.forEach(fq => held(fq, k * .9, 1.2, .018, 'triangle')));
+  held(131, 0, 2.6, .03, 'sine');
+}
+
+HS['6a'] = [
+  { id: 'kaburga', r: [420, 470, 130, 130], stand: [470, 600], on: () => !L.climb, tap() {
+      const f = S.f;
+      if (f.pan[0]) { climbUp(3); return; }
+      say(['sarmasik', 'ok', 'kubbe'], 2.2); f.teach = 2.4; f.teachTo = [535, 500]; } },
+  ...[0, 1, 2].map(i => ({ id: 'pan' + i, r: [KUBBE.pan[i].x - 55, KUBBE.pan[i].y - 10, 110, KUBBE.pan[i].h + 30], stand: KUBBE.way[0].slice(0, 2), noWalk: i > 0, high: true,
+    on: () => !S.f.pan[i],
+    tap() {
+      const f = S.f;
+      if ((L.climb || 0) !== i) { say(['kubbe', 'soru'], 1.4); return; }
+      // Pırpır carries the vine's tip across the middle gap
+      if (i === 1 && yanimda('pirpir')) { const p = KUBBE.pan[1]; f.pirFly = { x: p.x, y: p.y + p.h, t: 0, dur: 1.8, then: () => { f.pan[1] = 1; clank(); tone(1175, 0, .2, .04); setTimeout(() => { halo(p.x, p.y + p.h / 2, 150); climbHop(2); }, 500); } }; return; }
+      say(['tohum', 'ok', 'sarmasik'], 1.6); },
+    sar() { if ((L.climb || 0) !== i) { say(['kubbe', 'soru'], 1.4); return; } panTie(i); } })),
+  { id: 'guvercin6', r: [470, 210, 95, 80], stand: [470, 600], noWalk: true, high: true, on: () => !S.f.guvercin, tap() { say(['guvercin', L.climb ? 'kok' : 'kubbe']); },
+    kok() { if (!L.climb) { say(['guvercin', 'kubbe', 'soru']); return; } guv6(); }, sar() { if (!L.climb) { say(['guvercin', 'kubbe', 'soru']); return; } guv6(); } },
+  { id: 'borular', r: [960, 60, 290, 210], stand: [470, 600], noWalk: true, high: true, tap() {
+      if (S.f.kapi6) { say(['nota', 'unlem']); return; }
+      if (L.climb !== 3) { say(['can', 'kubbe', 'soru'], 2); return; }
+      openMelodi(); } },
+  { id: 'mentese', r: [820, 170, 70, 60], stand: [470, 600], noWalk: true, high: true, on: () => L.climb === 3 && !S.f.cark1, tap() { S.f.cark1 = 1; S.cark++; chime(); } },
+  { id: 'kapi6', r: [1000, 330, 230, 250], stand: [1060, 620], on: () => !L.climb, tap() {
+      if (!S.f.kapi6) { play('strain', .8); say(['kilit', 'can'], 2); return; }
+      goScene('6b', [140, 660]); } }
+];
+function guv6() {
+  const f = S.f; f.guvercin = 1; f.guvT = 0; tone(988, .2, .3, .05); tone(1175, .45, .3, .05);
+  setTimeout(() => { S.hafiza++; halo(515, 250, 200); S.overlay = { type: 'hafiza', t: 0, img: 'cu_hafiza8' }; }, 2200);
+}
+HS['6b'] = [
+  { id: 'toKubbe', to: '6a', spawn: [1060, 620], r: [0, 560, 80, 160], stand: [110, 660] },
+  { id: 'oluk', r: [170, 215, 120, 110], stand: [290, 650], high: true, on: () => !S.f.su, tap() {
+      const f = S.f;
+      if (f.olukTamam) { say(['vana', 'kok'], 1.8); return; }
+      S.overlay = { type: 'oluk', t: 0 }; },
+    use: { sise() { takeItem('sise'); suDone('sise'); } } },
+  { id: 'olukVana', r: [60, 90, 100, 110], stand: [200, 650], high: true, on: () => S.f.olukTamam && !S.f.su, tap() { play('strain', .9); say(['vana', 'kok'], 1.8); },
+    kok() { suDone('oluk'); } },
+  ...[0, 1, 2].map(i => ({ id: 'ayna' + i, r: [AYNA6.c[i][0] - 55, AYNA6.c[i][1] - 55, 110, 110], stand: [[365, 650], [600, 650], [820, 650]][i], high: true, on: () => !S.f.isik6,
+    tap: () => aynaTap(i), ...(i === 1 ? { sar() { const f = S.f; if (f.sarB) return; f.sarB = 1; f.sarBT = 0; tone(523, 0, .8, .05); tone(659, .2, .8, .05); halo(600, 340, 200); } } : {}) })),
+  { id: 'isiAgzi', r: [860, 220, 110, 100], stand: [900, 650], high: true, tap() { say(S.f.isi === 'firin' ? ['ates', 'unlem'] : ['firin', 'soru'], 2); } },
+  { id: 'kazan', r: [965, 400, 120, 170], stand: [930, 650], tap: () => kazanTap(),
+    use: { komur1: () => komurKoy('komur1'), komur2: () => komurKoy('komur2'), komur3: () => komurKoy('komur3') },
+    light() { const f = S.f; if (f.isi) return; if (!f.kazanDolu) { say(['kutuk', 'soru']); return; } isiDone('kazan'); } },
+  { id: 'raf6', r: [10, 420, 110, 70], stand: [160, 650], high: true, on: () => !S.f.k1, tap() { play('strain', .9); say(['kok', 'soru']); },
+    kok() { S.f.k1 = 1; addItem('komur1'); } },
+  { id: 'ray6', r: [1130, 610, 120, 60], stand: [1080, 670], on: () => !S.f.k2, tap() { S.f.k2 = 1; addItem('komur2'); } },
+  { id: 'kedi6', r: [1120, 460, 120, 60], stand: [1080, 650], high: true, on: () => !S.f.kediUp, tap() { S.f.kediUp = 1; S.f.kediT = 0; purr(); S.cark++; chime(); } },
+  { id: 'komur3', r: [1140, 470, 80, 50], stand: [1080, 650], high: true, on: () => S.f.kediUp && !S.f.k3, tap() { S.f.k3 = 1; addItem('komur3'); } },
+  { id: 'agac', r: [430, 110, 290, 410], stand: [575, 650], high: true, tap() {
+      const f = S.f;
+      if (f.kalp) { say(['cicek', 'unlem']); return; }
+      if (f.cicek) { say(['tohum', 'ok', 'agac'], 2); f.teach = 2.4; f.teachTo = [575, 330]; return; }
+      say(['su', 'gunes', 'ates'].filter((k, i) => ![f.su, f.isik6, f.isi][i]).concat(['soru']), 2.6); },
+    cic() { kalpUyan(); } },
+  { id: 'havuz', r: [290, 525, 580, 95], stand: [580, 660], tap() {
+      const f = S.f;
+      if (f.kalp) { S.overlay = { type: 'ekim', t: 0, up: true, hold: null, prog: 0 }; return; }
+      say(['havuz', 'soru'], 1.8); },
+    use: { sise() { takeItem('sise'); suDone('sise'); } } }
+];
+
+DRAW1['6a'] = function (dt) {
+  const f = S.f;
+  // the glass panels swing on their hinges; a tied one is held to the rib by the vine
+  KUBBE.pan.forEach((p, i) => { const a = panAng(i);
+    dq(i ? 0 : 440, () => {
+    X.save(); X.translate(p.x, p.y); X.rotate(a * .5);
+    X.fillStyle = 'rgba(205,215,220,.35)'; X.fillRect(-p.w / 2, 0, p.w, p.h); X.strokeStyle = '#5a4030'; X.lineWidth = 5; X.strokeRect(-p.w / 2, 0, p.w, p.h);
+    X.strokeStyle = 'rgba(255,255,255,.5)'; X.lineWidth = 1.5; X.beginPath(); X.moveTo(-p.w / 2 + 8, p.h * .3); X.lineTo(p.w / 2 - 10, p.h * .15); X.moveTo(-p.w / 4, p.h * .8); X.lineTo(p.w / 3, p.h * .45); X.stroke();
+    X.fillStyle = '#3b2a1e'; X.beginPath(); X.arc(0, 0, 5, 0, 7); X.fill();
+    if (f.pan[i]) { X.strokeStyle = '#6f9a4a'; X.lineWidth = 3; X.beginPath(); for (let y = 0; y <= p.h; y += 6) X.lineTo(-p.w / 2 - 4 + Math.sin(y * .3) * 4, y); X.stroke(); X.fillStyle = '#8fc36a'; for (let y = 8; y < p.h; y += 18) { X.beginPath(); X.ellipse(-p.w / 2 + 4, y, 5, 3, .5, 0, 7); X.fill(); } }
+    X.restore(); }); });
+  if (!f.pan[2] && (S.t % 4.4) > 3.1 && L.climb === 2) glowAt(KUBBE.pan[2].x, KUBBE.pan[2].y + 40, 50, '220,235,240', .2);
+  // the door, once the song has opened it
+  if (f.kapi6) { f.kapiT += dt; const u = Math.min(1, f.kapiT / 1.8); X.save(); X.globalAlpha = u; X.fillStyle = 'rgba(30,26,20,.85)'; X.beginPath(); X.ellipse(1105, 455, 98, 110 * u, 0, 0, 7); X.fill(); X.restore();
+    glowAt(1105, 470, 160, '200,235,170', .25 * u); }
+  // Nota plays by the door if she is with us; Kepçe waits on the roof, too heavy to climb
+  const d = S.dost || {};
+  if (notaCalar()) dq(640, () => spr(S.overlay && S.overlay.type === 'melodi' || f.kapi6 ? 'nota2' : 'nota1', 960, 640, 120, true, -1));
+  if (yanimda('kepce')) dq(FAR + 2, () => spr('kepce3', 170, 700, 250, true, 1));
+  if (yanimda('duduk') && !d.dudukKaldi) dq(660, () => spr('duduk2', 700, 668, 150, true, -1));
+  if (!f.guvercin) spr('guvercin1', 515 + Math.sin(S.t * 14) * (Math.sin(S.t * .8) > .5 ? 2 : 0), 285, 70);
+  else { f.guvT += dt; const u = f.guvT; if (u < 2.4) spr(u < 1.4 ? 'guvercin2' : 'guvercin3', 515 - u * 120, 285 - u * 40 + (u > 1.4 ? (u - 1.4) * 150 : 0), 80, true, -1); }
+  if (L.climb === 3 && !f.cark1) gear(852, 198, 12 + Math.sin(S.t * 4), '#d9c48e');
+  drawVine(dt);
+};
+DRAW1['6b'] = function (dt) {
+  const f = S.f, d = S.dost || {};
+  // water: dew running from the gutter's mouth into the basin
+  if (f.su) { f.suT += dt; const a = Math.min(1, f.suT); for (let i = 0; i < 16; i++) { const u = ((S.t * .9 + i / 16) % 1); X.fillStyle = `rgba(170,210,230,${.7 * a})`; X.beginPath(); X.arc(240 + u * 90, 300 + u * u * 250, 2.5, 0, 7); X.fill(); }
+    glowAt(360, 560, 60, '150,200,220', .25 * a); }
+  // the ray of sun and its path through the mirrors
+  const yol = aynaYol();
+  X.save(); X.globalCompositeOperation = 'lighter'; X.lineCap = 'round';
+  for (let k = 0; k < yol.pts.length - 1; k++) { const [x0, y0] = yol.pts[k], [x1, y1] = yol.pts[k + 1];
+    X.strokeStyle = 'rgba(255,240,190,.18)'; X.lineWidth = 16; X.beginPath(); X.moveTo(x0, y0); X.lineTo(x1, y1); X.stroke();
+    X.strokeStyle = 'rgba(255,245,210,.5)'; X.lineWidth = 3; X.stroke(); }
+  const end = yol.pts[yol.pts.length - 1]; glowAt(end[0], end[1], yol.hit ? 90 : 34, '255,240,190', yol.hit ? .55 : .35);
+  X.restore();
+  if (f.aynaT) f.aynaT.forEach((v, i) => { if (v > 0) { f.aynaT[i] -= dt; glowAt(AYNA6.c[i][0], AYNA6.c[i][1], 60, '255,240,200', v); } });
+  // the vine up the trunk to the middle mirror
+  if (f.sarB) { f.sarBT += dt; const u = Math.min(1, f.sarBT / 1.6); X.save(); X.strokeStyle = '#6f9a4a'; X.lineWidth = 4; X.beginPath(); for (let y = 540; y > 540 - 400 * u; y -= 5) X.lineTo(600 + Math.sin(y * .05) * 12, y); X.stroke(); X.restore(); }
+  // heat: warm air from the furnace line, or the boiler's fire
+  if (f.isi === 'firin') for (let i = 0; i < 8; i++) { const u = ((S.t * .7 + i / 8) % 1); glowAt(905 - u * 120, 270 + u * 150, 18 + u * 20, '255,170,90', .35 * (1 - u)); }
+  if (f.isi === 'kazan') { glowAt(995, 532, 40 + Math.sin(S.t * 9) * 5, '255,150,60', .7); lamp(995, 520, 90, '255,170,90', .35); }
+  if (f.isi) glowAt(575, 575, 180, '255,190,120', .08 + .03 * Math.sin(S.t * 2));
+  // Kepçe outside the glass, emptying his bucket of coal into the boiler through the roof hatch
+  if (yanimda('kepce')) { spr('kepce3', 1215, 470, 190, true, -1, .8);
+    if (f.kepceDoldur !== undefined && f.kepceDoldur < 2.6) { f.kepceDoldur += dt; for (let i = 0; i < 10; i++) { const u = ((f.kepceDoldur * 1.4 + i / 10) % 1); X.fillStyle = '#231d18'; X.fillRect(1120 - u * 90, 360 + u * 80, 6, 5); } } }
+  if (f.kazanDolu && !f.isi) glowAt(995, 530, 20, '120,100,80', .5);
+  // Paşa Kedi asleep on the buffer stop; a lump of coal was under him
+  if (!f.kediUp) spr('kedi1', 1180, 510, 44); else { f.kediT += dt; if (f.kediT < 1.6) spr('kedi3', 1120, 510, 60); else spr('kedi1', 1090, 510, 40); }
+  if (f.kediUp && !f.k3) { X.fillStyle = '#231d18'; X.beginPath(); X.ellipse(1180, 500, 12, 8, 0, 0, 7); X.fill(); }
+  if (!f.k1) { X.fillStyle = '#231d18'; X.beginPath(); X.ellipse(62, 452, 13, 9, 0, 0, 7); X.fill(); glowAt(62, 450, 16, '240,225,180', .25 + .15 * Math.sin(S.t * 4)); }
+  if (!f.k2) { X.fillStyle = '#231d18'; X.beginPath(); X.ellipse(1190, 640, 14, 9, 0, 0, 7); X.fill(); glowAt(1190, 638, 16, '240,225,180', .25 + .15 * Math.sin(S.t * 4 + 1)); }
+  // the heart wakes: glass leaves light one by one, sprinklers mist, and a flower opens in the basin
+  if (f.kalp) { f.kalpT += dt; const t = f.kalpT;
+    YAPRAK.forEach(([x, y], i) => { const u = Math.min(1, Math.max(0, (t - i * .12) / .6)); if (u > 0) glowAt(x, y + 12, 22, i % 3 ? '170,235,120' : '255,230,150', .55 * u * (.8 + .2 * Math.sin(S.t * 2 + i))); });
+    if (t > 2) for (let i = 0; i < 20; i++) { const u = ((S.t * .5 + i / 20) % 1); X.fillStyle = `rgba(210,230,240,${.5 * (1 - u)})`; X.beginPath(); X.arc(150 + i * 50, 150 + u * 200, 1.8, 0, 7); X.fill(); }
+    const g = Math.min(1, Math.max(0, (t - 2.5) / 2)); if (g > 0) { const k = g < .5 ? 'cicek1' : g < 1 ? 'cicek2' : 'cicek3'; dq(560, () => spr(k, 575, 560, 70 + 30 * g, true)); }
+    // Pırpır's happiest moment: circling the first real flower
+    if (yanimda('pirpir') && t > 4) { const a = S.t * 2.4; dq(561, () => spr('pirpir1', 575 + Math.cos(a) * 70, 500 + Math.sin(a) * 22, 56, true, Math.cos(a) > 0 ? -1 : 1)); if (Math.sin(S.t * 7) > .9) tone(1568 + Math.random() * 400, 0, .08, .015); } }
+};
+
+// ---- 6. bölüm overlays ----
+function drawOverlayB6(o, dt) {
+  const f = S.f, img = k => GRAY[k];
+  if (o.type === 'melodi') {
+    const im = o.solved ? IMG.cu_melodi : img('cu_melodi'); im && X.drawImage(im, CU.x, CU.y, CU.s, CU.s);
+    if (o.hit) { o.hit.t += dt; const i = o.hit.i; glowAt(CU.x + BORULAR.x[i], CU.y + BORULAR.y[i], 70, o.fail > 0 ? '220,80,60' : '255,220,150', .7 * Math.max(0, 1 - o.hit.t)); }
+    if (o.fail > 0) o.fail -= dt;
+    // the five petals of the door light up as the song goes on
+    f.melodi.forEach((_, k) => { const a = -Math.PI / 2 + k * Math.PI * 2 / 5; glowAt(CU.x + 300 + Math.cos(a) * 80, CU.y + 470 + Math.sin(a) * 80, 34, '180,235,140', .6); });
+    if (o.auto) spr('nota2', CU.x - 90, CU.y + CU.s, 170, true, 1);
+    X.font = '600 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.textAlign = 'center'; X.fillText('×', CU.x + CU.s + 30, CU.y + 20);
+    return true;
+  }
+  if (o.type === 'oluk') {
+    // three gutter pieces between the dome and the basin: turn them so the dew can run down
+    X.fillStyle = '#2d2722'; X.beginPath(); X.roundRect(340, 150, 600, 420, 18); X.fill();
+    const n = oluk().n;
+    OLUK.forEach((q, i) => { const m = rotMask(q.t === 'I' ? 5 : 3, f.olk[i]), h = 70, pts = { 1: [0, -h], 2: [h, 0], 4: [0, h], 8: [-h, 0] }, [a, b] = [1, 2, 4, 8].filter(e => m & e).map(e => pts[e]);
+      X.fillStyle = '#3a322b'; X.fillRect(q.x - 76, q.y - 76, 152, 152);
+      X.save(); X.translate(q.x, q.y); X.lineCap = 'round';
+      [[34, '#1c1712'], [18, n > i ? '#9fc6d8' : '#b0773e']].forEach(([lw, col]) => { X.lineWidth = lw; X.strokeStyle = col; X.beginPath(); X.moveTo(a[0], a[1]);
+        if (a[0] === -b[0] && a[1] === -b[1]) X.lineTo(b[0], b[1]); else X.quadraticCurveTo(0, 0, b[0], b[1]); X.stroke(); });
+      X.restore(); });
+    // in from the dome on the left, out to the basin on the right
+    X.fillStyle = '#9fc6d8'; X.fillRect(344, 280, 22, 20); X.fillStyle = n === 3 ? '#9fc6d8' : '#b0773e'; X.fillRect(714, 440, 60, 20);
+    if (o.solved) glowAt(760, 450, 70, '160,210,230', .6);
+    X.font = '600 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.textAlign = 'center'; X.fillText('×', 960, 150);
+    return true;
+  }
+  if (o.type === 'cicekCin') {
+    // the bud opens into a flower in Lehim's chest window
+    const t = o.t, a = Math.max(0, Math.min(1, t / 1, (6 - t) / 1)); X.fillStyle = '#000'; X.fillRect(0, 0, W, H);
+    const g = GRAY.cin_cicek; if (g) { X.save(); X.globalAlpha = a; const z = 1 + t * .01; X.translate(W / 2, H / 2); X.scale(z, z); X.drawImage(g, -320, -320, 640, 640);
+      X.globalAlpha = a * Math.min(1, Math.max(0, (t - 1.2) / 2)); IMG.cin_cicek && X.drawImage(IMG.cin_cicek, -320, -320, 640, 640); X.restore(); }
+    glowAt(W / 2 - 40, H / 2 - 20, 90 + 40 * Math.sin(t), '200,240,150', .3 * a);
+    if (t > 6) { S.overlay = null; f.cicek = 1; tone(392, 0, 1.2, .05); tone(523, .3, 1.2, .05); tone(784, .6, 1.4, .05); say(['tohum', 'ok', 'cicek', 'ok', 'agac'], 3.2); }
+    return true;
+  }
+  if (o.type === 'ekim') {
+    const im = IMG.cu_toprak; im && X.drawImage(im, CU.x, CU.y, CU.s, CU.s);
+    const hx = CU.x + 300, hy = CU.y + 322;
+    if (o.hold !== null && !o.done) { o.prog = Math.min(1, o.prog + dt / 2); if (o.prog >= 1) { o.done = 0.001; tone(262, 0, 2, .06); tone(392, .1, 2, .05); } }
+    else if (!o.done) o.prog = Math.max(0, o.prog - dt);
+    if (!o.done) { glowAt(hx, hy, 40 + 20 * Math.sin(S.t * 3), '170,235,110', .35 + .2 * o.prog);
+      X.strokeStyle = 'rgba(190,245,130,.9)'; X.lineWidth = 6; X.beginPath(); X.arc(hx, hy, 70, -Math.PI / 2, -Math.PI / 2 + o.prog * Math.PI * 2); X.stroke();
+      if (o.prog === 0) { X.save(); X.globalAlpha = .5 + .3 * Math.sin(S.t * 4); icon('tohum', hx, hy - 110, 44, '#8fcf6a'); X.restore(); } }
+    else { o.done += dt; const u = Math.min(1, o.done / 2.2); glowAt(hx, hy - u * 90, 50 + u * 200, '190,245,130', .7 * (1 - u * .4));
+      X.strokeStyle = '#6fae4a'; X.lineWidth = 4; X.beginPath(); X.moveTo(hx, hy); X.quadraticCurveTo(hx + 10, hy - 40 * u, hx - 4, hy - 80 * u); X.stroke();
+      if (o.done > 3 && !o.fired) { o.fired = 1; ekimBitti(); } }
+    return true;
+  }
+  return false;
+}
+// gutter pieces: a straight one, then a bend down, then a bend out to the basin (masks N1 E2 S4 W8)
+const OLUK = [{ t: 'I', x: 440, y: 290, from: 8, out: 2 }, { t: 'L', x: 640, y: 290, from: 8, out: 4 }, { t: 'L', x: 640, y: 450, from: 1, out: 2 }];
+function oluk() {
+  const f = S.f; let n = 0;
+  for (let i = 0; i < 3; i++) { const q = OLUK[i], m = rotMask(q.t === 'I' ? 5 : 3, f.olk[i]); if (!(m & q.from) || (m & ~q.from) !== q.out) break; n++; }
+  return { n, done: n === 3 };
+}
+function overlayDownB6(p) {
+  const o = S.overlay, f = S.f;
+  if (o.type === 'melodi') {
+    if (!inCU(p)) { S.overlay = null; f.melodi = []; return true; }
+    if (o.auto || o.solved) return true;
+    const i = BORULAR.x.findIndex((x, k) => Math.abs(p.x - CU.x - x) < 36 && p.y - CU.y > 10 && p.y - CU.y < BORULAR.y[k] + 30);
+    if (i >= 0) melodiPlay(i);
+    return true;
+  }
+  if (o.type === 'oluk') {
+    if (o.solved) return true;
+    if (p.x < 340 || p.x > 940 || p.y < 150 || p.y > 570) { S.overlay = null; return true; }
+    const i = OLUK.findIndex(q => Math.abs(p.x - q.x) < 76 && Math.abs(p.y - q.y) < 76); if (i < 0) return true;
+    f.olk[i] = (f.olk[i] + 1) % 4; clank();
+    if (oluk().done) { o.solved = true; chime(); setTimeout(() => { S.overlay = null; f.olukTamam = 1; say(['vana', 'kok'], 2.2); }, 1200); }
+    return true;
+  }
+  if (o.type === 'cicekCin') { if (o.t > 2) o.t = Math.max(o.t, 5.5); return true; }
+  if (o.type === 'ekim') {
+    if (o.done) return true;
+    if (!inCU(p)) { S.overlay = null; return true; }
+    if (Math.hypot(p.x - CU.x - 300, p.y - CU.y - 322) < 120) o.hold = S.t;
+    return true;
+  }
+  return false;
+}
+
+function hintB6() {
+  const f = S.f, d = S.dost || {}, has = i => S.inv.includes(i);
+  if (!f.kapi6) {
+    if (L.climb === 3) return ['6a', 'borular'];
+    const i = f.pan.findIndex(v => !v);
+    if (i < 0 || (L.climb || 0) < i) return ['6a', 'kaburga'];
+    return ['6a', 'pan' + i];
+  }
+  if (S.scene === '6a') return ['6a', 'kapi6'];
+  if (!f.su) { if (has('sise')) return ['6b', 'havuz']; return f.olukTamam ? ['6b', 'olukVana'] : ['6b', 'oluk']; }
+  if (!f.isik6) { const i = [2, 1, 0].find(k => f.ayna[k] !== AYNA6.need[k]); return ['6b', 'ayna' + i]; }
+  if (!f.isi) {
+    if (f.kazanDolu || yanimda('kepce')) return ['6b', 'kazan'];
+    if (['komur1', 'komur2', 'komur3'].some(has)) return ['6b', 'kazan'];
+    if (!f.k1) return ['6b', 'raf6']; if (!f.k2) return ['6b', 'ray6']; return f.kediUp ? ['6b', 'komur3'] : ['6b', 'kedi6'];
+  }
+  if (!f.kalp) return ['6b', 'agac'];
+  return ['6b', 'havuz'];
+}
+const DEFTER6 = {
+  kaburga: { idea: ['sarmasik', 'ok', 'kubbe'], full: [['tohum', 'ok', 'panel'], ['sarmasik', 'ok', 'kubbe']] },
+  pan0: { idea: ['sarmasik', 'panel'], full: [['panel', 'saat'], ['tohum', 'ok', 'panel'], ['sarmasik']] },
+  pan1: { idea: ['pirpir', 'sarmasik'], full: [['panel', 'saat'], ['pirpir', 'ok', 'panel'], ['tohum', 'ok', 'panel']] },
+  pan2: { idea: ['duman', 'x', 'panel'], full: [['panel', 'saat'], ['duman', 'x'], ['tohum', 'ok', 'panel']] },
+  borular: { idea: ['nota', 'can'], full: [['silO', 'silK', 'silO', 'silK', 'silB']] },
+  kapi6: { idea: ['kapi'], full: [['kapi']] },
+  havuz: { idea: ['sise', 'ok', 'havuz'], full: [['sise', 'ok', 'havuz'], ['tohum', 'ok', 'havuz']] },
+  oluk: { idea: ['su', 'ok', 'havuz'], full: [['boru', 'ok', 'su'], ['kok', 'ok', 'vana']] },
+  olukVana: { idea: ['kok', 'ok', 'vana'], full: [['tohum', 'ok', 'vana'], ['kok']] },
+  ayna0: { idea: ['gunes', 'ayna'], full: [['gunes', 'ok', 'ayna', 'ok', 'ayna', 'ok', 'ayna'], ['ayna', 'ok', 'havuz']] },
+  ayna1: { idea: ['pirpir', 'ayna'], full: [['gunes', 'ok', 'ayna', 'ok', 'ayna'], ['pirpir', 'ok', 'ayna'], ['sarmasik', 'ok', 'ayna']] },
+  ayna2: { idea: ['gunes', 'ayna'], full: [['gunes', 'ok', 'ayna'], ['ayna', 'ok', 'ayna']] },
+  kazan: { idea: ['kutuk', 'ok', 'ates'], full: [['kepce', 'ok', 'soba'], ['kutuk', 'arti', 'kutuk', 'arti', 'kutuk', 'ok', 'soba'], ['tohum', 'ok', 'ates']] },
+  raf6: { idea: ['kok', 'kutuk'], full: [['tohum', 'ok', 'kutuk'], ['kok']] },
+  ray6: { idea: ['goz', 'kutuk'], full: [['ray', 'ok', 'kutuk']] },
+  kedi6: { idea: ['kedi', 'kutuk'], full: [['kedi', 'ok', 'kutuk']] },
+  komur3: { idea: ['kutuk'], full: [['kutuk', 'ok', 'soba']] },
+  agac: { idea: ['cicek', 'ok', 'agac'], full: [['su', 'arti', 'gunes', 'arti', 'ates'], ['tohum', 'ok', 'agac']] }
+};
+
+// ---- final, credits, rain, Epilogue ----
+function drawFinal(dt) {
+  const F = S.fin; F.t += dt; const t = F.t; X.fillStyle = '#000'; X.fillRect(0, 0, W, H);
+  if (F.stage === 'son' || F.stage === 'yagmur') {
+    const key = F.stage === 'yagmur' ? 'son_5' : 'son_' + F.n, im = IMG[key], a = Math.max(0, Math.min(1, t / 1.5, (14 - t) / 1.2));
+    if (im) { X.save(); X.globalAlpha = a; const z = 1.08 - t * .006, px = Math.sin(t * .05) * 30; X.translate(W / 2 + px, H / 2); X.scale(z, z); X.drawImage(im, -W / 2, -H / 2, W, H); X.restore(); }
+    X.save(); X.globalAlpha = a;
+    if (F.stage === 'yagmur') { X.strokeStyle = 'rgba(200,215,235,.45)'; X.lineWidth = 1.4; for (let i = 0; i < 140; i++) { const x = (i * 97 + t * 40) % W, y = (i * 53 + t * 900) % H; X.beginPath(); X.moveTo(x, y); X.lineTo(x - 4, y + 18); X.stroke(); } if ((t % .1) < dt) tone(3000 + Math.random() * 3000, 0, .02, .003); }
+    else if (F.n === 1 || F.n === 3) for (let i = 0; i < 40; i++) { const u = ((t * .05 + i / 40) % 1); glowAt((i * 131) % W + Math.sin(t + i) * 20, H - u * H, 4, i % 2 ? '255,230,150' : '190,240,140', .7 * Math.sin(u * Math.PI)); }
+    else { X.fillStyle = 'rgba(225,220,212,.6)'; for (let i = 0; i < 70; i++) { const x = (i * 97 + Math.sin(t * .7 + i) * 30) % W, y = (i * 61 + t * 30) % H; X.beginPath(); X.arc(x, y, 1.5 + (i % 3) * .6, 0, 7); X.fill(); }
+      if (F.n === 4) glowAt(640, 560, 30 + 10 * Math.sin(t * 2), '170,235,110', .5); }
+    X.restore();
+    if (F.stage === 'son' && t > 3) { const b = Math.min(1, (t - 3) / 1.5) * a, [ad, ac] = SONLAR[F.n];
+      X.save(); X.globalAlpha = b; const g = X.createLinearGradient(0, H - 190, 0, H); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.75)'); X.fillStyle = g; X.fillRect(0, H - 190, W, 190);
+      X.textAlign = 'center'; X.fillStyle = '#f2ead8'; X.font = '700 54px "Cormorant Garamond", Georgia, serif'; X.fillText(ad, W / 2, H - 84);
+      X.font = '500 24px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf'; X.fillText(ac, W / 2, H - 44); X.restore(); }
+    if (t > 14.5) { if (F.stage === 'son') { F.stage = 'jenerik'; F.t = 0; } else { F.stage = 'epilog'; F.t = 0; epilogHazirla(); orchestra(); } }
+    return;
+  }
+  if (F.stage === 'jenerik') {
+    drawAsh(dt, .6); const lines = ['KÜL YAĞMURU', 'Son Tohumun Yolculuğu', '', 'EFKA Games', '', 'Lehim ve yol arkadaşları'], y0 = H + 20 - t * 60;
+    X.save(); X.textAlign = 'center';
+    lines.forEach((s, i) => { X.fillStyle = i ? '#b8b0a2' : '#e9e2d4'; X.font = i ? '500 30px "Cormorant Garamond", Georgia, serif' : '700 64px "Cormorant Garamond", Georgia, serif'; X.fillText(s, W / 2, y0 + i * 60); });
+    // the friends saved along the way, each with their little sign
+    dostlar().forEach((k, i) => { const y = y0 + 400 + i * 70; icon(k === 'nine' ? 'saat' : k, W / 2, y, 50, '#d8cfbf'); });
+    X.restore();
+    if (t > 13 + dostlar().length * 1.1) { if (F.rain) { F.stage = 'yagmur'; F.t = 0; } else { F.stage = 'epilog'; F.t = 0; epilogHazirla(); orchestra(); } }
+    return;
+  }
+  if (F.stage === 'epilog') drawEpilog(dt);
+}
+// Epilogue: every scene of the journey side by side, coloured as much as the Işık earned in its chapter
+const YOL = ['pa', 'pb', '1a', '1b', '1c', '1d', '2a', '2b', '2c', '2d', '3a', '3b', '3c', '3d', '4a', '4b', '4c', '4d', '5a', '5b', '5c', '5d', '6a', '6b'];
+function epilogHazirla() {
+  const d = S.dost || {}, b = d.isikB || {}, tw = 400, th = 225, per = S.isik / 6;
+  S.pano = YOL.map(sc => { const im = IMG['bg_' + sc]; if (!im) return null;
+    const c = document.createElement('canvas'); c.width = tw; c.height = th; c.getContext('2d').drawImage(im, 0, 0, tw, th);
+    const n = sc[0] === 'p' ? 1 : +sc[0], got = b[n] !== undefined ? b[n] : per;
+    return { col: c, gry: gray(c, .12), k: Math.max(.08, Math.min(1, got / ISIK_HEDEF[n])) }; });
+}
+function drawEpilog(dt) {
+  const F = S.fin, t = F.t, tw = 400, th = 225, total = YOL.length * (tw + 12), speed = 210, x0 = W / 2 - tw / 2 - Math.min(t * speed, total - tw - 12);
+  drawAsh(dt, .5);
+  const a = Math.min(1, t / 1.5), y = 200;
+  X.save(); X.globalAlpha = a;
+  (S.pano || []).forEach((p, i) => { if (!p) return; const x = x0 + i * (tw + 12); if (x > W || x + tw < 0) return;
+    X.drawImage(p.gry, x, y); X.globalAlpha = a * p.k; X.drawImage(p.col, x, y); X.globalAlpha = a;
+    X.strokeStyle = 'rgba(216,207,191,.35)'; X.lineWidth = 2; X.strokeRect(x, y, tw, th); });
+  X.restore();
+  // the stats and the way back once the strip has reached the greenhouse
+  const done = t * speed >= total - tw - 12;
+  if (done) { F.doneT = (F.doneT || 0) + dt; const b = Math.min(1, F.doneT / 1.5);
+    X.save(); X.globalAlpha = b; X.textAlign = 'center'; X.fillStyle = '#e9e2d4'; X.font = '700 60px "Cormorant Garamond", Georgia, serif'; X.fillText('KÜL YAĞMURU', W / 2, 120);
+    X.font = '600 26px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf';
+    gear(W / 2 - 250, 500, 15, '#d8cfbf'); X.fillText('× ' + S.cark, W / 2 - 205, 510);
+    X.fillStyle = 'rgba(160,215,120,.95)'; X.beginPath(); X.arc(W / 2 - 110, 500, 9, 0, 7); X.fill(); X.fillStyle = '#d8cfbf'; X.fillText('× ' + S.isik, W / 2 - 70, 510);
+    X.strokeStyle = '#d8cfbf'; X.lineWidth = 2; X.strokeRect(W / 2 + 10, 488, 20, 24); X.fillText('× ' + S.hafiza + ' / 9', W / 2 + 75, 510);
+    icon('kalp', W / 2 + 175, 500, 30, '#d8cfbf'); X.fillText('× ' + dostlar().length, W / 2 + 215, 510);
+    X.font = '500 26px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#b8b0a2'; X.fillText(SONLAR[F.n][0] + (F.rain ? ' · Yağmur' : ''), W / 2, 570);
+    if (F.doneT > 2.5) { X.font = '500 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#6f685e'; X.fillText('Başa dönmek için dokunun', W / 2, 640); }
+    X.restore(); }
+}
+
 // the seed-light drag gesture teaches itself toward a target
 function teachTarget() { return S.f.teachTo || [1180, 620]; }
 
@@ -2168,17 +2660,17 @@ function hintB1() {
   }
   return ['1c', 'drezin'];
 }
-const currentGoal = () => S.bolum === 5 ? hintB5() : S.bolum === 4 ? hintB4() : S.bolum === 3 ? hintB3() : S.bolum === 2 ? hintB2() : hintB1();
+const currentGoal = () => S.bolum === 6 ? hintB6() : S.bolum === 5 ? hintB5() : S.bolum === 4 ? hintB4() : S.bolum === 3 ? hintB3() : S.bolum === 2 ? hintB2() : hintB1();
 function showHintB1() {
   const [sc, id] = currentGoal(), hub = ['', '1a', '2a', '3a'][S.bolum];
-  const CHAIN = S.bolum === 5 ? ['5a', '5b', '5c', '5d'] : ['4a', '4b', '4c', '4d'];
+  const CHAIN = S.bolum === 6 ? ['6a', '6b'] : S.bolum === 5 ? ['5a', '5b', '5c', '5d'] : ['4a', '4b', '4c', '4d'];
   if (sc === 'inv') { say(defterOf(id).idea || ['soru'], 3); return; }
   let target = id;
   // another scene: point at the exit that leads there (through the hub)
   if (sc !== S.scene) {
     let ex = S.bolum >= 4 ? HS[S.scene].find(h => h.to === CHAIN[CHAIN.indexOf(S.scene) + Math.sign(CHAIN.indexOf(sc) - CHAIN.indexOf(S.scene))]) : HS[S.scene].find(h => h.to === (S.scene === hub ? sc : hub));
     if (!ex && S.scene === '4a') ex = HS['4a'].find(h => h.id === 'kapi');
-    const FWD = { '5a': 'kapi5a', '5b': 'toKoruk', '5c': 'kapi5c' };
+    const FWD = { '5a': 'kapi5a', '5b': 'toKoruk', '5c': 'kapi5c', '6a': 'kapi6' };
     if (!ex && FWD[S.scene] && CHAIN.indexOf(sc) > CHAIN.indexOf(S.scene)) ex = HS[S.scene].find(h => h.id === FWD[S.scene]);
     if (!ex && S.scene === '2d') ex = HS[S.scene].find(h => h.to === '2c');
     if (!ex && S.scene === '2c' && sc === '2d') ex = HS['2c'].find(h => h.id === 'gecit');
@@ -2393,6 +2885,16 @@ function icon(name, x, y, s, col = '#2b2520') {
     case 'firin': g.strokeRect(-12, -6, 24, 20); g.fillRect(-4, -18, 6, 12); g.beginPath(); g.arc(0, 6, 5, Math.PI, 0); g.fill(); break;
     case 'atesci': g.beginPath(); g.arc(0, -9, 7, 0, 7); g.stroke(); g.strokeRect(-7, -1, 14, 14); g.fillRect(-4, 2, 8, 6); g.beginPath(); g.moveTo(9, -4); g.lineTo(14, 14); g.stroke(); break;
     case 'perde': g.strokeRect(-14, -12, 28, 24); g.beginPath(); g.moveTo(-14, -12); g.quadraticCurveTo(-6, 0, -14, 12); g.moveTo(14, -12); g.quadraticCurveTo(6, 0, 14, 12); g.stroke(); break;
+    case 'cicek': g.fillStyle = '#e8e2c8'; for (let i = 0; i < 5; i++) { const a = i * Math.PI * 2 / 5 - Math.PI / 2; g.beginPath(); g.ellipse(Math.cos(a) * 8, -4 + Math.sin(a) * 8, 6, 4, a, 0, 7); g.fill(); }
+      g.fillStyle = '#e8c860'; g.beginPath(); g.arc(0, -4, 4, 0, 7); g.fill(); g.strokeStyle = '#6fae4a'; g.beginPath(); g.moveTo(0, 4); g.lineTo(0, 17); g.stroke(); break;
+    case 'agac': g.beginPath(); g.moveTo(0, 16); g.lineTo(0, -2); g.moveTo(0, 4); g.lineTo(-10, -8); g.moveTo(0, 0); g.lineTo(9, -10); g.moveTo(0, -2); g.lineTo(0, -14); g.stroke();
+      [[-10, -10], [9, -12], [0, -16], [-5, -2], [6, -4]].forEach(([a, b]) => { g.beginPath(); g.ellipse(a, b, 3.5, 2.4, .5, 0, 7); g.stroke(); }); break;
+    case 'havuz': g.beginPath(); g.ellipse(0, 4, 16, 7, 0, 0, 7); g.stroke(); g.beginPath(); g.ellipse(0, 2, 11, 4, 0, 0, 7); g.fill(); g.beginPath(); g.moveTo(-16, 4); g.lineTo(-16, 10); g.moveTo(16, 4); g.lineTo(16, 10); g.stroke(); break;
+    case 'panel': g.save(); g.rotate(.25); g.strokeRect(-9, -12, 18, 26); g.beginPath(); g.moveTo(-6, -2); g.lineTo(5, -9); g.stroke(); g.restore(); g.beginPath(); g.arc(-3, -15, 2.5, 0, 7); g.fill(); break;
+    case 'kalp': g.beginPath(); g.moveTo(0, 12); g.bezierCurveTo(-18, 0, -10, -16, 0, -6); g.bezierCurveTo(10, -16, 18, 0, 0, 12); g.fill(); break;
+    case 'muzik': g.beginPath(); g.ellipse(-6, 10, 5, 3.5, -.4, 0, 7); g.fill(); g.beginPath(); g.ellipse(8, 6, 5, 3.5, -.4, 0, 7); g.fill();
+      g.beginPath(); g.moveTo(-2, 9); g.lineTo(-2, -12); g.lineTo(12, -16); g.lineTo(12, 5); g.stroke(); break;
+    case 'komur1': case 'komur2': case 'komur3': g.beginPath(); g.moveTo(-12, 8); g.lineTo(-8, -6); g.lineTo(3, -11); g.lineTo(12, -2); g.lineTo(9, 10); g.closePath(); g.fill(); g.fillStyle = 'rgba(255,170,90,.6)'; g.fillRect(-2, -5, 5, 2); break;
     case 'yol': g.lineWidth = 1.5; for (let i = 0; i <= 3; i++) { g.beginPath(); g.moveTo(-15 + i * 10, -15); g.lineTo(-15 + i * 10, 15); g.moveTo(-15, -15 + i * 10); g.lineTo(15, -15 + i * 10); g.stroke(); }
       g.lineWidth = 4; g.beginPath(); g.moveTo(-19, 10); g.lineTo(-10, 10); g.quadraticCurveTo(-10, 0, -5, 0); g.lineTo(5, 0); g.quadraticCurveTo(10, 0, 10, -10); g.lineTo(19, -10); g.stroke(); break;
   }
@@ -2477,7 +2979,7 @@ function hsAt(p) { return (HS[S.scene] || []).find(h => (!h.on || h.on()) && inR
 C.addEventListener('pointerdown', e => {
   e.preventDefault(); const p = pt(e); audioStart();
   if (S.mode === 'title') {
-    if (S.saved) { const [top, step] = titleRows(); if (p.y > top - 20) { const n = clamp(Math.floor((p.y - (top - 20)) / step) + 1, 1, S.saved); [null, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5][n](true); return; } }
+    if (S.saved) { const [top, step] = titleRows(); if (p.y > top - 20) { const n = clamp(Math.floor((p.y - (top - 20)) / step) + 1, 1, S.saved); [null, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5, startBolum6][n](true); return; } }
     S.mode = 'cin'; S.cin = { t: 0 }; musicBox(); return;
   }
   if (S.mode === 'cin') { S.cin.t = Math.max(S.cin.t, 9.2); return; }
@@ -2487,8 +2989,13 @@ C.addEventListener('pointerdown', e => {
   if (S.mode === 'end2') { if (S.t > 2.5) startBolum3(); return; }
   if (S.mode === 'end3') { if (S.t > 2.5) startBolum4(); return; }
   if (S.mode === 'end4') { if (S.t > 2.5) startBolum5(); return; }
-  if (S.mode === 'end' || S.mode === 'end5') { if (S.t > 2.5) location.href = location.pathname; return; }
+  if (S.mode === 'end5') { if (S.t > 2.5) startBolum6(); return; }
+  if (S.mode === 'end') { if (S.t > 2.5) location.href = location.pathname; return; }
+  if (S.mode === 'final') { finalTap(); return; }
   if (S.mode !== 'play' || S.fade > .2) return;
+  // any touch wakes Lehim from an idle daydream
+  L.idleT = 0; if (IDLE.includes(L.anim)) { L.anim = null; L.animThen = null; }
+  if (!S.overlay) S.tapFx = { x: p.x, y: p.y, t: 0, hit: !!hsAt(p) };
   if (S.overlay) { overlayDown(p); return; }
   if (inRect(p, [10, 10, 78, 78])) { showHint(); return; }
   for (let i = 0; i < S.inv.length; i++) if (inRect(p, slotRect(i))) { drag = { item: S.inv[i], x: p.x, y: p.y, x0: p.x, y0: p.y }; return; }
@@ -2514,13 +3021,16 @@ C.addEventListener('pointerup', e => {
       }
       if (S.f.bez) { say(['bez', 'x'], 1.6); return; }
       const h = hsAt(p);
+      // on the dome Lehim cannot walk: he acts from where he clings
+      const act = fn => (h.noWalk || L.climb) ? (faceTo(h), fn()) : walkTo(h.stand[0], h.stand[1], () => { faceTo(h); fn(); });
       // one gesture: the seed becomes a root on cracks, grates and weights, a lily on ash and water, light elsewhere
-      if (h && h.pol && (S.f.polen || h.polTeach)) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); h.pol(); });
-      else if (h && h.sar && S.f.sarmasik) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); h.sar(); });
-      else if (h && h.nil && S.f.nilufer) { if (h.noWalk || L.onLake) { faceTo(h); h.nil(); } else walkTo(h.stand[0], h.stand[1], () => { faceTo(h); h.nil(); }); }
+      if (h && h.cic && S.f.cicek) act(() => h.cic());
+      else if (h && h.pol && (S.f.polen || h.polTeach || S.bolum >= 6)) act(() => h.pol());
+      else if (h && h.sar && (S.f.sarmasik || S.bolum >= 5)) act(() => h.sar());
+      else if (h && h.nil && (S.f.nilufer || S.bolum >= 4)) { if (h.noWalk || L.onLake) { faceTo(h); h.nil(); } else walkTo(h.stand[0], h.stand[1], () => { faceTo(h); h.nil(); }); }
       else if (L.onLake) say(['nilufer', 'soru'], 1.4);
-      else if (h && h.kok && (S.f.kok || S.bolum >= 3)) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); growRoot(h.r[0] + h.r[2] / 2, h.r[1] + h.r[3] / 2, () => h.kok()); });
-      else if (h && h.light) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); h.light(); });
+      else if (h && h.kok && (S.f.kok || S.bolum >= 3)) act(() => growRoot(h.r[0] + h.r[2] / 2, h.r[1] + h.r[3] / 2, () => h.kok()));
+      else if (h && h.light) act(() => h.light());
       else if (h && h.kok) say(['tohum', 'soru'], 1.6);
       else { say(['goz', 'soru'], 1.6); }
       return;
@@ -2542,13 +3052,33 @@ C.addEventListener('pointerup', e => {
   if (!down) return; down = null;
   if (L.onLake) return; // standing on a lily: only the seed can move him on
   const h = hsAt(p);
+  // clinging to the dome: reach what is up here, anything else means climbing back down
+  if (L.climb) { if (h && h.high && h.tap) reach(h, () => h.tap()); else climbDown(); return; }
   if (h) walkTo(h.stand[0], h.stand[1], () => h.to ? goScene(h.to, h.spawn) : reach(h, () => h.tap()));
   else walkTo(p.x, p.y);
 });
 C.addEventListener('pointercancel', () => { drag = null; down = null; if (S.overlay && S.overlay.up) overlayUp(null); });
 // turn toward a hotspot, stretch an arm to it, then act
 function faceTo(h) { const cx = h.r[0] + h.r[2] / 2; if (Math.abs(cx - L.x) > 20) L.face = cx > L.x ? 1 : -1; }
-function reach(h, then) { faceTo(h); play('reach', .38, then); }
+function reach(h, then) {
+  faceTo(h); const cy = h.r[1] + h.r[3] / 2, b = lehimBox(), k = 190 * scaleAt(L.y) / 279;
+  L.reachExt = clamp((b[1] + 30 - cy) / k, 0, 170); L.reachLo = cy > L.y - b[3] * .3 ? 1 : 0;
+  play('reach', L.reachExt > 20 ? .95 : L.reachLo ? .6 : .38, then);
+}
+// idle daydreams when the player leaves Lehim alone for a while
+const IDLE = ['bak', 'islik', 'esne', 'ayak', 'sil'];
+function idleAnim() {
+  const a = IDLE[Math.floor(Math.random() * IDLE.length)];
+  if (a === 'islik') { [784, 988, 1175, 988].forEach((fq, i) => tone(fq, .1 + i * .22, .2, .025, 'sine')); say(['muzik'], 1.4); }
+  if (a === 'esne') tone(220, 0, .6, .02, 'triangle');
+  play(a, { bak: 2.6, islik: 1.8, esne: 2, ayak: 1.6, sil: 2 }[a]);
+}
+function finalTap() {
+  const F = S.fin; if (!F) return;
+  if ((F.stage === 'son' || F.stage === 'yagmur') && F.t > 4) F.t = Math.max(F.t, 14.5);
+  else if (F.stage === 'jenerik' && F.t > 2) F.t = 999;
+  else if (F.stage === 'epilog') { if (F.doneT > 2.5) location.href = location.pathname; else if (F.t > 2) F.t = 999; }
+}
 function useOnLehim(item) {
   const f = S.f;
   if (item === 'bez') { takeItem('bez'); f.bez = 1; clank(); return; } // the rag covers the seed's light
@@ -2583,7 +3113,7 @@ function mkTrace() { // follow the rails from the west edge of the bottom-left t
 }
 function overlayDownB1(p) {
   const o = S.overlay;
-  if (overlayDownB3(p) || overlayDownB4(p) || overlayDownB5(p)) return;
+  if (overlayDownB3(p) || overlayDownB4(p) || overlayDownB5(p) || overlayDownB6(p)) return;
   if (o.type === 'saat') {
     if (o.solved) return;
     if (!inCU(p)) { S.overlay = null; return; }
@@ -2692,6 +3222,7 @@ function overlayMove(p) {
 function overlayUp(p) {
   const o = S.overlay;
   if (o.type === 'pist') { pistUp(); return; }
+  if (o.type === 'ekim') { o.hold = null; return; }
   if (o.type === 'saat' && o.grab) {
     if (o.grab === 'h') o.h = Math.round(o.h) % 12; else o.m = (Math.round(o.m / 5) * 5) % 60;
     o.grab = null; clank();
@@ -2708,7 +3239,7 @@ function overlayUp(p) {
 }
 function drawOverlayB1(o, dt) {
   const img = k => GRAY[k];
-  if (drawOverlayB3(o, dt) || drawOverlayB4(o, dt) || drawOverlayB5(o, dt)) return;
+  if (drawOverlayB3(o, dt) || drawOverlayB4(o, dt) || drawOverlayB5(o, dt) || drawOverlayB6(o, dt)) return;
   if (o.type === 'defter') { drawDefter(o, dt); return; }
   if (o.type === 'vana') {
     const im = img('cu_vana'); if (!im) return; X.drawImage(im, CU.x, CU.y, CU.s, CU.s);
@@ -2933,7 +3464,17 @@ function drawLehim(dt) {
   if (a === 'shrug') { armL = .6 * Math.sin(u * Math.PI); armR = -.6 * Math.sin(u * Math.PI); headR = .12 * Math.sin(u * Math.PI); bob = 3 * Math.sin(u * Math.PI); }
   if (a === 'climb') { const c = Math.sin(u * 22); bob = u * 300; armL = 2.6 + c * .4; armR = -2.6 + c * .4; legL = Math.max(0, c) * 10; legR = Math.max(0, -c) * 10; L.alpha = 1 - Math.max(0, u - .6) * 2.5; }
   if (a === 'leave') { L.alpha = 1 - u; }
-  if (a === 'reach') { const k = Math.sin(u * Math.PI); armR = -1.35 * k; armL = .15 * k; lean = .07 * k; headR = .08 * k; bob = 2 * k; }
+  let ext = 0, squash = 0;
+  if (a === 'reach') { const k = Math.sin(u * Math.PI);
+    // like Machinarium's robot: the body telescopes up on its legs for things overhead, and folds down for things at his feet
+    if (L.reachExt > 20) { const e = Math.min(1, Math.sin(Math.min(1, u * 1.25) * Math.PI) * 1.4); ext = L.reachExt * e; armR = -2.75 * e; armL = .35 * e; headR = -.12 * e; if (u > .45 && u < .6) armR += Math.sin(u * 60) * .1; }
+    else if (L.reachLo) { squash = .2 * k; armR = -.5 * k; lean = .28 * k; headR = .18 * k; }
+    else { armR = -1.35 * k; armL = .15 * k; lean = .07 * k; headR = .08 * k; bob = 2 * k; } }
+  if (a === 'bak') { headR = .22 * Math.sin(u * Math.PI * 2); headY += Math.abs(Math.sin(u * Math.PI * 2)) * 2; }
+  if (a === 'islik') { headR = -.1 + Math.sin(u * 18) * .03; bob = Math.abs(Math.sin(u * 12)) * 2; armL = .2; }
+  if (a === 'esne') { const k = Math.sin(u * Math.PI); ext = 55 * k; armL = 2.5 * k; armR = -2.5 * k; headR = -.1 * k; }
+  if (a === 'ayak') { legR = Math.abs(Math.sin(u * Math.PI * 6)) * 7; headR = Math.sin(u * Math.PI * 6) * .03; }
+  if (a === 'sil') { armR = -.95 + Math.sin(u * 40) * .16; headR = .16; lean = .03; }
   const flip = L.face > 0 ? 1 : -1, shrink = a === 'leave' ? 1 - u * .4 : 1;
   X.save(); X.globalAlpha = Math.max(0, L.alpha);
   X.fillStyle = 'rgba(0,0,0,.28)'; X.beginPath(); X.ellipse(L.x, L.y - 4, 60 * k * Math.max(0, 1 - bob / 120), 9 * s, 0, 0, 7); X.fill();
@@ -2945,7 +3486,13 @@ function drawLehim(dt) {
   // legs stay on the ground; everything above bobs and sways
   // legs travel with the body so the hips never separate; a lifted foot just rises a little more
   X.save(); X.translate(0, -bob);
+  if (squash) { X.translate(119, 279); X.scale(1, 1 - squash); X.translate(-119, -279); }
   part('legL', 0, -legL, walk ? -st * .06 : 0); part('legR', 0, -legR, walk ? -st * .06 : 0);
+  // telescoping tubes between the hips and the legs
+  if (ext > 2) [124, 190].forEach(x => { X.fillStyle = '#5b554d'; X.fillRect(x - 10, 250 - ext * .55, 20, ext * .55 + 4); X.fillStyle = '#8c857a'; X.fillRect(x - 7, 246 - ext, 14, ext * .5 + 6);
+    X.strokeStyle = '#2e2a26'; X.lineWidth = 2.5; X.strokeRect(x - 10, 250 - ext * .55, 20, ext * .55 + 4); X.strokeRect(x - 7, 246 - ext, 14, ext * .5 + 6);
+    X.fillStyle = '#3b3631'; X.fillRect(x - 11, 250 - ext * .55 - 3, 22, 5); });
+  X.translate(0, -ext);
   X.save(); X.translate(119, 250); X.rotate(sway + lean); X.scale(1, 1 + breathe); X.translate(-119, -250);
   part('scarf', 0, 0, scarf); part('armL', 0, 0, armL); part('body');
   // seed in the chest window
@@ -3066,6 +3613,9 @@ function drawScene(dt) {
       X.beginPath(); X.ellipse(r[0] + r[2] / 2, r[1] + r[3] / 2, r[2] / 2 + 10, r[3] / 2 + 10, 0, 0, 7); X.stroke(); X.restore(); }
     if (S.hint.t <= 0) S.hint = null;
   }
+  if (S.tapFx) { const q = S.tapFx; q.t += dt; const u = q.t / .5; if (u >= 1) S.tapFx = null; else {
+    X.save(); X.strokeStyle = q.hit ? `rgba(255,236,190,${.8 * (1 - u)})` : `rgba(236,228,212,${.45 * (1 - u)})`; X.lineWidth = q.hit ? 3 : 2;
+    X.beginPath(); X.arc(q.x, q.y, 8 + u * (q.hit ? 34 : 22), 0, 7); X.stroke(); X.restore(); } }
   drawBubble(); drawInv();
   // dragging visuals
   if (drag && drag.item) drawItem(drag.item, drag.x, drag.y, 64);
@@ -3154,6 +3704,8 @@ function lehimTint() {
   if (sc === '3c') return 'rgba(205,145,85,.1)';
   if (sc === '3d') return f.kepce ? 'rgba(160,120,80,.12)' : 'rgba(60,50,40,.1)';
   if (sc[0] === '5') return f.firin === 'son' && sc === '5d' ? 'rgba(40,36,40,.2)' : sc === '5c' ? 'rgba(255,140,60,.16)' : 'rgba(255,150,80,.12)';
+  if (sc === '6a') return 'rgba(190,196,206,.12)';
+  if (sc === '6b') return f.kalp ? 'rgba(200,235,170,.1)' : f.isi ? 'rgba(235,200,150,.1)' : 'rgba(200,196,188,.1)';
   if (sc === '4a') return 'rgba(190,170,160,.1)';
   if (sc === '4b') return 'rgba(175,185,195,.1)';
   if (sc === '4c') return 'rgba(220,170,120,.1)';
@@ -3200,6 +3752,10 @@ const EMIT = {
   '2d': [{ x: 70, y: 120, rate: 2.2, vx: 18, vy: -10, sp: 6, s: 8, g: 20, life: 2.6, rgb: '235,235,232', a: .35, on: () => S.f.vanalar }],
   '3a': [{ x: 30, y: 140, rate: .8, vx: 6, vy: -12, sp: 3, s: 6, g: 12, life: 3, rgb: '200,198,194', a: .22 },
          { x: 102, y: 158, rate: .6, vx: 6, vy: -12, sp: 3, s: 6, g: 12, life: 3, rgb: '200,198,194', a: .2 }],
+  '6a': [{ x: 180, y: 190, rate: .8, vx: 8, vy: -8, sp: 4, s: 8, g: 14, life: 5, rgb: '150,146,140', a: .22 },
+         { x: 282, y: 285, rate: .7, vx: 7, vy: -8, sp: 4, s: 7, g: 12, life: 5, rgb: '150,146,140', a: .2 },
+         { x: 414, y: 300, rate: .6, vx: 6, vy: -7, sp: 4, s: 7, g: 12, life: 5, rgb: '150,146,140', a: .2 }],
+  '6b': [{ x: 1030, y: 400, rate: 1.2, vx: 2, vy: -18, sp: 4, s: 5, g: 12, life: 2.4, rgb: '235,235,232', a: .3, on: () => S.f.isi === 'kazan' }],
   '3c': [{ x: 268, y: 150, rate: 1.4, vx: 3, vy: -18, sp: 4, s: 6, g: 14, life: 2.6, rgb: '235,235,232', a: .3 },
          { x: 600, y: 40, rate: 1.6, vx: 4, vy: -20, sp: 5, s: 7, g: 16, life: 2.6, rgb: '235,235,232', a: .3 },
          { x: 525, y: 130, rate: 1.2, vx: 3, vy: -16, sp: 4, s: 6, g: 14, life: 2.4, rgb: '235,235,232', a: .28 },
@@ -3266,6 +3822,13 @@ function drawAmbient(sc, dt) {
     glowAt(1200, 290, 140 + 10 * Math.sin(S.t * 4), '255,140,60', .25); for (let i = 0; i < 10; i++) { const u = ((S.t * .5 + i / 10) % 1); glowAt(1150 + Math.sin(i * 5) * 40 - u * 60, 300 - u * 160, 2.5, '255,200,120', .8 * (1 - u)); } }
   if (sc === '5c') { [[265, 100], [412, 190], [868, 190], [1015, 100], [565, 115], [727, 115]].forEach(([x, y]) => lamp(x, y, 38, '255,190,110', .4)); glowAt(645, 360, 200 + 10 * Math.sin(S.t * 2), '255,150,60', .18); }
   if (sc === '5d') { lamp(88, 185, 40, '255,190,110', .4); lamp(192, 270, 36, '255,190,110', .4); lamp(85, 360, 40, '255,190,110', .4); lamp(983, 65, 36, '255,190,110', .4); lamp(800, 290, 34, '255,190,110', .4); }
+  if (sc === '6a') { mist(420, 160, 11, .1); mist(300, 110, -7, .07);
+    // wind-driven ash streaks and the brass pipes glinting
+    X.save(); X.strokeStyle = 'rgba(230,226,220,.35)'; X.lineWidth = 1.2; for (let i = 0; i < 26; i++) { const x = (i * 131 + S.t * 160) % (W + 200) - 100, y = (i * 67 + S.t * 40) % H; X.beginPath(); X.moveTo(x, y); X.lineTo(x - 14, y + 4); X.stroke(); } X.restore();
+    [[1085, 90], [1040, 140], [1140, 125], [995, 180], [1200, 180]].forEach(([x, y], i) => { if (Math.sin(S.t * 1.3 + i * 1.7) > .85) glowAt(x, y, 18, '255,235,190', .5); }); }
+  if (sc === '6b') { motes(780, 0, 560, 560, 140, .45); [[905, 262]].forEach(([x, y]) => lamp(x, y, 30, '255,200,120', f.isi ? .4 : .15));
+    // the hanging bells sway in the draught
+    [[1015, 200], [1145, 215], [1220, 170], [285, 230], [360, 290]].forEach(([x, y], i) => glowAt(x + Math.sin(S.t * 1.1 + i) * 3, y, 10, '255,230,180', .12)); }
   if (sc === '4a') { lamp(362, 312, 45, '255,200,120', .4); lamp(877, 312, 45, '255,200,120', .4);
     for (let i = 0; i < 9; i++) { const x = 180 + i * 20, y = 185 + i * 10; if (Math.sin(S.t * 3 + i * 1.7) > .2) glowAt(x, y, 10, '255,220,150', .55); }
     [[556, 255], [623, 265], [690, 262]].forEach(([x, y], i) => glowAt(x + Math.sin(S.t * 1.3 + i) * 2, y + 18, 16, '255,210,150', .12)); mist(470, 150, 9, .08); }
@@ -3310,14 +3873,14 @@ function drawExits() {
   });
 }
 // chapter rows under the title: [first row y, spacing]
-function titleRows() { return S.saved > 4 ? [566, 30] : [588, 36]; }
+function titleRows() { return S.saved > 5 ? [552, 27] : S.saved > 4 ? [566, 30] : [588, 36]; }
 function drawTitle(dt) {
   X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .8);
   X.save(); X.textAlign = 'center'; X.fillStyle = '#e9e2d4';
   X.font = '700 96px "Cormorant Garamond", Georgia, serif'; X.fillText('KÜL YAĞMURU', W / 2, 300);
   X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('Son Tohumun Yolculuğu · Prolog', W / 2, 350);
   if (S.saved) { const [top, step] = titleRows(); X.font = `600 ${S.saved > 4 ? 22 : 24}px "Cormorant Garamond", Georgia, serif`; X.fillStyle = '#d8cfbf';
-    ['1. Bölüm: Durmuş Saatler İstasyonu ›', '2. Bölüm: Borular Mahallesi ›', '3. Bölüm: Kül Gölü ›', '4. Bölüm: Terk Edilmiş Lunapark ›', '5. Bölüm: Büyük Fırın ›'].slice(0, S.saved).forEach((t, i) => X.fillText(t, W / 2, top + i * step)); }
+    ['1. Bölüm: Durmuş Saatler İstasyonu ›', '2. Bölüm: Borular Mahallesi ›', '3. Bölüm: Kül Gölü ›', '4. Bölüm: Terk Edilmiş Lunapark ›', '5. Bölüm: Büyük Fırın ›', '6. Bölüm: Seranın Kalbi ›'].slice(0, S.saved).forEach((t, i) => X.fillText(t, W / 2, top + i * step)); }
   const p = .7 + .3 * Math.sin(S.t * 3); X.globalAlpha = p;
   const g = X.createRadialGradient(W / 2, 470, 2, W / 2, 470, 60); g.addColorStop(0, 'rgba(180,240,120,.9)'); g.addColorStop(1, 'rgba(120,200,80,0)');
   X.fillStyle = g; X.beginPath(); X.arc(W / 2, 470, 60, 0, 7); X.fill();
@@ -3342,7 +3905,7 @@ function drawCard(dt) {
   X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .6);
   X.save(); X.globalAlpha = a; X.textAlign = 'center';
   // accent colour per chapter: amber lamp light, copper, turquoise water
-  const n = c.n || 1, CARD = [null, ['Durmuş Saatler İstasyonu', '#e9c98a'], ['Borular Mahallesi', '#d49a6a'], ['Kül Gölü', '#8cc4bc'], ['Terk Edilmiş Lunapark', '#d27a74'], ['Büyük Fırın', '#e8864a']][n];
+  const n = c.n || 1, CARD = [null, ['Durmuş Saatler İstasyonu', '#e9c98a'], ['Borular Mahallesi', '#d49a6a'], ['Kül Gölü', '#8cc4bc'], ['Terk Edilmiş Lunapark', '#d27a74'], ['Büyük Fırın', '#e8864a'], ['Seranın Kalbi', '#b8e0a0']][n];
   X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText(n + '. Bölüm', W / 2, 300);
   X.font = '700 72px "Cormorant Garamond", Georgia, serif'; X.fillStyle = CARD[1]; X.fillText(CARD[0], W / 2, 380);
   X.restore();
@@ -3350,7 +3913,9 @@ function drawCard(dt) {
 }
 function drawFiliz(dt) {
   // the seed grows in Lehim's chest window at the end of a chapter (Tohum → Filiz → İki yaprak)
-  const c = S.filiz; c.t += dt; const t = c.t, key = c.img || 'cin_filiz', im = GRAY[key], [cx, cy, cr] = c.c || [378, 300, 105], [sx, sy] = c.s || [384, 335];
+  const c = S.filiz;
+  if (!c.rec) { c.rec = 1; recIsik(S.bolum); try { const sv = JSON.parse(localStorage.getItem('ky_bolum') || '{}'); sv.dost = S.dost; localStorage.setItem('ky_bolum', JSON.stringify(sv)); } catch (e) {} }
+  c.t += dt; const t = c.t, key = c.img || 'cin_filiz', im = GRAY[key], [cx, cy, cr] = c.c || [378, 300, 105], [sx, sy] = c.s || [384, 335];
   X.fillStyle = '#000'; X.fillRect(0, 0, W, H);
   const a = Math.max(0, Math.min(1, t / 1.2, (8 - t) / 1));
   if (im) { X.save(); X.globalAlpha = a; const z = 1 + t * .01; X.translate(W / 2, H / 2); X.scale(z, z); X.drawImage(im, -320, -320, 640, 640);
@@ -3379,7 +3944,7 @@ function drawEnd5(dt) {
     f.firin === 'sera' ? 'Fırın\'ın ısısı artık seraya akıyor.' : f.firin === 'son' ? 'Fırın söndü; şehir karardı.' : 'Fırın yanmaya devam ediyor.'
   ].filter(Boolean);
   lines.forEach((t, i) => X.fillText(t, W / 2, 390 + i * 34));
-  if (S.t > 2.5) { X.font = '500 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#6f685e'; X.fillText('6. Bölüm: Seranın Kalbi yakında · Başa dönmek için dokunun', W / 2, 650); }
+  if (S.t > 2.5) { X.font = '500 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#6f685e'; X.fillStyle = '#d8cfbf'; X.fillText('6. Bölüm: Seranın Kalbi için dokunun ›', W / 2, 650); }
   X.restore();
 }
 function drawEnd4(dt) {
@@ -3484,6 +4049,7 @@ function step(dt) {
   else if (S.mode === 'end3') drawEnd3(dt);
   else if (S.mode === 'end4') drawEnd4(dt);
   else if (S.mode === 'end5') drawEnd5(dt);
+  else if (S.mode === 'final') drawFinal(dt);
   else {
     // movement
     if (L.moving) {
@@ -3491,10 +4057,12 @@ function step(dt) {
       if (d <= sp) { L.x = L.tx; L.y = L.ty; L.moving = false; const t = L.then; L.then = null; t && t(); }
       else { L.x += dx / d * sp; L.y += dy / d * sp; }
     }
-    if (L.hop) { const h = L.hop; h.t += dt; const u = Math.min(1, h.t / .55); L.x = L.tx = h.x0 + (h.x1 - h.x0) * u; L.y = L.ty = h.y0 + (h.y1 - h.y0) * u;
+    if (L.hop) { const h = L.hop; h.t += dt; const u = Math.min(1, h.t / .55); L.x = L.tx = h.x0 + (h.x1 - h.x0) * u; L.y = L.ty = h.y0 + (h.y1 - h.y0) * u - (h.s1 !== undefined ? Math.sin(u * Math.PI) * 30 : 0);
+      if (h.s1 !== undefined) L.climbS = h.s0 + (h.s1 - h.s0) * u;
       if (u >= 1) { L.hop = null; tone(330, 0, .12, .04, 'triangle'); h.then && h.then(); } }
     if (L.anim) { L.animT -= dt; if (L.animT <= 0) { const t = L.animThen; L.anim = null; L.animThen = null; if (L.alpha > 0 && S.scene !== 'pb') L.alpha = 1; t && t(); } }
     if (S.bubble) { S.bubble.t -= dt; if (S.bubble.t <= 0) S.bubble = null; }
+    if (!S.overlay && !L.moving && !L.anim && !L.hop && !S.lock && !drag && !S.root) { L.idleT = (L.idleT || 0) + dt; if (L.idleT > 9) { L.idleT = -Math.random() * 6; idleAnim(); } }
     drawScene(dt);
   }
   S.fade += (S.fadeTarget - S.fade) * Math.min(1, dt * 5);
@@ -3510,7 +4078,7 @@ function ready() {
   if (started) return; started = true;
   try {
     // saved: 0 nothing, 1..3 highest chapter reachable
-    try { const s = JSON.parse(localStorage.getItem('ky_bolum') || 'null'); S.saved = !s ? 0 : Math.min(5, s.bitti ? s.bolum + 1 : s.bolum); } catch (e) { S.saved = 0; }
+    try { const s = JSON.parse(localStorage.getItem('ky_bolum') || 'null'); S.saved = !s ? 0 : Math.min(6, s.bitti ? s.bolum + 1 : s.bolum); } catch (e) { S.saved = 0; }
     const q = (location.search.match(/[?&]bolum=(\d)/) || [])[1]; if (q) S.saved = Math.max(S.saved, +q);
     colorLayer = document.createElement('canvas'); colorLayer.width = W; colorLayer.height = H;
     maskC = document.createElement('canvas'); maskC.width = W; maskC.height = H;
@@ -3521,7 +4089,7 @@ function ready() {
 Object.entries(SRC).forEach(([k, src]) => { const i = new Image(); i.onload = () => { IMG[k] = i; if (++loaded >= total) ready(); }; i.onerror = () => { if (++loaded >= total) ready(); }; i.src = src; });
 setTimeout(ready, 20000); // a stuck download must never keep the game on the loading screen
 // test hook: ?debug exposes the state for automated play-throughs
-if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, goScene, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5, hintB5, boruTrace, hintB2, hintB3, hintB4, openDefter, TOPS, pistNext, aynaTrace };
+if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, goScene, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5, startBolum6, hintB6, aynaYol, oluk, KUBBE, panAng, sonHesap, dostlar, climbUp, hintB5, boruTrace, hintB2, hintB3, hintB4, openDefter, TOPS, pistNext, aynaTrace };
 })();
 </script>
 

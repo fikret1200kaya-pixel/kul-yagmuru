@@ -110,3 +110,19 @@ Sayılan dostlar (en fazla 9):
 
 ## Tamir Defteri ipucu sırası
 6.1 paneller → (güvercin) → 6.2 melodi → 6.3 su, ışık, ısı → Çiçek (demir ağaç) → 6.4 ekim.
+
+## Oyunda nasıl kuruldu
+- **Tırmanış:**
+  - Lehim kubbede dört tutamakta durur (`KUBBE.way`), paneller kodla çizilir ve sallanır (`panAng`).
+  - Tohum, panel kaburgaya değdiği anda (açı küçükken) bırakılırsa sarmaşık paneli bağlar ve Lehim bir üst tutamağa zıplar.
+  - Kubbedeyken yere dokunmak onu indirir; bağlı panellerden tekrar çıkılır.
+  - Üçüncü panelde rüzgâr her 4,4 saniyede bir kısa süre durur.
+- **Melodi:** çan-borular soldan sağa çok uzun, uzun, orta, kısa, çok kısa. Şarkı orta, kısa, orta, kısa, uzun borudur; en uçtaki iki boru şaşırtmacadır. Nota kurulduysa kendisi çalar.
+- **Oluk (suyun zor yolu):** üç parça vardır: düz, aşağı dirsek, dışarı dirsek. Parçalar döndürülünce çiğ havuza akar, ardından vana kökle açılır.
+- **Aynalar:** güneş sırasıyla sağ, orta ve sol aynaya çarpar. Doğru dönüş sayısı sağ 1, orta 2, sol 3'tür. Ortadaki aynaya Pırpır uçar; o yoksa sarmaşık gövdeden aynaya uzanır. Yan aynaların zincirini Lehim boyunu uzatarak çeker.
+- **Isı:**
+  - Fırın seraya bağlandıysa sahneye girince ısı kendiliğinden gelir.
+  - Değilse Kepçe kazanı doldurur; Kepçe yoksa üç kömür bulunur: raf (kök), ray kenarı ve kedinin altı. Kazan ışıkla yakılır.
+- **Fırın açık bırakıldıysa** dostlar seraya gelmez (Pırpır, Nota, Kepçe, Düdük): bütün bulmacaların zor yolu çözülür.
+- **Ekim:** Parmak çukura iki saniye basılı tutulur; erken bırakınca ilerleme geri çekilir.
+- **Final:** Son sinematiği 14 saniye sürer. Ardından jenerik gelir ve kurtarılan dostların simgeleri akar. Varsa yağmur sonu gösterilir, en son Epilog. Her bölümün Işık'ı tohum evresi sinematiği sırasında `S.dost.isikB`'ye yazılır.

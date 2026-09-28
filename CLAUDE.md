@@ -55,10 +55,23 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 - Bulmaca tabloları: `ATKILIT` (kilit 0-4-7), `BANT` (makas zamanlaması), `BORU` (ısı hattı; `boruTrace` yolu izler), `PLATES` (projeksiyon sırası; `openProj`, `rememberPlate`).
 - Bölümler arası seçimler `S.dost` içinde: `bant`, `firin`, `ikna`, `plates`, `dudukKaldi`.
 
+## 6. Bölüm ve Epilog
+- Oynanabilir: 6a Kubbenin Dışı, 6b Seranın Kalbi. Tasarım `docs/bolum6.md`, görseller `tools_bolum6.py`.
+- Çiçek gücü: hedefin `cic()` işleyicisi varsa (demir ağaç) tohum orada çiçek açar.
+- Tırmanış `L.climb` (kubbedeki tutamak) ve `L.climbS` (ölçek) ile tutulur. Kubbedeyken sahne hotspot'larından yalnızca `high` olanlara uzanılır, gerisi Lehim'i indirir. `noWalk` hotspot'larda Lehim olduğu yerden davranır.
+- Sonlar: `sonHesap` (Canlılık ≥ 3 yüksek, `dostlar()` ≥ 6 çok dost, Fırın açıksa az dost). Gizli yağmur sonu: Yeşil Sabah + 9 hafıza çizimi + Fırın seraya.
+- Akış: `S.mode = 'final'`; `S.fin.stage` sırasıyla son, jenerik, yağmur (gizli sonda) ve epilog. Epilog panoraması 24 arka planın küçük kopyalarıdır; her biri bölümünün Işık'ı (`S.dost.isikB`, hedef `ISIK_HEDEF`) oranında renklenir.
+- Final sinematikleri (`son_1`–`son_5`) büyük olduğu için yalnızca 6. Bölüm başlarken yüklenir (`loadSonlar`).
+
+## Machinarium hissi (her bölümde)
+- **Uzanma:** Lehim yüksekteki bir şeye dokunulunca bacaklarının üstünde teleskop gibi uzar (`reach` + `L.reachExt`). Yerdeki şeyler için çömelir (`L.reachLo`).
+- **Boşta kalma:** Oyuncu 9 saniye dokunmazsa Lehim kendi kendine bir şey yapar (`IDLE`: etrafa bakar, ıslık çalar, gerinir, ayağını vurur, camını siler). Her dokunuş bunu keser.
+- **Dokunma halkası:** Her dokunuşta küçük bir halka belirir; etkileşimli bir şeye dokunulduysa halka daha parlaktır.
+
 ## Sıradaki iş
 - Test sürümünde ipuçları sınırsız ve ücretsiz: `IPUCU_SINIRSIZ = true`. Yayından önce `false` yapılacak.
 - Test sürümünde devriyede iki kez yakalanınca Toplayıcı uyuklar (geçiş serbest). Oyuncu devriyeyi geçemedi: telefonda zamanlama ve saklanma yerleri gözden geçirilecek.
-- 6. Bölüm — Seranın Kalbi ve Epilog: tasarım `docs/bolum6.md`, ChatGPT tarifleri `docs/gorsel_tarifleri_bolum6.md`. Görseller `assets/raw/`'a gelince kodlanacak (yeni güç Çiçek; dört son, gizli yağmur sonu, Epilog panoraması).
+- Oyun baştan sona tamam (Prolog → 6. Bölüm → Epilog). Sıradaki iş düzeltmeler: kullanıcının telefonda oynayıp bildirdikleri.
 - 1. Bölüm prototipini telefonda test etmek (GDD üretim planı aşama 4).
 - Bilinen eksik: körük alındıktan sonra duvardaki körük görseli arka planda kalıyor.
 
