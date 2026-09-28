@@ -58,7 +58,7 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 ## Sıradaki iş
 - Test sürümünde ipuçları sınırsız ve ücretsiz: `IPUCU_SINIRSIZ = true`. Yayından önce `false` yapılacak.
 - Test sürümünde devriyede iki kez yakalanınca Toplayıcı uyuklar (geçiş serbest). Oyuncu devriyeyi geçemedi: telefonda zamanlama ve saklanma yerleri gözden geçirilecek.
-- 6. Bölüm — Seranın Kalbi ve Epilog: tasarım ve ChatGPT tarifleri yazılacak (finalin ışığı ve dostları 5. Bölüm seçimlerinden gelir).
+- 6. Bölüm — Seranın Kalbi ve Epilog: tasarım `docs/bolum6.md`, ChatGPT tarifleri `docs/gorsel_tarifleri_bolum6.md`. Görseller `assets/raw/`'a gelince kodlanacak (yeni güç Çiçek; dört son, gizli yağmur sonu, Epilog panoraması).
 - 1. Bölüm prototipini telefonda test etmek (GDD üretim planı aşama 4).
 - Bilinen eksik: körük alındıktan sonra duvardaki körük görseli arka planda kalıyor.
 
