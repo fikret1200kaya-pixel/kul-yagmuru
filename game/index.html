@@ -54,7 +54,13 @@ const SRC = {
   ...(() => { const o = {}; [['duduk', 4], ['giseci', 3], ['kedi', 4], ['guvercin', 3], ['nine', 4], ['torun', 2], ['ikiz', 3], ['pirpir', 4], ['toplayici', 2], ['capa', 4], ['kepce', 4], ['nilufer', 3]].forEach(([n, c]) => { for (let i = 1; i <= c; i++) o[n + i] = 'img/' + n + '_' + i + '.png'; }); return o; })(),
   sd_head:'img/side_head.png', sd_body:'img/side_body.png', sd_armN:'img/side_armN.png', sd_armF:'img/side_armF.png', sd_legN:'img/side_legN.png', sd_legF:'img/side_legF.png', sd_scarf:'img/side_scarf.png', ...(() => { const o = {}; ['head','body','armL','armR','scarf','legL','legR'].forEach(p => { o['rA_' + p] = 'img/rig_lehim_1_' + p + '.png'; if (p !== 'armR') o['rB_' + p] = 'img/rig_lehim_1_tekkol_' + p + '.png'; }); return o; })(), avuc:'img/cin_avuc.jpg', kapak:'img/cin_kapak.jpg', b5:'img/b5_panel.jpg', lever:'img/lever.png'
 };
-const IMG = {}, GRAY = {};
+const IMG = {}, GRAYC = {};
+// grey copy of an image, made on first use
+const GRAY = new Proxy(GRAYC, { get(c, k) {
+  if (typeof k !== 'string') return undefined;
+  if (!(k in c)) { const im = IMG[k]; if (!im) return undefined; c[k] = gray(im, k.startsWith('bg') ? .12 : .08); }
+  return c[k];
+} });
 function gray(img, tint = 0.10) {
   const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
   const g = c.getContext('2d'); g.drawImage(img, 0, 0);
@@ -122,7 +128,18 @@ const S = {
   bolum: 0, hafiza: 0, bought: {}, bakisAt: -1e9, dost: {}, lilies: []
 };
 const L = { x: 560, y: 600, tx: 560, ty: 600, face: 1, moving: false, arm: false, anim: null, animT: 0, then: null, alpha: 1 };
-const BG = {};
+const BGC = {};
+// a scene's colour and grey canvases, made when the scene is first shown
+const BG = new Proxy(BGC, { get(c, sc) {
+  if (typeof sc !== 'string') return undefined;
+  if (!(sc in c)) { const im = IMG['bg_' + sc]; if (!im) return undefined; c[sc] = { col: canvasOf(im), gry: GRAY['bg_' + sc] }; }
+  return c[sc];
+} });
+// leaving a chapter: let the browser reclaim the other chapters' scene canvases and grey copies
+function freeScenes(keep) {
+  Object.keys(BGC).forEach(sc => { if (!sc.startsWith(keep)) { delete BGC[sc]; delete GRAYC['bg_' + sc]; } });
+  Object.keys(GRAYC).forEach(k => { if (k.startsWith('cu_') || k.startsWith('cin_')) delete GRAYC[k]; });
+}
 let colorLayer = null, colorDirty = true, maskC = null;
 
 function stamp(scene, key, x, y) {
@@ -225,6 +242,7 @@ const rotMask = (m, r) => { for (let i = 0; i < r; i++) m = ((m << 1) | (m >> 3)
 
 function saveProgress() { try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 1, cark: S.cark, isik: S.isik, canlilik: S.canlilik })); } catch (e) {} }
 function startBolum1(fromSave) {
+  freeScenes('1');
   if (fromSave) { try { const s = JSON.parse(localStorage.getItem('ky_bolum') || '{}'); S.cark = s.cark || 0; S.isik = s.isik || 0; S.canlilik = s.canlilik || 4; } catch (e) {} }
   S.bolum = 1; S.f = { mk: MK.rot0.slice() }; S.inv = ['dal']; S.overlay = null; S.bubble = null; S.hint = null;
   L.arm = true; L.alpha = 1; L.anim = null; L.moving = false; L.then = null; L.face = 1;
@@ -459,6 +477,7 @@ const DEVRIYE = { x0: 700, x1: 1150, y: 588, v: 105, zone: 430, gecit: [760, 552
 
 function saveB2() { try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 2, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza, dost: S.dost })); } catch (e) {} }
 function startBolum2(fromSave) {
+  freeScenes('2');
   if (fromSave) { try { const s = JSON.parse(localStorage.getItem('ky_bolum') || '{}'); S.cark = s.cark || 0; S.isik = s.isik || 0; S.canlilik = s.canlilik || 4; S.hafiza = s.hafiza || 0; S.dost = s.dost || {}; } catch (e) {} }
   S.bolum = 2; S.f = { v: [0, 0, 0, 0, 0], mil: [null, null, null], guard: 'intro', gx: 1320 }; S.inv = ['dal']; S.overlay = null; S.bubble = null; S.hint = null;
   L.arm = true; L.alpha = 1; L.anim = null; L.moving = false; L.then = null; L.face = 1;
@@ -821,6 +840,7 @@ const KEPCE = { poly: [[405, 60], [900, 60], [965, 505], [400, 512]], eyes: [[66
 
 function saveB3() { try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 3, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza, dost: S.dost })); } catch (e) {} }
 function startBolum3(fromSave) {
+  freeScenes('3');
   if (fromSave) { try { const s = JSON.parse(localStorage.getItem('ky_bolum') || '{}'); S.cark = s.cark || 0; S.isik = s.isik || 0; S.canlilik = s.canlilik || 4; S.hafiza = s.hafiza || 0; S.dost = s.dost || {}; } catch (e) {} }
   S.bolum = 3; S.f = { agir: [1, 1, 1], lens: [0, 0, 0], kanca: [0, 0, 0] }; S.inv = ['dal']; S.lilies = []; S.overlay = null; S.bubble = null; S.hint = null;
   if (S.dost && S.dost.kurma) S.inv.push('anahtar');
@@ -2427,7 +2447,8 @@ function frame(now) {
   }
 }
 function step(dt) {
-  if (S.mode === 'loading') { X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); X.fillStyle = '#6f685e'; X.font = '500 26px Georgia, serif'; X.textAlign = 'center'; X.fillText('Yükleniyor…', W / 2, H / 2); }
+  if (S.mode === 'loading') { X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); X.fillStyle = '#6f685e'; X.font = '500 26px Georgia, serif'; X.textAlign = 'center'; X.fillText('Yükleniyor…', W / 2, H / 2);
+    X.fillStyle = 'rgba(111,104,94,.35)'; X.fillRect(W / 2 - 150, H / 2 + 30, 300, 4); X.fillStyle = '#9b9387'; X.fillRect(W / 2 - 150, H / 2 + 30, 300 * loaded / total, 4); }
   else if (S.mode === 'title') drawTitle(dt);
   else if (S.mode === 'cin') drawCin(dt);
   else if (S.mode === 'end') drawEnd(dt);
@@ -2454,21 +2475,24 @@ function step(dt) {
 }
 requestAnimationFrame(frame);
 
-Promise.all(Object.entries(SRC).map(([k, src]) => new Promise(res => { const i = new Image(); i.onload = () => { IMG[k] = i; res(); }; i.onerror = res; i.src = src; })))
-  .then(() => {
-    Object.keys(IMG).forEach(k => { GRAY[k] = gray(IMG[k], k.startsWith('bg') ? .12 : .08); });
-    BG.pa = { col: canvasOf(IMG.bg_pa), gry: gray(IMG.bg_pa, .12) };
-    BG.pb = { col: canvasOf(IMG.bg_pb), gry: gray(IMG.bg_pb, .12) };
-    ['1a', '1b', '1c', '1d'].forEach(k => { const im = IMG['bg_' + k]; if (im) BG[k] = { col: canvasOf(im), gry: GRAY['bg_' + k] }; });
-    ['2a', '2b', '2c', '2d', '3a', '3b', '3c', '3d'].forEach(k => { const im = IMG['bg_' + k]; if (im) BG[k] = { col: canvasOf(im), gry: GRAY['bg_' + k] }; });
-    // saved: 0 nothing, 1 chapter 1 reachable, 2 chapter 2 reachable
+// every image is loaded up front, but grey copies and scene canvases are made only when first drawn
+// (phones cap total canvas memory; preparing all 16 scenes at once stalled the loading screen)
+let loaded = 0; const total = Object.keys(SRC).length;
+let started = false;
+function ready() {
+  if (started) return; started = true;
+  try {
+    // saved: 0 nothing, 1..3 highest chapter reachable
     try { const s = JSON.parse(localStorage.getItem('ky_bolum') || 'null'); S.saved = !s ? 0 : Math.min(3, s.bitti ? s.bolum + 1 : s.bolum); } catch (e) { S.saved = 0; }
     const q = (location.search.match(/[?&]bolum=(\d)/) || [])[1]; if (q) S.saved = Math.max(S.saved, +q);
     colorLayer = document.createElement('canvas'); colorLayer.width = W; colorLayer.height = H;
     maskC = document.createElement('canvas'); maskC.width = W; maskC.height = H;
     if (!X.roundRect) CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) { this.moveTo(x + r, y); this.arcTo(x + w, y, x + w, y + h, r); this.arcTo(x + w, y + h, x, y + h, r); this.arcTo(x, y + h, x, y, r); this.arcTo(x, y, x + w, y, r); this.closePath(); };
-    S.mode = 'title';
-  });
+  } catch (e) { console.error(e); }
+  S.mode = 'title';
+}
+Object.entries(SRC).forEach(([k, src]) => { const i = new Image(); i.onload = () => { IMG[k] = i; if (++loaded >= total) ready(); }; i.onerror = () => { if (++loaded >= total) ready(); }; i.src = src; });
+setTimeout(ready, 20000); // a stuck download must never keep the game on the loading screen
 // test hook: ?debug exposes the state for automated play-throughs
 if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, goScene, startBolum1, startBolum2, startBolum3, hintB2, hintB3, openDefter, TOPS };
 })();
