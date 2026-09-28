@@ -914,8 +914,10 @@ function fallIn() {
 function crossStep(i) {
   const f = S.f, t = TOPS[i], expected = f.step || 0;
   const lx = t.x - 44, ly = t.y + 14;
-  if (i !== expected) { openLily(lx, ly, .5, () => { bad(); }); if (L.onLake) setTimeout(fallIn, 500); return; }
-  openLily(lx, ly, 4, lily => {
+  if (i === f.step - 1) return; // already standing there
+  if (i !== expected) { openLily(lx, ly, .6, () => { bad(); say(['fener', 'soru'], 1.6); }); f.yanlis = (f.yanlis || 0) + 1; return; }
+  if (L.lily) L.lily.life = L.lily.t + 1.6; // the lily left behind sinks a moment later
+  openLily(lx, ly, 12, lily => {
     hopTo(lx, ly, () => {
       L.onLake = 1; L.lily = lily; f.step = expected + 1;
       if (f.step === TOPS.length) {
@@ -945,6 +947,10 @@ function b3Finish(how) {
 }
 
 HS['3a'] = [
+  // crossing: drop the seed next to each sunken top, in the beam's order
+  ...TOPS.map((t, i) => ({ id: 't_' + t.ic, r: [t.x - 48, t.y - 38, 96, 58], stand: [t.x, 540], noWalk: true, on: () => S.f.pervane && !S.f.gecti3,
+    // once the lily is known, a simple tap opens one there too
+    tap() { if (S.f.nilufer) crossStep(i); else say(['nilufer', 'soru']); }, nil() { crossStep(i); } })),
   { id: 'toFener', to: '3b', spawn: [300, 650], r: [1135, 335, 75, 150], stand: [1170, 520] },
   { id: 'kayik', r: [90, 355, 80, 155], stand: [210, 530], on: () => !S.f.tahta, tap() { S.f.tahta = 1; clank(); tone(120, .2, .3, .08, 'square'); addItem('tahta'); } },
   { id: 'varil', r: [190, 590, 170, 80], stand: [300, 540], on: () => !S.f.varil, tap() { say(['varil', 'kol', 'x']); },
@@ -955,7 +961,7 @@ HS['3a'] = [
       const f = S.f; if (f.balik) { say(['balik', 'unlem'], 2, [640, 400]); return; }
       f.sadT = 0; say(['balik', 'soru'], 2.6, [640, 400]); },
     use: { cay() { takeItem('cay'); S.f.cayVerildi = 1; S.f.cayT = 0; halo(630, 470, 180); tone(1319, 0, .3, .04); } } },
-  { id: 'olta', r: [680, 420, 110, 60], stand: [720, 540], on: () => !S.f.balik, tap() { say(['balik', 'soru']); },
+  { id: 'olta', r: [700, 446, 100, 50], stand: [720, 540], on: () => !S.f.balik, tap() { say(['balik', 'soru']); },
     nil() {
       const f = S.f; if (f.balik) return;
       openLily(730, 452, 7, () => {
@@ -970,9 +976,6 @@ HS['3a'] = [
       say(['sal', 'soru']); },
     use: { sal() { takeItem('sal'); S.f.sal = 1; clank(); halo(110, 640, 160); } } },
   { id: 'kedi3', r: [105, 222, 90, 50], stand: [210, 530], on: () => !S.f.kediUp, tap() { S.f.kediUp = 1; S.f.kediT = 0; purr(); S.cark++; chime(); } },
-  // crossing: drop the seed next to each sunken top, in the beam's order
-  ...TOPS.map((t, i) => ({ id: 't_' + t.ic, r: [t.x - 60, t.y - 40, 120, 70], stand: [t.x, 540], noWalk: true, on: () => S.f.pervane && !S.f.gecti3,
-    tap() { say(['nilufer', 'soru']); }, nil() { crossStep(i); } })),
   { id: 'gol', r: [300, 395, 760, 100], stand: [1000, 540], on: () => S.f.gecti3, tap() {
       // once found, the path is remembered: Lehim hops across on fresh lilies
       S.lock = true; let k = 0;
@@ -1057,7 +1060,9 @@ DRAW1['3a'] = function (dt) {
     const g = X.createLinearGradient(1145, 95, 1145 + Math.cos(ang) * 1000, 95 + Math.sin(ang) * 1000); g.addColorStop(0, 'rgba(255,230,170,.28)'); g.addColorStop(1, 'rgba(255,230,170,0)');
     X.fillStyle = g; X.beginPath(); X.moveTo(1145, 95); X.lineTo(1145 + Math.cos(ang - .06) * 1100, 95 + Math.sin(ang - .06) * 1100); X.lineTo(1145 + Math.cos(ang + .06) * 1100, 95 + Math.sin(ang + .06) * 1100); X.closePath(); X.fill(); X.restore();
     // every cycle the tops flash one by one in the crossing order
-    const idx = Math.floor(((S.t % 7.5) - 1.5) / 1.1); if (idx >= 0 && idx < TOPS.length && f.pervane) { const t = TOPS[idx]; glowAt(t.x, t.y - 4, 60, '255,230,160', .7); }
+    const idx = Math.floor(((S.t % 10) - 1.5) / 1.6); if (idx >= 0 && idx < TOPS.length && f.pervane) { const t = TOPS[idx]; glowAt(t.x, t.y - 4, 80, '255,230,160', .85);
+      for (let k = 0; k <= idx; k++) glowAt(t.x - idx * 9 + k * 18, t.y - 52, 7, '255,240,190', .95); }
+    if (f.pervane && (f.yanlis || 0) >= 2 && !f.gecti3) { const t = TOPS[f.step || 0]; if (t) glowAt(t.x, t.y - 4, 46 + 8 * Math.sin(S.t * 4), '190,245,140', .35); }
   }
   // raft at the foot of the steps
   if (f.sal) dq(700, () => { // door planks on a barrel, lashed with Çapa's net, bobbing on the ash
@@ -3050,8 +3055,9 @@ C.addEventListener('pointerup', e => {
     return;
   }
   if (!down) return; down = null;
-  if (L.onLake) return; // standing on a lily: only the seed can move him on
   const h = hsAt(p);
+  if (L.onLake) { if (h && h.id.startsWith('t_')) { faceTo(h); h.tap(); } return; } // on a lily: only the sunken tops move him on
+  if (h && h.noWalk && !L.climb && h.tap) { faceTo(h); h.tap(); return; } // out of reach on foot: he acts from where he stands
   // clinging to the dome: reach what is up here, anything else means climbing back down
   if (L.climb) { if (h && h.high && h.tap) reach(h, () => h.tap()); else climbDown(); return; }
   if (h) walkTo(h.stand[0], h.stand[1], () => h.to ? goScene(h.to, h.spawn) : reach(h, () => h.tap()));
