@@ -3,7 +3,7 @@
 Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil oyun. Yayıncı: EFKA Games. Tüm yanıtlar Türkçe olmalı.
 
 ## Durum
-- `game/index.html`: tek dosyalık HTML5 canvas oyunu (kütüphanesiz). Oynanabilir: Prolog (Hurda Çukuru P-A, Hurdalık Kapısı P-B) ve 1. Bölüm — Durmuş Saatler İstasyonu (1a Peron, 1b Bekleme Salonu, 1c Makas Kulübesi, 1d Vagon İçi; bulmacalar 1.1–1.6, Seçim 1'in üç yolu, Posta Güvercini yan görevi, 3 gizli çark).
+- `game/index.html`: tek dosyalık HTML5 canvas oyunu (kütüphanesiz). Oynanabilir: Prolog (Hurda Çukuru P-A, Hurdalık Kapısı P-B) , 1. Bölüm — Durmuş Saatler İstasyonu (1a Peron, 1b Bekleme Salonu, 1c Makas Kulübesi, 1d Vagon İçi; bulmacalar 1.1–1.6, Seçim 1'in üç yolu, Posta Güvercini yan görevi, 3 gizli çark) ve 2. Bölüm — Borular Mahallesi (aşağıda).
 - 1. Bölüm'ün adım adım çözümü ve tasarım kararları: `docs/bolum1.md`.
 - `game/img/`: oyunda kullanılan işlenmiş görseller (arka planlar 1280x720 `bg_*`, yakın çekimler `cu_*`, kesilmiş sprite'lar, Lehim'in önden `rig_*` ve yandan `side_*` parça animasyonu).
 - `assets/raw/`: ChatGPT/ElevenLabs ile üretilen orijinal görseller (A = arka plan, B = yakın çekim, C = karakter sayfası, D = ek görsel).
@@ -30,8 +30,15 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 - Tamir Defteri üç seviyelidir (GDD): Bakış ücretsiz ve 5 dakikada bir dolar (hedefi, başka sahnedeyse o sahnenin çıkışını vurgular), Fikir 1 Çark (tek eskiz), Tam çözüm 3 Çark (adım adım satırlar). Hedef sırası `hintB1`, eskizler `DEFTER` tablosundadır; satın alınan seviye o hedef için kalıcıdır.
 - İlerleme `localStorage` `ky_bolum` anahtarında tutulur; başlık ekranında "1. Bölüm" seçeneği çıkar. `?bolum=1` bu seçeneği her zaman gösterir, `?debug` durumu `window.KY` olarak açar (otomatik test için).
 
+## 2. Bölüm
+- Oynanabilir: 2a Buhar Meydanı, 2b Nine Saat'in Evi, 2c Hurdacı Sokağı, 2d Asansör Kulesi. Tasarım `docs/bolum2.md`, görseller `tools_bolum2.py` ile üretilir.
+- Kök gücü: tohum sürüklemesi, hedefin `kok()` işleyicisi varsa kök olur (`growRoot`), yoksa ışık (`light()`). Bez Lehim'e takılıyken ikisi de kapalıdır.
+- Asansör Kulesi'ndeki iki dişli arka plandan kesilip `disli_kucuk` / `disli_buyuk` sprite'ı yapıldı; yerleri komşu dokuyla yamandı.
+- Test için `?bolum=2` başlıkta 2. Bölüm seçeneğini açar.
+
 ## Sıradaki iş
-- 2. Bölüm — Borular Mahallesi: adım adım tasarım `docs/bolum2.md`, ChatGPT görsel tarifleri `docs/gorsel_tarifleri_bolum2.md`. Görseller `assets/raw/`'a gelince bölüm kodlanacak (yeni güç Kök: tohum sürüklemesi hedefe göre ışık ya da kök olur).
+- Test sürümünde ipuçları sınırsız ve ücretsiz: `IPUCU_SINIRSIZ = true`. Yayından önce `false` yapılacak.
+- 3. Bölüm — Kül Gölü: önce adım adım tasarım ve görsel tarifleri.
 - 1. Bölüm prototipini telefonda test etmek (GDD üretim planı aşama 4).
 - Bilinen eksik: körük alındıktan sonra duvardaki körük görseli arka planda kalıyor.
 

@@ -44,7 +44,11 @@ const SRC = {
   bg_1a:'img/bg_1a.jpg', bg_1b:'img/bg_1b.jpg', bg_1c:'img/bg_1c.jpg', bg_1d:'img/bg_1d.jpg',
   cu_saat:'img/cu_saat.jpg', cu_tarife:'img/cu_tarife.jpg', cu_makas:'img/cu_makas.jpg', cu_bilet:'img/cu_bilet.jpg',
   cu_hafiza1:'img/cu_hafiza1.jpg', cin_filiz:'img/cin_filiz.jpg',
-  ...(() => { const o = {}; [['duduk', 4], ['giseci', 3], ['kedi', 4], ['guvercin', 3]].forEach(([n, c]) => { for (let i = 1; i <= c; i++) o[n + i] = 'img/' + n + '_' + i + '.png'; }); return o; })(),
+  bg_2a:'img/bg_2a.jpg', bg_2b:'img/bg_2b.jpg', bg_2c:'img/bg_2c.jpg', bg_2d:'img/bg_2d.jpg',
+  cu_vana:'img/cu_vana.jpg', cu_montaj:'img/cu_montaj.jpg', cu_disliduvar:'img/cu_disliduvar.jpg', cin_ikiyaprak:'img/cin_ikiyaprak.jpg',
+  cu_hafiza2:'img/cu_hafiza2.jpg', cu_hafiza3:'img/cu_hafiza3.jpg', cu_kivilcim:'img/cu_kivilcim.jpg',
+  disli_kucuk:'img/disli_kucuk.png', disli_buyuk:'img/disli_buyuk.png',
+  ...(() => { const o = {}; [['duduk', 4], ['giseci', 3], ['kedi', 4], ['guvercin', 3], ['nine', 4], ['torun', 2], ['ikiz', 3], ['pirpir', 4], ['toplayici', 2]].forEach(([n, c]) => { for (let i = 1; i <= c; i++) o[n + i] = 'img/' + n + '_' + i + '.png'; }); return o; })(),
   sd_head:'img/side_head.png', sd_body:'img/side_body.png', sd_armN:'img/side_armN.png', sd_armF:'img/side_armF.png', sd_legN:'img/side_legN.png', sd_legF:'img/side_legF.png', sd_scarf:'img/side_scarf.png', ...(() => { const o = {}; ['head','body','armL','armR','scarf','legL','legR'].forEach(p => { o['rA_' + p] = 'img/rig_lehim_1_' + p + '.png'; if (p !== 'armR') o['rB_' + p] = 'img/rig_lehim_1_tekkol_' + p + '.png'; }); return o; })(), avuc:'img/cin_avuc.jpg', kapak:'img/cin_kapak.jpg', b5:'img/b5_panel.jpg', lever:'img/lever.png'
 };
 const IMG = {}, GRAY = {};
@@ -136,7 +140,9 @@ function takeItem(id) { S.inv = S.inv.filter(i => i !== id); }
 const GEO = {
   pa: { x: [140, 1085], y: [458, 700], s: [.82, .38] }, pb: { x: [250, 1180], y: [505, 690], s: [.82, .34] },
   '1a': { x: [285, 1000], y: [566, 700], s: [.78, .3] }, '1b': { x: [245, 1030], y: [596, 705], s: [.84, .3] },
-  '1c': { x: [130, 1150], y: [572, 705], s: [.78, .32] }, '1d': { x: [330, 1040], y: [578, 705], s: [.84, .34] }
+  '1c': { x: [130, 1150], y: [572, 705], s: [.78, .32] }, '1d': { x: [330, 1040], y: [578, 705], s: [.84, .34] },
+  '2a': { x: [250, 1150], y: [585, 700], s: [.8, .3] }, '2b': { x: [230, 1110], y: [545, 700], s: [.85, .35] },
+  '2c': { x: [150, 1150], y: [548, 705], s: [.72, .36] }, '2d': { x: [150, 1150], y: [612, 705], s: [.9, .28] }
 };
 function walkBounds(x, y) { const g = GEO[S.scene]; return { x: clamp(x, g.x[0], g.x[1]), y: clamp(y, g.y[0], g.y[1]) }; }
 function scaleAt(y) { const g = GEO[S.scene]; return g.s[0] + g.s[1] * (y - g.y[0]) / (g.y[1] - g.y[0]); }
@@ -431,6 +437,360 @@ const DRAW1 = {
     else { f.guvT += dt; const u = f.guvT; if (u < 2.4) spr(u < 1.4 ? 'guvercin2' : 'guvercin3', 425 + u * 120, 110 + Math.sin(u * 6) * 10 - u * 20 + (u > 1.4 ? (u - 1.4) * 250 : 0), 90, true); }
   }
 };
+// =====================================================================
+// 2. BÖLÜM — BORULAR MAHALLESİ
+// 2a Buhar Meydanı (merkez) · 2b Nine Saat'in Evi · 2c Hurdacı Sokağı · 2d Asansör Kulesi
+// =====================================================================
+Object.assign(COMBO, { 'mavi+sari': 'yesil', 'teneke+yesil': 'sahte', 'diz+yay': 'dizyay', 'dizyay+taban': 'bacak' });
+// valve manifold: notches on each pipe collar (left to right) and where each pipe goes
+const VANA = { x: [72, 187, 299, 412, 529], y: 327, r: 54, notch: [1, 2, 3, 1, 2], gauge: [300, 112] };
+// Vana 1 house chimney · 2 cracked pipe by Nine's door · 3 elevator tower · 4 steam whistle · 5 exhaust. Kazan makes 6.
+const VANA_DUDUK = 3, VANA_SIZINTI = 1, VANA_ASANSOR = 2;
+// gear wall: axles top/middle/bottom; the engraved plate shows medium / small / large
+const MIL = { y: [75, 250, 430], x: 548, need: ['orta', 'kucuk', 'buyuk'], r: { kucuk: 42, orta: 62, buyuk: 104 } };
+// patrol in Hurdacı Sokağı: the collector rolls between these x, and these spots hide Lehim
+const DEVRIYE = { x0: 700, x1: 1150, y: 588, v: 105, zone: 430, gecit: [760, 552], saklan: [[515, 562], [880, 552]] };
+
+function saveB2() { try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 2, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza })); } catch (e) {} }
+function startBolum2(fromSave) {
+  if (fromSave) { try { const s = JSON.parse(localStorage.getItem('ky_bolum') || '{}'); S.cark = s.cark || 0; S.isik = s.isik || 0; S.canlilik = s.canlilik || 4; S.hafiza = s.hafiza || 0; } catch (e) {} }
+  S.bolum = 2; S.f = { v: [0, 0, 0, 0, 0], mil: [null, null, null], guard: 'intro', gx: 1320 }; S.inv = ['dal']; S.overlay = null; S.bubble = null; S.hint = null;
+  L.arm = true; L.alpha = 1; L.anim = null; L.moving = false; L.then = null; L.face = 1;
+  S.scene = '2a'; L.x = L.tx = 300; L.y = L.ty = 650; colorDirty = true;
+  saveB2(); S.mode = 'card'; S.card = { t: 0, n: 2 }; S.fade = 0; S.fadeTarget = 0;
+}
+// chest window position, for roots and glows
+function chestPos() { const k = 190 * scaleAt(L.y) / 279; return [L.x + L.face * (165 - 119) * k, L.y - (279 - 187) * k]; }
+// the seed grows a root to (x, y), acts, and pulls it back
+function growRoot(x, y, then) {
+  const [x0, y0] = chestPos(); S.lock = true; tone(196, 0, .9, .05, 'triangle'); tone(247, .2, .9, .04, 'triangle');
+  S.root = { x0, y0, x1: x, y1: y, t: 0, dur: Math.min(1.4, .5 + Math.hypot(x - x0, y - y0) / 600), then, bend: (Math.random() - .5) * 120 };
+}
+function drawRoot(dt) {
+  const r = S.root; if (!r) return; r.t += dt;
+  const grow = Math.min(1, r.t / r.dur), hold = r.dur + .5, back = r.t > hold ? Math.min(1, (r.t - hold) / .6) : 0, u = grow * (1 - back);
+  if (grow >= 1 && !r.fired) { r.fired = true; r.then && r.then(); }
+  if (back >= 1) { S.root = null; S.lock = false; return; }
+  const mx = (r.x0 + r.x1) / 2 + r.bend, my = Math.min(r.y0, r.y1) - 60;
+  const P = t => [(1 - t) * (1 - t) * r.x0 + 2 * (1 - t) * t * mx + t * t * r.x1, (1 - t) * (1 - t) * r.y0 + 2 * (1 - t) * t * my + t * t * r.y1];
+  X.save(); X.lineCap = 'round'; X.lineJoin = 'round';
+  [[9, 'rgba(70,56,36,.95)'], [4, 'rgba(120,98,62,1)'], [1.6, 'rgba(160,215,110,.9)']].forEach(([w, c]) => {
+    X.lineWidth = w; X.strokeStyle = c; X.beginPath();
+    for (let i = 0; i <= 40; i++) { const t = i / 40 * u, [px, py] = P(t), wob = Math.sin(t * 22 + S.t * 3) * 3 * (1 - t); i ? X.lineTo(px + wob, py) : X.moveTo(px, py); }
+    X.stroke(); });
+  // little side rootlets
+  for (let i = 1; i < 6; i++) { const t = i / 6; if (t > u) break; const [px, py] = P(t); X.strokeStyle = 'rgba(90,72,46,.9)'; X.lineWidth = 2; X.beginPath(); X.moveTo(px, py); X.quadraticCurveTo(px + 10 * (i % 2 ? 1 : -1), py + 6, px + 16 * (i % 2 ? 1 : -1), py + 14); X.stroke(); }
+  const [tx, ty] = P(u); glowAt(tx, ty, 22, '170,235,110', .7);
+  X.restore();
+}
+// the collector: guard in the square, patrols in the alley
+function drawToplayici(x, y, h, pose, face, a = 1) { spr(pose === 2 ? 'toplayici2' : 'toplayici1', x, y, h, false, face, a); glowAt(x + face * h * .18, y - h * .72, 14, '255,210,140', .5); }
+function b2Finish() {
+  S.f.bitti = 1; S.lock = true; musicBox(); tone(98, 0, 3, .06, 'sawtooth');
+  walkTo(300, 640, () => { L.alpha = 0; S.f.ride = 0; });
+  setTimeout(() => { S.fadeTarget = 1; }, 3800);
+  setTimeout(() => { S.lock = false; S.mode = 'filiz'; S.filiz = { t: 0, img: 'cin_ikiyaprak', c: [291, 318, 120], s: [298, 326] }; S.fade = 0; S.fadeTarget = 0; S.overlay = null; musicBox();
+    try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 2, bitti: 1, cark: S.cark, isik: S.isik, canlilik: S.canlilik, hafiza: S.hafiza, pirpir: S.f.pirpir })); } catch (e) {} }, 4800);
+}
+function kivilcim() { // first suspicion: a flash of the furnace
+  S.overlay = { type: 'kivilcim', t: 0 }; tone(80, 0, 1.2, .1, 'sawtooth'); tone(60, .1, 1.4, .08, 'sawtooth');
+}
+function pirpirFree(how) {
+  const f = S.f; f.pirpir = 'joined'; f.pirpirHow = how; f.pirpirT = 0;
+  halo(400, 330, 240); if (how === 'yaprak') setTimeout(() => halo(640, 400, 200), 700);
+  tone(880, .1, .3, .05); tone(1175, .3, .3, .05); tone(1397, .5, .4, .05);
+}
+
+HS['2a'] = [
+  { id: 'toHurdaci', to: '2c', spawn: [170, 650], r: [1170, 380, 110, 200], stand: [1150, 600] },
+  { id: 'kapi', r: [880, 400, 95, 160], stand: [925, 592], tap() {
+      if (S.f.kapi) { goScene('2b', [240, 620]); return; }
+      play('strain', 1); say(['kilit']); } },
+  { id: 'catlak', r: [818, 420, 62, 110], stand: [860, 600], on: () => !S.f.kapi, tap() { say(S.f.kok ? ['tohum', 'ok', 'kok'] : ['goz', 'soru']); },
+    kok() { S.f.kapi = 1; clank(); tone(150, .2, .4, .08, 'square'); halo(920, 470, 220); say(['kapi', 'unlem']); } },
+  { id: 'yosun', r: [140, 270, 90, 60], stand: [290, 600], on: () => !S.f.kok && S.f.guard !== 'intro', tap() { say(['goz', 'tohum']); S.f.teach = 2.4; S.f.teachTo = [175, 300]; },
+    light() { learnKok(); } },
+  { id: 'vana', r: [505, 400, 320, 90], stand: [660, 600], tap() { S.overlay = { type: 'vana', t: 0, ang: S.f.v.map(v => v * Math.PI / 2) }; } },
+  { id: 'ag', r: [355, 280, 105, 180], stand: [440, 610], on: () => !S.f.pirpir, tap() {
+      const f = S.f;
+      if (f.guard === 'lamp') { play('shrug', 1); say(['toplayici', 'x']); return; }
+      if (f.guard === 'bait') { f.agT = 0; clank(); setTimeout(() => pirpirFree('yaprak'), 600); setTimeout(() => { f.guard = 'leave'; f.baitOn = 0; }, 2600); return; }
+      say(['pirpir', 'soru']); },
+    kok() {
+      const f = S.f; if (f.guard !== 'lamp') { pirpirFree('kok'); return; }
+      // tearing the net under the collector's nose: Pırpır is free but the alarm goes off
+      f.alarm = 1; f.guardT = 0; pirpirFree('kok'); for (let i = 0; i < 6; i++) tone(i % 2 ? 660 : 880, i * .25, .22, .07, 'square');
+      setTimeout(() => { f.guard = 'leave'; }, 1600); } },
+  { id: 'bait', r: [160, 470, 150, 90], stand: [290, 610], on: () => S.f.guard === 'lamp', tap() { say(['goz']); },
+    use: { sahte() { takeItem('sahte'); S.f.baitOn = 1; S.f.guard = 'bait'; clank(); } } },
+  { id: 'varil', r: [20, 520, 120, 130], stand: [262, 650], on: () => S.f.guard === 'lamp' && !S.f.pirpir, tap() {
+      // hide and let the collector take Pırpır away
+      const f = S.f; S.lock = true; play('shrug', 1.2, () => { L.alpha = .35; });
+      setTimeout(() => { f.pirpir = 'taken'; f.guard = 'leave'; tone(120, 0, 1.5, .08, 'sawtooth'); }, 1400);
+      setTimeout(() => { L.alpha = 1; S.lock = false; say(['pirpir', 'x'], 2.6); }, 4200); } },
+  { id: 'kedi2', r: [1060, 500, 110, 60], stand: [1050, 610], on: () => !S.f.kediUp, tap() { S.f.kediUp = 1; S.f.kediT = 0; purr(); S.cark++; chime(); } }
+];
+HS['2b'] = [
+  { id: 'toMeydan', to: '2a', spawn: [925, 600], r: [30, 160, 170, 360], stand: [240, 620] },
+  { id: 'izgara', r: [440, 560, 380, 95], stand: [860, 640], on: () => !S.f.anahtar, tap() { say(['anahtar', 'kol', 'x']); },
+    kok() { S.f.anahtar = 1; clank(); addItem('anahtar'); } },
+  { id: 'nine', r: [760, 380, 140, 190], stand: [700, 620], tap() {
+      const f = S.f; if (f.torun) { say(['saat'], 1.6, [830, 390]); return; }
+      say(['anahtar', 'soru'], 2.6, [830, 390]); },
+    use: { anahtar() {
+      const f = S.f; takeItem('anahtar'); f.windT = 0; clank(); for (let i = 0; i < 8; i++) tone(1200 + (i % 2) * 180, .3 + i * .18, .06, .05, 'square');
+      setTimeout(() => { f.torun = 1; halo(345, 420, 240); tone(1319, 0, .5, .06); tone(1568, .12, .5, .06); }, 2000);
+      setTimeout(() => { addItem('anahtar'); f.kurma = 1; say(['anahtar', 'unlem'], 2.2, [830, 390]); }, 3200);
+      setTimeout(() => { S.hafiza++; S.overlay = { type: 'hafiza', t: 0, img: 'cu_hafiza2' }; }, 4600); } } },
+  { id: 'torun', r: [270, 360, 150, 130], stand: [470, 600], tap() { say(S.f.torun ? ['saat', 'unlem'] : ['saat', 'soru']); } },
+  { id: 'sari', r: [1066, 368, 26, 40], stand: [1040, 590], on: () => !S.f.sari, tap() { S.f.sari = 1; addItem('sari'); } },
+  { id: 'mavi', r: [1094, 368, 26, 40], stand: [1040, 590], on: () => !S.f.mavi, tap() { S.f.mavi = 1; addItem('mavi'); } },
+  { id: 'saatkutu', r: [695, 400, 70, 90], stand: [640, 590], on: () => !S.f.cark2, tap() { S.f.cark2 = 1; S.cark++; chime(); tone(1568, 0, .3, .04); } }
+];
+HS['2c'] = [
+  { id: 'toMeydan2', to: '2a', spawn: [1140, 610], r: [0, 500, 110, 220], stand: [160, 650] },
+  { id: 'gecit', r: [680, 280, 170, 240], stand: DEVRIYE.gecit, tap() { S.f.gecti = 1; L.alpha = 1; goScene('2d', [230, 650]); } },
+  { id: 'sandik', r: [470, 430, 90, 110], stand: DEVRIYE.saklan[0], tap() {} },
+  { id: 'varil1', r: [838, 400, 84, 124], stand: DEVRIYE.saklan[1], tap() {} },
+  { id: 'yigin', r: [120, 280, 260, 200], stand: [300, 600], tap() {
+      const f = S.f; if (!f.supheli) { f.supheli = 1; kivilcim(); return; }
+      play('shrug', 1.2); say(['kapak', 'soru']); } },
+  { id: 'cark3', r: [300, 500, 60, 40], stand: [380, 610], on: () => S.f.supheli && !S.f.cark3, tap() { S.f.cark3 = 1; S.cark++; chime(); } },
+  { id: 'orta', r: [415, 485, 80, 70], stand: [540, 612], on: () => !S.f.orta, tap() { S.f.orta = 1; addItem('orta'); clank(); } },
+  { id: 'diz', r: [170, 470, 70, 60], stand: [300, 620], on: () => !S.f.diz, tap() { S.f.diz = 1; addItem('diz'); } },
+  { id: 'yay', r: [365, 440, 55, 50], stand: [470, 610], on: () => !S.f.yay, tap() { S.f.yay = 1; addItem('yay'); } },
+  { id: 'taban', r: [240, 510, 70, 45], stand: [330, 630], on: () => !S.f.taban, tap() { S.f.taban = 1; addItem('taban'); } },
+  { id: 'ikiz', r: [490, 420, 150, 200], stand: [420, 640], on: () => !S.f.ikizGone, tap() {
+      say(S.f.ikiz ? ['teneke'] : ['levye', 'soru'], 2.4, [565, 400]); },
+    use: {
+      levye() { takeItem('levye'); ikizDone('ayir'); },
+      bacak() { takeItem('bacak'); ikizDone('bacak'); } } },
+  { id: 'bez', r: [1175, 170, 65, 230], stand: [1130, 620], on: () => !S.f.bezTaken, tap() { S.f.bezTaken = 1; addItem('bez'); } },
+  { id: 'levye', r: [1110, 420, 120, 220], stand: [1080, 650], on: () => !S.f.levyeTaken, tap() { S.f.levyeTaken = 1; addItem('levye'); } }
+];
+HS['2d'] = [
+  { id: 'toSokak', to: '2c', spawn: [760, 570], r: [0, 560, 100, 160], stand: [170, 660] },
+  { id: 'montaj', r: [685, 115, 140, 285], stand: [760, 640], tap() { S.overlay = { type: 'montaj', t: 0 }; } },
+  { id: 'mil0', r: [495, 30, 120, 95], stand: [560, 640], tap: () => milTap(0), use: { kucuk: () => milPut(0, 'kucuk'), orta: () => milPut(0, 'orta') } },
+  { id: 'mil1', r: [495, 200, 120, 100], stand: [560, 640], tap: () => milTap(1), use: { kucuk: () => milPut(1, 'kucuk'), orta: () => milPut(1, 'orta') } },
+  { id: 'mil2', r: [495, 380, 120, 100], stand: [560, 640], tap: () => milTap(2), use: { kucuk: () => milPut(2, 'kucuk'), orta: () => milPut(2, 'orta') } },
+  { id: 'buyuk', r: [715, 395, 250, 215], stand: [680, 660], on: () => !S.f.buyuk, tap() { play('strain', 1.2); say(['disli', 'kol', 'x']); },
+    kok() { S.f.buyuk = 1; S.f.mil[2] = 'buyuk'; S.f.liftT = 0; clank(); tone(110, 0, 1.2, .08, 'sawtooth'); milCheck(); } },
+  { id: 'kanca', r: [890, 20, 100, 130], stand: [930, 640], on: () => !S.f.kucuk, tap() {
+      const f = S.f;
+      if (f.pirpir === 'joined') { f.fetchT = 0; setTimeout(() => { f.kucuk = 1; addItem('kucuk'); }, 2200); return; }
+      if (f.kancaIndi) { f.kucuk = 1; addItem('kucuk'); clank(); return; }
+      say(['kol', 'x']); } },
+  { id: 'agirlik', r: [1050, 160, 185, 300], stand: [1000, 650], on: () => !S.f.kucuk && !S.f.kancaIndi, tap() { play('strain', 1); say(['kok', 'soru']); },
+    kok() { S.f.kancaIndi = 1; S.f.kancaT = 0; clank(); tone(90, 0, 1, .08, 'sawtooth'); } },
+  { id: 'guvercin2', r: [200, 60, 110, 110], stand: [300, 640], on: () => !S.f.guvercin, tap() { say(['guvercin', 'kok']); },
+    kok() { S.f.guvercin = 1; S.f.guvT = 0; tone(988, .2, .3, .05); tone(1175, .45, .3, .05);
+      setTimeout(() => { S.hafiza++; halo(250, 110, 220); S.overlay = { type: 'hafiza', t: 0, img: 'cu_hafiza3' }; }, 2200); } },
+  { id: 'kafes', r: [110, 230, 260, 370], stand: [300, 640], tap() {
+      const f = S.f;
+      if (!f.dizili) { say(['disli', 'soru']); return; }
+      if (!f.vanalar) { say(['vana', 'soru']); return; }
+      b2Finish(); } }
+];
+ENTER['2d'] = () => { if (S.f.bez) { S.f.bez = 0; addItem('bez'); } }; // past the patrol: the rag comes off
+ENTER['2a'] = () => { if (S.f.guard === 'intro' && !S.f.introT) { S.f.introT = 0.001; S.lock = true; } };
+function learnKok() {
+  const f = S.f; if (f.kok) return;
+  f.kok = 1; f.kokT = 0; tone(392, 0, 1.4, .06); tone(523, .3, 1.4, .05); tone(659, .6, 1.6, .05);
+  growRoot(175, 300, () => { halo(175, 300, 200); say(['tohum', 'ok', 'kok'], 3); });
+}
+function ikizDone(how) {
+  const f = S.f; f.ikiz = how; f.ikizT = 0; clank();
+  halo(565, 520, 220); if (how === 'bacak') setTimeout(() => halo(565, 520, 260), 700);
+  setTimeout(() => { addItem('teneke'); say(['teneke', 'unlem'], 2, [565, 400]); }, 1300);
+}
+function milTap(i) { const g = S.f.mil[i]; if (!g) { say(['disli', 'soru']); return; } if (g === 'buyuk') return; S.f.mil[i] = null; addItem(g); f_unjam(); }
+function f_unjam() { S.f.dizili = 0; }
+function milPut(i, g) { if (S.f.mil[i]) { say(['x']); bad(); return; } takeItem(g); S.f.mil[i] = g; clank(); milCheck(); }
+function milCheck() {
+  const m = S.f.mil; if (!m[0] || !m[1] || !m[2]) return;
+  if (m.every((g, i) => g === MIL.need[i])) { S.f.dizili = 1; chime(); setTimeout(() => halo(548, 250, 300), 300); if (S.f.vanalar) say(['kafes', 'unlem']); }
+  else { // wrong order: they grind and spring back
+    bad(); tone(70, 0, .8, .1, 'sawtooth'); S.f.jamT = 0;
+    setTimeout(() => { [0, 1].forEach(i => { const g = m[i]; if (g && g !== 'buyuk') { m[i] = null; addItem(g); } }); say(['montaj', 'soru']); }, 900);
+  }
+}
+
+// ---- 2. bölüm scene layers ----
+DRAW1['2a'] = function (dt) {
+  const f = S.f;
+  // opening: a collector rolls in and vacuums the last moss under the eave
+  if (f.guard === 'intro' && f.introT) {
+    f.introT += dt; const t = f.introT;
+    if (t < 3) f.gx = 1320 - (1320 - 250) * (t / 3);
+    else if (t < 5.4) { f.gx = 250; f.suck = 1; }
+    else if (t < 7.4) { f.suck = 0; f.gx = 250 + (470 - 250) * ((t - 5.4) / 2); }
+    else { f.guard = 'lamp'; f.gx = 470; S.lock = false; say(['toplayici', 'unlem'], 2.4); setTimeout(() => say(['goz', 'tohum'], 2.4), 2600); }
+  }
+  if (f.guard === 'bait') f.gx += (215 - f.gx) * Math.min(1, dt * 1.2);
+  if (f.guard === 'leave') { f.gx += 160 * dt; if (f.gx > 1350) f.guard = 'gone'; }
+  // the last moss in the crack (green, the only living thing here)
+  if (!f.kok) { const n = f.suck ? .4 : 1; for (let i = 0; i < 6; i++) { X.fillStyle = `rgba(140,200,90,${.8 * n})`; X.beginPath(); X.arc(160 + i * 6, 300 + Math.sin(i * 2) * 4, 3, 0, 7); X.fill(); } }
+  if (f.suck) for (let i = 0; i < 10; i++) { const u = ((S.t * 1.5 + i / 10) % 1); X.fillStyle = `rgba(140,200,90,${.7 * (1 - u)})`; X.beginPath(); X.arc(175 + (f.gx + 40 - 175) * u, 300 + (520 - 300) * u, 2.5, 0, 7); X.fill(); }
+  // Pırpır trapped in the net hanging from the lamp
+  if (!f.pirpir || (f.pirpir === 'joined' && (f.pirpirT || 0) < .6)) { if (f.pirpir) f.pirpirT += dt; spr('pirpir2', 405, 452 + Math.sin(S.t * 2) * 2, 170, false, 1, f.pirpir ? 1 - f.pirpirT / .6 : 1); }
+  if (f.pirpir === 'taken' && f.guard !== 'gone') {} // carried off inside the collector
+  if (f.baitOn && f.guard !== 'gone') { X.save(); X.translate(222, 540); X.rotate(-.3); icon('teneke', 0, 0, 34, '#8fcf6a'); X.restore(); }
+  // collector
+  if (f.guard !== 'gone' && f.gx < 1330) {
+    const pose = f.suck || (f.guard === 'bait') || (f.guard === 'leave' && f.pirpir === 'taken' && f.gx < 520) ? 2 : 1, face = f.guard === 'leave' || f.guard === 'intro' && f.introT < 3 ? (f.guard === 'leave' ? 1 : -1) : -1;
+    dq(612, () => drawToplayici(f.gx, 612, 230, pose, face));
+  }
+  if (!f.kediUp) dq(FAR + 1, () => spr('kedi1', 1098, 548, 56)); else { f.kediT += dt; if (f.kediT < 1.6) dq(FAR + 1, () => spr('kedi3', 1098, 548, 80)); }
+  if (f.kapi) { X.fillStyle = 'rgba(20,14,10,.85)'; X.beginPath(); X.moveTo(892, 548); X.lineTo(892, 450); X.quadraticCurveTo(925, 405, 958, 450); X.lineTo(958, 548); X.closePath(); X.fill(); glowAt(925, 500, 60, '255,190,110', .25); }
+};
+DRAW1['2b'] = function (dt) {
+  const f = S.f;
+  // the grandchild in the armchair, then awake
+  dq(520, () => spr(f.torun ? 'torun2' : 'torun1', 345, f.torun ? 500 + Math.abs(Math.sin(S.t * 5)) * -6 : 482, f.torun ? 150 : 118, !!f.torun));
+  // Granny Clock: crying by the grate, winding, waving
+  const nPose = f.windT !== undefined && f.windT < 2.2 ? 'nine3' : f.torun ? 'nine4' : 'nine1';
+  if (f.windT !== undefined) f.windT += dt;
+  dq(575, () => spr(nPose, 830, 575, 210, !!f.torun, f.windT !== undefined && f.windT < 2.2 ? -1 : 1));
+  if (!f.torun && Math.sin(S.t * 2) > .3) { X.fillStyle = 'rgba(200,220,235,.8)'; X.beginPath(); X.arc(862, 430 + (S.t % 1) * 30, 3, 0, 7); X.fill(); }
+  if (!f.anahtar) glowAt(640, 612, 16 + Math.sin(S.t * 4) * 3, '240,220,160', .45);
+};
+DRAW1['2c'] = function (dt) {
+  const f = S.f;
+  // Vida & Somun
+  if (!f.ikizGone) {
+    const pose = !f.ikiz ? 'ikiz1' : f.ikiz === 'ayir' ? 'ikiz2' : 'ikiz3';
+    if (f.ikiz) f.ikizT += dt;
+    const x = f.ikiz === 'bacak' && f.ikizT > 3 ? 565 + (f.ikizT - 3) * 60 : 565 + (!f.ikiz ? Math.sin(S.t * 3) * 6 : 0);
+    if (f.ikiz === 'bacak' && x > 700) f.ikizGone = 1;
+    dq(620, () => spr(pose, x, 620, 200, !!f.ikiz));
+    if (!f.ikiz && Math.sin(S.t * 2.3) > .5) { glowAt(510, 430, 12, '230,230,226', .6); glowAt(625, 455, 12, '230,230,226', .6); }
+  }
+  // junk parts glinting in the heap
+  const glint = (x, y) => glowAt(x, y, 10 + Math.sin(S.t * 5 + x) * 3, '240,225,180', .5);
+  if (!f.diz) glint(205, 500); if (!f.yay) glint(392, 465); if (!f.taban) glint(275, 530);
+  if (!f.orta) { gearSpr('orta', 455, 522, 30, .4, false); glint(455, 522); }
+  if (f.supheli && !f.cark3) gear(330, 522, 11 + Math.sin(S.t * 4), '#d9c48e');
+  // patrol by the tower passage (until Lehim slips through)
+  if (!f.gecti) {
+    f.pt = (f.pt || 0) + dt;
+    const span = DEVRIYE.x1 - DEVRIYE.x0, per = span / DEVRIYE.v * 2, cols = f.alarm ? [0, .5] : [0];
+    f.cols = cols.map(off => { const ph = ((f.pt / per + off) % 1), x = ph < .5 ? DEVRIYE.x0 + span * ph * 2 : DEVRIYE.x1 - span * (ph - .5) * 2; return { x, face: ph < .5 ? 1 : -1 }; });
+    f.cols.forEach(c => {
+      // lamp cone shows where it looks
+      const g = X.createLinearGradient(c.x, 0, c.x + c.face * 380, 0); g.addColorStop(0, 'rgba(255,220,150,.22)'); g.addColorStop(1, 'rgba(255,220,150,0)');
+      X.fillStyle = g; X.beginPath(); X.moveTo(c.x + c.face * 40, DEVRIYE.y - 150); X.lineTo(c.x + c.face * 400, DEVRIYE.y - 210); X.lineTo(c.x + c.face * 400, DEVRIYE.y + 40); X.lineTo(c.x + c.face * 40, DEVRIYE.y - 20); X.closePath(); X.fill();
+      dq(DEVRIYE.y, () => drawToplayici(c.x, DEVRIYE.y, 190, 1, c.face));
+    });
+    // standing still at a hiding spot, Lehim shrinks into the shadows
+    const hidden = !L.moving && DEVRIYE.saklan.some(([hx, hy]) => Math.hypot(L.x - hx, L.y - hy) < 30);
+    if (!f.caught && !L.anim) L.alpha = hidden ? .55 : 1;
+    DEVRIYE.saklan.forEach(([hx, hy]) => { if (!hidden && L.x < hx + 200) glowAt(hx, hy - 20, 26, '20,16,12', .35); });
+    if (!S.lock && L.alpha > 0 && L.x > DEVRIYE.zone && !f.caught) {
+      const seen = !hidden && f.cols.some(c => { const dx = L.x - c.x; return (Math.sign(dx) === c.face && Math.abs(dx) < 380) || (!f.bez && Math.abs(dx) < 520); });
+      if (seen) caught();
+    }
+  }
+};
+function caught() {
+  const f = S.f; f.caught = 1; S.lock = true; L.moving = false; L.then = null; tone(660, 0, .2, .07, 'square'); tone(880, .15, .3, .07, 'square');
+  say(f.bez ? ['toplayici', 'unlem'] : ['toplayici', 'tohum', 'unlem'], 2);
+  setTimeout(() => { for (let i = 0; i < 6; i++) tone(200 - i * 20, i * .05, .3, .03, 'sawtooth'); play('slip', 1.1); }, 500);
+  setTimeout(() => { S.fadeTarget = 1; }, 1300);
+  setTimeout(() => { L.x = L.tx = 170; L.y = L.ty = 650; L.face = 1; S.fadeTarget = 0; S.lock = false; f.caught = 0; }, 1900);
+}
+DRAW1['2d'] = function (dt) {
+  const f = S.f;
+  // gears on the axles
+  const turning = f.dizili && f.vanalar, sp = turning ? S.t * 1.4 : 0;
+  f.mil.forEach((g, i) => { if (!g) return; const r = MIL.r[g], dir = i % 2 ? -1 : 1;
+    let x = MIL.x, y = MIL.y[i]; if (g === 'buyuk' && f.liftT !== undefined && f.liftT < 1.2) { f.liftT += dt; const u = f.liftT / 1.2; x = 838 + (MIL.x - 838) * u; y = 500 + (MIL.y[2] - 500) * u - Math.sin(u * Math.PI) * 60; }
+    gearSpr(g, x, y, r, sp * dir * 42 / r, turning); });
+  // where the big gear lay: a puff of settling dust
+  if (f.buyuk) { f.dustT = (f.dustT || 0) + dt; if (f.dustT < 3) glowAt(838, 560, 90 + f.dustT * 50, '200,190,175', .5 * (1 - f.dustT / 3)); }
+  else dq(606, () => gearSpr('buyuk', 838, 500, 114, 0, false));
+  if (f.jamT !== undefined && f.jamT < .9) { f.jamT += dt; glowAt(MIL.x, 160, 60, '255,200,140', .3 * Math.sin(f.jamT * 20)); }
+  // the hanging gear: carried down by Pırpır, or lowered on its hook by the root
+  if (!f.kucuk) {
+    let hy = 100; if (f.kancaIndi) { f.kancaT += dt; hy = 100 + Math.min(1, f.kancaT / 1.5) * 380; }
+    if (f.fetchT !== undefined) { f.fetchT += dt; }
+    X.strokeStyle = 'rgba(40,32,24,.9)'; X.lineWidth = 3; X.beginPath(); X.moveTo(937, 20); X.lineTo(937, hy - 40); X.stroke();
+    if (!(f.fetchT > .8)) gearSpr('kucuk', 937, hy, 42, Math.sin(S.t * .8) * .05, false);
+  }
+  if (f.buyuk === undefined) {} // the big gear still lies on the floor (painted)
+  if (turning) glowAt(240, 420, 120, '255,190,110', .15 + .05 * Math.sin(S.t * 3));
+  if (!f.guvercin) spr('guvercin1', 250 + Math.sin(S.t * 14) * (Math.sin(S.t * .8) > .5 ? 2 : 0), 150, 80);
+  else { f.guvT += dt; const u = f.guvT; if (u < 2.4) spr(u < 1.4 ? 'guvercin2' : 'guvercin3', 250 + u * 140, 150 - u * 30 + (u > 1.4 ? (u - 1.4) * 250 : 0), 90, true); }
+  if (f.ride !== undefined) { f.ride += dt; }
+};
+// the tower gears are cut from the painting; the medium one reuses the big gear's drawing, scaled down
+function gearSpr(g, x, y, r, rot, col) {
+  const key = g === 'kucuk' ? 'disli_kucuk' : 'disli_buyuk', im = col ? IMG[key] : GRAY[key]; if (!im) { gear(x, y, r, '#7c6444'); return; }
+  const native = g === 'kucuk' ? 42 : 114, s = r / native;
+  X.save(); X.translate(x, y); X.rotate(rot); X.drawImage(im, -im.width * s / 2, -im.height * s / 2, im.width * s, im.height * s); X.restore();
+}
+// Pırpır follows Lehim once he has joined
+function drawPirpir(dt) {
+  const f = S.f; if (f.pirpir !== 'joined' || (S.scene === '2a' && (f.pirpirT || 0) < .6)) return;
+  if (S.scene === '2d' && f.fetchT !== undefined && f.fetchT < 2.4) { // flies up for the hanging gear and back
+    const u = f.fetchT / 2.4, k = Math.sin(u * Math.PI); const x = L.x + 60 + (937 - L.x - 60) * k, y = L.y - 210 + (100 - L.y + 210) * k;
+    spr(u > .4 ? 'pirpir3' : 'pirpir1', x, y + 50, 70, true); return;
+  }
+  const bx = L.x + L.face * 70 + Math.sin(S.t * 1.7) * 20, by = L.y - 200 * scaleAt(L.y) + Math.sin(S.t * 3.1) * 8;
+  spr('pirpir1', bx, by, 62, true, -L.face);
+  if (Math.sin(S.t * 30) > 0) { X.fillStyle = 'rgba(240,235,220,.25)'; X.beginPath(); X.ellipse(bx - 8, by - 44, 12, 5, -.4, 0, 7); X.fill(); }
+}
+
+// ---- 2. bölüm hints ----
+function hintB2() {
+  const f = S.f, has = i => S.inv.includes(i);
+  if (!f.kok) return ['2a', 'yosun'];
+  if (!f.vanalar) return ['2a', 'vana'];
+  if (!f.kapi) return ['2a', 'catlak'];
+  if (!f.anahtar) return ['2b', 'izgara'];
+  if (!f.torun) return ['2b', 'nine'];
+  if (!f.ikiz) { if (has('dizyay') && f.taban) return ['inv', 'bacak']; if (has('diz') && has('yay')) return ['inv', 'dizyay']; return has('levye') || has('bacak') ? ['2c', 'ikiz'] : ['2c', 'levye']; }
+  if (!f.pirpir) {
+    if (has('sahte')) return ['2a', 'bait'];
+    if (has('yesil') && has('teneke')) return ['inv', 'sahte'];
+    if (has('sari') && has('mavi')) return ['inv', 'yesil'];
+    if (!f.sari) return ['2b', 'sari']; if (!f.mavi) return ['2b', 'mavi'];
+    return ['2a', 'ag'];
+  }
+  if (!f.orta) return ['2c', 'orta'];
+  if (!f.gecti) return f.bezTaken ? ['2c', 'gecit'] : ['2c', 'bez'];
+  if (!f.buyuk) return ['2d', 'buyuk'];
+  if (!f.kucuk) return f.pirpir === 'joined' ? ['2d', 'kanca'] : f.kancaIndi ? ['2d', 'kanca'] : ['2d', 'agirlik'];
+  if (!f.dizili) return ['2d', 'mil1'];
+  return ['2d', 'kafes'];
+}
+const DEFTER2 = {
+  yosun: { idea: ['tohum', 'ok', 'kok'], full: [['tohum', 'ok', 'catlak'], ['kok']] },
+  vana: { idea: ['vana', 'arti', 'vana'], full: [['vana', 'kisa', 'ok', 'duman'], ['vana', 'kisa', 'kisa', 'kisa', 'ok', 'kafes'], ['vana', 'kisa', 'kisa', 'ok', 'duman']] },
+  catlak: { idea: ['kok', 'ok', 'kapi'], full: [['tohum', 'ok', 'catlak'], ['kok', 'ok', 'kilit']] },
+  izgara: { idea: ['kok', 'anahtar'], full: [['tohum', 'ok', 'izgara'], ['kok', 'ok', 'anahtar']] },
+  nine: { idea: ['anahtar', 'ok', 'saat'], full: [['anahtar', 'ok', 'nine']] },
+  levye: { idea: ['levye', 'ikiz'], full: [['levye', 'ok', 'ikiz'], ['diz', 'arti', 'yay', 'arti', 'taban', 'ok', 'ikiz']] },
+  ikiz: { idea: ['levye', 'ikiz'], full: [['levye', 'ok', 'ikiz'], ['bacak', 'ok', 'ikiz']] },
+  dizyay: { idea: ['diz', 'arti', 'yay'], full: [['diz', 'arti', 'yay', 'ok', 'bacak']] },
+  bacak: { idea: ['yay', 'arti', 'taban'], full: [['diz', 'arti', 'yay', 'arti', 'taban', 'ok', 'bacak']] },
+  ag: { idea: ['teneke', 'boya'], full: [['kok', 'ok', 'ag', 'unlem'], ['saklan', 'ok', 'pirpir', 'x'], ['teneke', 'arti', 'boya', 'ok', 'toplayici']] },
+  sari: { idea: ['boya', 'arti', 'boya'], full: [['sari', 'arti', 'mavi', 'ok', 'yesil']] },
+  mavi: { idea: ['boya', 'arti', 'boya'], full: [['sari', 'arti', 'mavi', 'ok', 'yesil']] },
+  yesil: { idea: ['sari', 'arti', 'mavi'], full: [['sari', 'arti', 'mavi', 'ok', 'yesil']] },
+  sahte: { idea: ['teneke', 'arti', 'yesil'], full: [['teneke', 'arti', 'yesil', 'ok', 'sahte']] },
+  bait: { idea: ['sahte', 'toplayici'], full: [['sahte', 'ok', 'merdiven'], ['toplayici', 'ok', 'sahte'], ['ag', 'ok', 'pirpir']] },
+  orta: { idea: ['goz', 'disli'], full: [['disli', 'ok', 'orta']] },
+  bez: { idea: ['bez', 'tohum'], full: [['bez', 'ok', 'tohum'], ['saklan', 'ok', 'gecit']] },
+  gecit: { idea: ['toplayici', 'saklan'], full: [['bez', 'ok', 'tohum'], ['toplayici', 'ok', 'saklan', 'ok', 'gecit']] },
+  buyuk: { idea: ['kok', 'disli'], full: [['tohum', 'ok', 'disli'], ['kok', 'ok', 'mil']] },
+  kanca: { idea: ['pirpir', 'disli'], full: [['pirpir', 'ok', 'disli'], ['kok', 'ok', 'agirlik']] },
+  agirlik: { idea: ['kok', 'agirlik'], full: [['tohum', 'ok', 'agirlik'], ['kanca', 'ok', 'disli']] },
+  mil1: { idea: ['montaj', 'disli'], full: [['orta', 'ok', 'mil'], ['kucuk', 'ok', 'mil'], ['buyuk', 'ok', 'mil']] },
+  kafes: { idea: ['kafes'], full: [['vana', 'arti', 'disli', 'ok', 'kafes']] }
+};
+const defterOf = id => DEFTER2[id] || DEFTER[id] || {};
+
 // the seed-light drag gesture teaches itself toward a target
 function teachTarget() { return S.f.teachTo || [1180, 620]; }
 
@@ -456,11 +816,20 @@ function hintB1() {
   }
   return ['1c', 'drezin'];
 }
+const currentGoal = () => S.bolum === 2 ? hintB2() : hintB1();
 function showHintB1() {
-  const [sc, id] = hintB1();
-  if (sc === 'inv') { say(['miknatis', 'tel', 'olta'], 3); return; }
+  const [sc, id] = currentGoal(), hub = S.bolum === 2 ? '2a' : '1a';
+  if (sc === 'inv') { say(defterOf(id).idea || ['soru'], 3); return; }
   let target = id;
-  if (sc !== S.scene) { const ex = HS[S.scene].find(h => h.to === (S.scene === '1a' ? sc : '1a')); target = ex ? ex.id : null; }
+  // another scene: point at the exit that leads there (through the hub)
+  if (sc !== S.scene) {
+    let ex = HS[S.scene].find(h => h.to === (S.scene === hub ? sc : hub));
+    if (!ex && S.scene === '2d') ex = HS[S.scene].find(h => h.to === '2c');
+    if (!ex && S.scene === '2c' && sc === '2d') ex = HS['2c'].find(h => h.id === 'gecit');
+    if (!ex && S.scene === '2a' && sc === '2b') ex = HS['2a'].find(h => h.id === 'kapi');
+    if (!ex && S.scene === '2a' && sc === '2d') ex = HS['2a'].find(h => h.to === '2c');
+    target = ex ? ex.id : null;
+  }
   if (target) S.hint = { id: target, t: 3.2 };
   if (id === 'bench' && S.scene === '1b' && !f_benchLit()) say(['goz', 'karanlik']);
   if (id === 'drezin' && S.f.dudukLeft) say(RIT.map(b => b ? 'uzun' : 'kisa'), 3.4);
@@ -489,10 +858,12 @@ const DEFTER = {
   duduk: { idea: ['ates', 'duduk'], full: [['duduk', 'ok', 'drezin']] },
   drezin: { idea: ['duduk', 'ray'], full: [['kisa', 'kisa', 'uzun', 'kisa']] }
 };
-const BAKIS_BEKLE = 300;
-function openDefter() { S.overlay = { type: 'defter', t: 0, goal: hintB1()[1] }; }
+// TEST: all hint levels free and instant while chapters are being checked; set to false for release
+const IPUCU_SINIRSIZ = true;
+const BAKIS_BEKLE = IPUCU_SINIRSIZ ? 0 : 300;
+function openDefter() { S.overlay = { type: 'defter', t: 0, goal: currentGoal()[1] }; }
 function defterBuy(level) {
-  const o = S.overlay, key = o.goal, cost = level === 2 ? 1 : 3, have = S.bought[key] || 0;
+  const o = S.overlay, key = o.goal, cost = IPUCU_SINIRSIZ ? 0 : level === 2 ? 1 : 3, have = S.bought[key] || 0;
   if (have >= level) return;
   if (S.cark < cost) { o.shake = .4; o.shakeBtn = level; bad(); return; }
   S.cark -= cost; S.bought[key] = level; chime();
@@ -564,6 +935,41 @@ function icon(name, x, y, s, col = '#2b2520') {
     case 'saat410': g.beginPath(); g.arc(0, 0, 15, 0, 7); g.stroke();
       g.lineWidth = 3.5; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.sin(Math.PI * 4 / 6 + .09) * 8, -Math.cos(Math.PI * 4 / 6 + .09) * 8); g.stroke();
       g.lineWidth = 2.5; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.sin(Math.PI / 3) * 12, -Math.cos(Math.PI / 3) * 12); g.stroke(); break;
+    case 'kok': g.beginPath(); g.moveTo(0, -16); g.bezierCurveTo(8, -6, -8, 2, 2, 16); g.stroke(); g.lineWidth = 2;
+      g.beginPath(); g.moveTo(1, -2); g.quadraticCurveTo(9, 2, 13, 9); g.moveTo(0, 6); g.quadraticCurveTo(-8, 9, -12, 15); g.moveTo(3, -10); g.lineTo(-7, -6); g.stroke(); break;
+    case 'kapi': g.beginPath(); g.moveTo(-11, 16); g.lineTo(-11, -4); g.arc(0, -4, 11, Math.PI, 0); g.lineTo(11, 16); g.closePath(); g.stroke(); g.beginPath(); g.arc(5, 4, 2, 0, 7); g.fill(); break;
+    case 'catlak': g.beginPath(); g.moveTo(-4, -16); g.lineTo(3, -8); g.lineTo(-3, -1); g.lineTo(5, 7); g.lineTo(0, 16); g.stroke(); g.lineWidth = 2; g.beginPath(); g.moveTo(-3, -1); g.lineTo(-10, 3); g.moveTo(3, -8); g.lineTo(10, -11); g.stroke(); break;
+    case 'anahtar': g.beginPath(); g.arc(-8, 0, 7, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-1, 0); g.lineTo(16, 0); g.moveTo(10, 0); g.lineTo(10, 6); g.moveTo(15, 0); g.lineTo(15, 5); g.stroke(); break;
+    case 'toplayici': g.beginPath(); g.moveTo(-10, 14); g.lineTo(-10, -4); g.quadraticCurveTo(-8, -16, 4, -14); g.quadraticCurveTo(10, -10, 8, 0); g.lineTo(8, 14); g.closePath(); g.stroke();
+      g.beginPath(); g.moveTo(6, -4); g.quadraticCurveTo(18, 0, 14, 14); g.stroke(); g.beginPath(); g.arc(2, -6, 2.5, 0, 7); g.fill(); break;
+    case 'pirpir': g.beginPath(); g.ellipse(0, 3, 10, 8, 0, 0, 7); g.stroke(); g.beginPath(); g.arc(-4, 1, 2.5, 0, 7); g.arc(4, 1, 2.5, 0, 7); g.fill();
+      g.beginPath(); g.ellipse(-9, -9, 7, 4, -.6, 0, 7); g.ellipse(9, -9, 7, 4, .6, 0, 7); g.stroke(); break;
+    case 'teneke': case 'sahte': g.beginPath(); g.moveTo(-14, 12); g.quadraticCurveTo(-12, -12, 14, -12); g.quadraticCurveTo(12, 12, -14, 12); g.closePath(); name === 'sahte' ? g.fill() : g.stroke();
+      g.strokeStyle = name === 'sahte' ? 'rgba(40,60,30,.7)' : col; g.beginPath(); g.moveTo(-12, 10); g.lineTo(10, -8); g.stroke(); break;
+    case 'boya': case 'sari': case 'mavi': case 'yesil': g.beginPath(); g.moveTo(-10, -6); g.lineTo(-8, 14); g.lineTo(8, 14); g.lineTo(10, -6); g.closePath(); g.stroke();
+      g.beginPath(); g.ellipse(0, -6, 10, 4, 0, 0, 7); g.stroke();
+      if (name !== 'boya') { g.fillStyle = { sari: '#cdb56a', mavi: '#7a95b0', yesil: '#8fcf6a' }[name]; g.beginPath(); g.ellipse(0, -6, 8, 3, 0, 0, 7); g.fill(); g.fillRect(-7, -2, 3, 9); } break;
+    case 'levye': g.lineWidth = 4; g.beginPath(); g.moveTo(-14, 14); g.lineTo(10, -10); g.quadraticCurveTo(16, -16, 10, -16); g.stroke(); break;
+    case 'ikiz': g.strokeRect(-14, -16, 8, 6); g.beginPath(); g.moveTo(-10, -10); g.lineTo(-10, 14); g.stroke(); for (let i = -6; i < 12; i += 5) { g.beginPath(); g.moveTo(-14, i); g.lineTo(-6, i + 2); g.stroke(); }
+      g.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; g.lineTo(6 + Math.cos(a) * 9, 4 + Math.sin(a) * 9); } g.closePath(); g.stroke(); break;
+    case 'diz': g.beginPath(); g.arc(0, 0, 6, 0, 7); g.stroke(); g.lineWidth = 4; g.beginPath(); g.moveTo(-4, -4); g.lineTo(-12, -14); g.moveTo(4, 4); g.lineTo(10, 16); g.stroke(); break;
+    case 'yay': case 'dizyay': g.beginPath(); for (let i = 0; i <= 30; i++) { const a = i / 30 * Math.PI * 10; g.lineTo(Math.sin(a) * 8, -15 + i); } g.stroke(); if (name === 'dizyay') { g.beginPath(); g.arc(0, -17, 5, 0, 7); g.stroke(); } break;
+    case 'taban': g.beginPath(); g.moveTo(-14, 10); g.quadraticCurveTo(-14, 0, -4, 0); g.lineTo(-4, -8); g.lineTo(4, -8); g.lineTo(4, 0); g.quadraticCurveTo(16, 2, 14, 10); g.closePath(); g.stroke(); break;
+    case 'bacak': g.lineWidth = 4; g.beginPath(); g.moveTo(-2, -16); g.lineTo(-2, -2); g.stroke(); g.lineWidth = 2; g.beginPath(); for (let i = 0; i <= 12; i++) g.lineTo(-2 + Math.sin(i * 1.6) * 5, -2 + i); g.stroke();
+      g.beginPath(); g.moveTo(-10, 16); g.quadraticCurveTo(-10, 10, -2, 10); g.quadraticCurveTo(10, 10, 12, 16); g.closePath(); g.stroke(); break;
+    case 'bez': g.beginPath(); g.moveTo(-12, -14); g.lineTo(12, -14); g.lineTo(10, 4); g.lineTo(6, 14); g.lineTo(2, 6); g.lineTo(-4, 15); g.lineTo(-8, 5); g.lineTo(-12, 10); g.closePath(); g.stroke(); break;
+    case 'orta': case 'kucuk': case 'buyuk': case 'disli2': { const rr = name === 'kucuk' ? 9 : name === 'orta' ? 12 : 16; g.beginPath(); for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2, q = i % 2 ? rr * .78 : rr; g.lineTo(Math.cos(a) * q, Math.sin(a) * q); } g.closePath(); g.stroke(); g.beginPath(); g.arc(0, 0, 3, 0, 7); g.stroke(); break; }
+    case 'kafes': g.beginPath(); g.moveTo(-12, 16); g.lineTo(-12, -6); g.quadraticCurveTo(0, -20, 12, -6); g.lineTo(12, 16); g.closePath(); g.stroke(); [-6, 0, 6].forEach(v => { g.beginPath(); g.moveTo(v, -10); g.lineTo(v, 16); g.stroke(); }); break;
+    case 'vana': g.beginPath(); g.arc(0, 0, 12, 0, 7); g.stroke(); for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(a) * 12, Math.sin(a) * 12); g.stroke(); } break;
+    case 'duman': [[-6, 6, 7], [4, -2, 8], [10, -12, 6]].forEach(([a, b, r]) => { g.beginPath(); g.arc(a, b, r, 0, 7); g.stroke(); }); break;
+    case 'montaj': g.strokeRect(-13, -16, 26, 32); [[0, -9, 4], [0, -1, 3], [0, 9, 6]].forEach(([a, b, r]) => { g.beginPath(); g.arc(a, b, r, 0, 7); g.stroke(); }); break;
+    case 'merdiven': g.beginPath(); g.moveTo(-15, 14); g.lineTo(-15, 6); g.lineTo(-5, 6); g.lineTo(-5, -2); g.lineTo(5, -2); g.lineTo(5, -10); g.lineTo(15, -10); g.stroke(); break;
+    case 'saklan': g.strokeRect(-9, -12, 18, 26); g.beginPath(); g.moveTo(-9, -4); g.lineTo(9, -4); g.moveTo(-9, 6); g.lineTo(9, 6); g.stroke(); g.beginPath(); g.arc(-12, -8, 2, 0, 7); g.arc(-12, -14, 2, 0, 7); g.fill(); break;
+    case 'izgara': g.beginPath(); g.ellipse(0, 0, 16, 9, 0, 0, 7); g.stroke(); [-8, 0, 8].forEach(v => { g.beginPath(); g.moveTo(v, -7); g.lineTo(v, 7); g.stroke(); }); break;
+    case 'agirlik': g.strokeRect(-11, -4, 22, 18); g.beginPath(); g.moveTo(0, -4); g.lineTo(0, -16); g.stroke(); g.beginPath(); g.arc(0, -8, 3, 0, 7); g.stroke(); break;
+    case 'mil': g.beginPath(); g.arc(0, 0, 10, 0, 7); g.stroke(); g.fillRect(-3, -3, 6, 6); break;
+    case 'nine': g.beginPath(); g.arc(0, -4, 11, 0, 7); g.stroke(); g.beginPath(); g.moveTo(0, -4); g.lineTo(0, -11); g.moveTo(0, -4); g.lineTo(5, -2); g.stroke(); g.beginPath(); g.moveTo(-12, 16); g.lineTo(-8, 7); g.lineTo(8, 7); g.lineTo(12, 16); g.stroke(); break;
+    case 'ag': g.lineWidth = 2; g.beginPath(); g.moveTo(0, -16); g.lineTo(-12, 8); g.lineTo(0, 16); g.lineTo(12, 8); g.closePath(); g.moveTo(-6, -4); g.lineTo(6, 12); g.moveTo(6, -4); g.lineTo(-6, 12); g.stroke(); break;
     case 'yol': g.lineWidth = 1.5; for (let i = 0; i <= 3; i++) { g.beginPath(); g.moveTo(-15 + i * 10, -15); g.lineTo(-15 + i * 10, 15); g.moveTo(-15, -15 + i * 10); g.lineTo(15, -15 + i * 10); g.stroke(); }
       g.lineWidth = 4; g.beginPath(); g.moveTo(-19, 10); g.lineTo(-10, 10); g.quadraticCurveTo(-10, 0, -5, 0); g.lineTo(5, 0); g.quadraticCurveTo(10, 0, 10, -10); g.lineTo(19, -10); g.stroke(); break;
   }
@@ -592,7 +998,7 @@ function drawItem(id, cx, cy, size) {
   if (im) { const g = GRAY[im], k = size / Math.max(g.width, g.height); X.drawImage(g, cx - g.width * k / 2, cy - g.height * k / 2, g.width * k, g.height * k); return; }
   const cr = CROP[id];
   if (cr && GRAY[cr[0]]) { const [k0, sx, sy, sw, sh] = cr, k = size / Math.max(sw, sh); X.drawImage(GRAY[k0], sx, sy, sw, sh, cx - sw * k / 2, cy - sh * k / 2, sw * k, sh * k); return; }
-  if (['ampul', 'tel', 'miknatis', 'olta', 'disli', 'jeton', 'koruk', 'briket', 'afis', 'bilet'].includes(id)) { icon(id, cx, cy, size * .72, '#cfc6b6'); return; }
+  if (!['vida', 'makas', 'dal'].includes(id)) { icon(id, cx, cy, size * .72, id === 'sahte' ? '#8fcf6a' : '#cfc6b6'); return; }
   X.save(); X.translate(cx, cy); X.strokeStyle = '#cfc6b6'; X.fillStyle = '#cfc6b6'; X.lineWidth = 3; X.lineCap = 'round';
   if (id === 'vida') { X.beginPath(); X.moveTo(-9, -14); X.lineTo(9, -14); X.moveTo(0, -14); X.lineTo(0, 16); X.stroke(); for (let i = -8; i < 14; i += 5) { X.beginPath(); X.moveTo(-5, i); X.lineTo(5, i + 3); X.stroke(); } }
   if (id === 'makas') { X.fillStyle = '#9d968a'; X.beginPath(); X.moveTo(-18, 14); X.lineTo(12, -16); X.lineTo(17, -11); X.lineTo(-13, 19); X.closePath(); X.fill(); X.stroke(); }
@@ -636,7 +1042,7 @@ function currentHint() {
   if (!f.pitSeen) return 'pit'; if (!f.gateOpen) return 'panel'; return 'gate';
 }
 function showHint() {
-  if (S.bolum === 1) { openDefter(); return; }
+  if (S.bolum >= 1) { openDefter(); return; }
   const id = currentHint(); S.hint = { id, t: 3.2 };
   if (id === 'corner' || (id === 'lehim' && !S.f.vidaTaken)) say(['goz', 'karanlik']);
 }
@@ -648,13 +1054,15 @@ function hsAt(p) { return (HS[S.scene] || []).find(h => (!h.on || h.on()) && inR
 C.addEventListener('pointerdown', e => {
   e.preventDefault(); const p = pt(e); audioStart();
   if (S.mode === 'title') {
-    if (S.saved && p.y > 555 && p.y < 640) { startBolum1(true); return; }
+    if (S.saved && p.y > 575 && p.y < 622) { startBolum1(true); return; }
+    if (S.saved >= 2 && p.y >= 622 && p.y < 672) { startBolum2(true); return; }
     S.mode = 'cin'; S.cin = { t: 0 }; musicBox(); return;
   }
   if (S.mode === 'cin') { S.cin.t = Math.max(S.cin.t, 9.2); return; }
   if (S.mode === 'card') { S.card.t = Math.max(S.card.t, 3.2); return; }
   if (S.mode === 'filiz') { S.filiz.t = Math.max(S.filiz.t, 7); return; }
-  if (S.mode === 'end' || S.mode === 'end1') { if (S.t > 2.5) location.href = location.pathname; return; }
+  if (S.mode === 'end1') { if (S.t > 2.5) startBolum2(); return; }
+  if (S.mode === 'end' || S.mode === 'end2') { if (S.t > 2.5) location.href = location.pathname; return; }
   if (S.mode !== 'play' || S.fade > .2) return;
   if (S.overlay) { overlayDown(p); return; }
   if (inRect(p, [10, 10, 78, 78])) { showHint(); return; }
@@ -674,9 +1082,16 @@ C.addEventListener('pointerup', e => {
   if (drag) {
     const d = drag; drag = null;
     if (d.light) {
-      if (Math.hypot(p.x - d.x0, p.y - d.y0) < 24) { say(['kubbe']); return; }
+      if (Math.hypot(p.x - d.x0, p.y - d.y0) < 24) {
+        if (S.f.bez) { S.f.bez = 0; addItem('bez'); return; } // tapping Lehim takes the rag off his chest
+        say(['kubbe']); return;
+      }
+      if (S.f.bez) { say(['bez', 'x'], 1.6); return; }
       const h = hsAt(p);
-      if (h && h.light) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); h.light(); });
+      // one gesture: the seed becomes a root on cracks, grates and weights, light elsewhere
+      if (h && h.kok && S.f.kok) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); growRoot(h.r[0] + h.r[2] / 2, h.r[1] + h.r[3] / 2, () => h.kok()); });
+      else if (h && h.light) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); h.light(); });
+      else if (h && h.kok) say(['tohum', 'soru'], 1.6);
       else { say(['goz', 'soru'], 1.6); }
       return;
     }
@@ -705,6 +1120,7 @@ function faceTo(h) { const cx = h.r[0] + h.r[2] / 2; if (Math.abs(cx - L.x) > 20
 function reach(h, then) { faceTo(h); play('reach', .38, then); }
 function useOnLehim(item) {
   const f = S.f;
+  if (item === 'bez') { takeItem('bez'); f.bez = 1; clank(); return; } // the rag covers the seed's light
   if (item === 'kol' && !L.arm) {
     takeItem('kol'); L.arm = true; clank(); play('dance', 1.4, () => { f.loose = 1; say(['kapak', 'vida', 'soru'], 3.2); bad(); }); return;
   }
@@ -765,6 +1181,30 @@ function overlayDownB1(p) {
     o.press = S.t; hornStart(); clank();
     return;
   }
+  if (o.type === 'vana') {
+    if (o.solved) return;
+    if (!inCU(p)) { S.overlay = null; return; }
+    const f = S.f;
+    VANA.x.forEach((vx, i) => {
+      if (Math.hypot(p.x - CU.x - vx, p.y - CU.y - VANA.y) > VANA.r + 6) return;
+      f.v[i] = f.v[i] ? 0 : 1; clank(); tone(300 + i * 40, 0, .15, .04, 'triangle');
+      if (f.v[i] && i === VANA_SIZINTI) { // the cracked pipe sprays the square with steam and the valve is shut again
+        tone(220, .1, 1, .05, 'sawtooth'); f.leakT = 0; o.steam = 1;
+        setTimeout(() => { f.v[i] = 0; o.steam = 0; say(['duman', 'x'], 1.6); }, 1000); }
+      if (f.v[i] && i === VANA_DUDUK) { // the whistle shrieks and a collector turns to look
+        held(1400, 0, .9, .06); held(1860, 0, .9, .03);
+        setTimeout(() => { f.v[i] = 0; say(['toplayici', 'unlem'], 1.6); }, 1000); }
+      setTimeout(() => {
+        const sum = f.v.reduce((s, v, k) => s + v * VANA.notch[k], 0);
+        if (f.v[VANA_ASANSOR] && sum === 6 && !f.v[VANA_SIZINTI] && !f.v[VANA_DUDUK] && !o.solved) {
+          o.solved = true; o.solveT = 0; chime();
+          setTimeout(() => { S.overlay = null; f.vanalar = 1; halo(660, 440, 300); say(['kafes', 'unlem']); }, 1500);
+        }
+      }, 1050);
+    });
+    return;
+  }
+  if (o.type === 'kivilcim') { if (o.t > 1.2) { S.overlay = null; say(['kapak', 'soru'], 2.4); } return; }
   if (o.type === 'defter') {
     if (!inRect(p, [DEF.x, DEF.y, DEF.w, DEF.h])) { S.overlay = null; return; }
     DEF.btn.forEach(([bx, level]) => {
@@ -787,7 +1227,7 @@ function drawDefter(o, dt) {
   X.strokeStyle = 'rgba(120,100,80,.25)'; X.lineWidth = 1.5; for (let ly = y + 60; ly < y + h - 110; ly += 36) { X.beginPath(); X.moveTo(x + 50, ly); X.lineTo(x + w - 30, ly); X.stroke(); }
   X.strokeStyle = 'rgba(150,60,40,.35)'; X.beginPath(); X.moveTo(x + 70, y + 20); X.lineTo(x + 70, y + h - 110); X.stroke();
   X.fillStyle = '#2b2520'; for (let i = 0; i < 9; i++) { X.beginPath(); X.arc(x + 22, y + 40 + i * 52, 7, 0, 7); X.fill(); }
-  const d = DEFTER[o.goal] || {}, lvl = S.bought[o.goal] || 0, col = '#3a2f26';
+  const d = defterOf(o.goal), lvl = S.bought[o.goal] || 0, col = '#3a2f26';
   const row = (icons, cy, s) => { const gap = s * 1.25, x0 = x + w / 2 + 20 - (icons.length - 1) * gap / 2; icons.forEach((ic, i) => icon(ic, x0 + i * gap, cy, s, col)); };
   if (lvl >= 3 && d.full) {
     d.full.forEach((r, i) => { X.fillStyle = 'rgba(58,47,38,.5)'; X.font = '700 22px "Cormorant Garamond", Georgia, serif'; X.textAlign = 'center'; X.fillText(String(i + 1), x + 100, y + 95 + i * 115); row(r, y + 88 + i * 115, 56); });
@@ -797,7 +1237,7 @@ function drawDefter(o, dt) {
   X.strokeStyle = 'rgba(58,47,38,.3)'; X.beginPath(); X.moveTo(x + 40, y + h - 100); X.lineTo(x + w - 40, y + h - 100); X.stroke();
   DEF.btn.forEach(([bx, level]) => {
     const dx = o.shakeBtn === level && o.shake > 0 ? sx : 0, cx = bx + dx, cy = DEF.by;
-    const owned = level > 1 && (S.bought[o.goal] || 0) >= level, cost = level === 2 ? 1 : 3;
+    const owned = level > 1 && (S.bought[o.goal] || 0) >= level, cost = IPUCU_SINIRSIZ ? 0 : level === 2 ? 1 : 3;
     const ok = level === 1 ? S.t - S.bakisAt >= BAKIS_BEKLE : owned || S.cark >= cost;
     X.fillStyle = ok ? 'rgba(58,47,38,.12)' : 'rgba(58,47,38,.05)'; X.beginPath(); X.arc(cx, cy, 44, 0, 7); X.fill();
     X.globalAlpha = ok ? 1 : .35;
@@ -806,7 +1246,7 @@ function drawDefter(o, dt) {
     if (level === 1) { // refill ring
       const k = Math.min(1, (S.t - S.bakisAt) / BAKIS_BEKLE);
       if (k < 1) { X.strokeStyle = '#8a6a3a'; X.lineWidth = 4; X.beginPath(); X.arc(cx, cy, 44, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); X.stroke(); }
-    } else if (!owned) { gear(cx - 14, cy + 28, 9, ok ? '#6a5236' : 'rgba(106,82,54,.4)'); X.fillStyle = ok ? '#3a2f26' : 'rgba(58,47,38,.4)'; X.font = '700 20px "Cormorant Garamond", Georgia, serif'; X.textAlign = 'left'; X.fillText('×' + cost, cx - 2, cy + 35); }
+    } else if (!owned && cost) { gear(cx - 14, cy + 28, 9, ok ? '#6a5236' : 'rgba(106,82,54,.4)'); X.fillStyle = ok ? '#3a2f26' : 'rgba(58,47,38,.4)'; X.font = '700 20px "Cormorant Garamond", Georgia, serif'; X.textAlign = 'left'; X.fillText('×' + cost, cx - 2, cy + 35); }
   });
 }
 function overlayMove(p) {
@@ -834,6 +1274,32 @@ function overlayUp(p) {
 function drawOverlayB1(o, dt) {
   const img = k => GRAY[k];
   if (o.type === 'defter') { drawDefter(o, dt); return; }
+  if (o.type === 'vana') {
+    const im = img('cu_vana'); if (!im) return; X.drawImage(im, CU.x, CU.y, CU.s, CU.s);
+    const f = S.f, sum = f.v.reduce((s, v, k) => s + v * VANA.notch[k], 0);
+    // each wheel turns a quarter when opened, and an open valve regains its colour
+    VANA.x.forEach((vx, i) => {
+      o.ang[i] += (f.v[i] * Math.PI / 2 - o.ang[i]) * Math.min(1, dt * 10);
+      X.save(); X.translate(CU.x + vx, CU.y + VANA.y); X.beginPath(); X.arc(0, 0, VANA.r, 0, 7); X.clip(); X.rotate(o.ang[i]);
+      X.drawImage(f.v[i] ? IMG.cu_vana : im, -vx, -VANA.y, CU.s, CU.s); X.restore(); });
+    // gauge: cover the painted needle and draw a live one (0 = right, too little outlet pushes it into the red)
+    const [gx, gy] = VANA.gauge, face = X.createRadialGradient(CU.x + gx, CU.y + gy, 10, CU.x + gx, CU.y + gy, 66);
+    face.addColorStop(0, 'rgba(226,222,212,1)'); face.addColorStop(.85, 'rgba(214,210,200,1)'); face.addColorStop(1, 'rgba(214,210,200,0)');
+    X.fillStyle = face; X.beginPath(); X.arc(CU.x + gx, CU.y + gy, 66, 0, 7); X.fill();
+    const target = (sum >= 6 ? -.2 : .2 + (6 - sum) / 6 * 1.0) + (sum > 6 ? -(sum - 6) * .25 : 0);
+    o.needle = o.needle === undefined ? target : o.needle + (target - o.needle) * Math.min(1, dt * 3);
+    const nd = o.needle + Math.sin(S.t * 30) * (sum < 6 ? .03 : .005);
+    X.save(); X.translate(CU.x + gx, CU.y + gy); X.rotate(nd); X.fillStyle = '#2b2520'; X.beginPath(); X.moveTo(-6, 6); X.lineTo(0, -62); X.lineTo(6, 6); X.closePath(); X.fill(); X.restore();
+    X.fillStyle = '#8a6a3a'; X.beginPath(); X.arc(CU.x + gx, CU.y + gy, 8, 0, 7); X.fill();
+    if (o.steam) { glowAt(CU.x + 187, CU.y + 470, 220, '235,235,232', .55); }
+    if (o.solved) { o.solveT += dt; X.globalAlpha = Math.min(1, o.solveT); IMG.cu_vana && X.drawImage(IMG.cu_vana, CU.x, CU.y, CU.s, CU.s); X.globalAlpha = 1; }
+    X.font = '600 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.textAlign = 'center'; X.fillText('×', CU.x + CU.s + 30, CU.y + 20);
+  }
+  if (o.type === 'montaj') { const im = img('cu_montaj'); im && X.drawImage(im, CU.x, CU.y, CU.s, CU.s); }
+  if (o.type === 'kivilcim') { // a flash of the furnace, gone as fast as it came
+    const im = IMG.cu_kivilcim, a = Math.max(0, Math.min(1, o.t * 4, (2.4 - o.t) * 2)); if (im) { X.globalAlpha = a * (.85 + .15 * Math.sin(o.t * 40)); X.drawImage(im, CU.x - 40, CU.y - 40, CU.s + 80, CU.s + 80); X.globalAlpha = 1; }
+    if (o.t > 2.4) { S.overlay = null; say(['kapak', 'soru'], 2.4); }
+  }
   if (o.type === 'saat') {
     img('cu_saat') && X.drawImage(img('cu_saat'), CU.x, CU.y, CU.s, CU.s);
     if (o.solved) { o.solveT += dt; X.globalAlpha = Math.min(1, o.solveT); IMG.cu_saat && X.drawImage(IMG.cu_saat, CU.x, CU.y, CU.s, CU.s); X.globalAlpha = 1; }
@@ -856,7 +1322,7 @@ function drawOverlayB1(o, dt) {
     }
   }
   if (o.type === 'bilet') { const im = S.f.bilet ? IMG.cu_bilet : img('cu_bilet'); im && X.drawImage(im, W / 2 - 320, H / 2 - 320, 640, 640); }
-  if (o.type === 'hafiza') { const im = IMG.cu_hafiza1; if (im) { X.globalAlpha = Math.min(1, o.t); X.drawImage(im, CU.x, CU.y, CU.s, CU.s); X.globalAlpha = 1; } }
+  if (o.type === 'hafiza') { const im = IMG[o.img || 'cu_hafiza1']; if (im) { X.globalAlpha = Math.min(1, o.t); X.drawImage(im, CU.x, CU.y, CU.s, CU.s); X.globalAlpha = 1; } }
   if (o.type === 'makas') {
     img('cu_makas') && X.drawImage(img('cu_makas'), CU.x, CU.y, CU.s, CU.s);
     const tr = mkTrace();
@@ -910,6 +1376,7 @@ function drawOverlayB1(o, dt) {
 function overlayDown(p) {
   const o = S.overlay;
   if (!['pit', 'panel'].includes(o.type)) { overlayDownB1(p); return; }
+  // (prologue overlays below)
   if (o.type === 'pit') { if (o.farewell) return; S.overlay = null; return; }
   if (o.type === 'panel') {
     if (o.lock) return;
@@ -1052,6 +1519,7 @@ function drawLehim(dt) {
   gl.addColorStop(0, 'rgba(170,235,110,.75)'); gl.addColorStop(.4, 'rgba(120,200,80,.25)'); gl.addColorStop(1, 'rgba(90,160,60,0)');
   X.fillStyle = gl; X.beginPath(); X.arc(wx, wy + 6, wr * 1.5, 0, 7); X.fill();
   X.fillStyle = '#b9ee86'; X.beginPath(); X.ellipse(wx, wy + 7, 6.4, 4.4, -.4, 0, 7); X.fill();
+  if (S.f.bez) { X.fillStyle = '#7d7466'; X.beginPath(); X.ellipse(wx, wy + 4, wr * 1.5, wr * 1.35, .2, 0, 7); X.fill(); X.strokeStyle = '#5d564b'; X.lineWidth = 2; X.stroke(); }
   if (S.f.loose && !S.f.fixed) { X.strokeStyle = '#b08a4a'; X.lineWidth = 3; X.beginPath(); X.ellipse(wx - 30 - Math.sin(t * 6) * 4, wy + 2, 9, 20, 0, 0, 7); X.stroke(); }
   if (L.arm) part('armR', 0, 0, armR);
   else if (Math.sin(t * 5) > .85) { X.fillStyle = 'rgba(255,220,140,.9)'; X.beginPath(); X.arc(212, 158, 4, 0, 7); X.fill(); }
@@ -1092,6 +1560,7 @@ function drawLehimSide(s) {
   gl.addColorStop(0, 'rgba(170,235,110,.75)'); gl.addColorStop(.4, 'rgba(120,200,80,.25)'); gl.addColorStop(1, 'rgba(90,160,60,0)');
   X.fillStyle = gl; X.beginPath(); X.arc(wx, wy + 4, wr * 1.5, 0, 7); X.fill();
   X.fillStyle = '#b9ee86'; X.beginPath(); X.ellipse(wx, wy + 5, 5, 3.4, -.4, 0, 7); X.fill();
+  if (S.f.bez) { X.fillStyle = '#7d7466'; X.beginPath(); X.ellipse(wx, wy + 3, wr * 1.5, wr * 1.35, .2, 0, 7); X.fill(); }
   // head rides on the neck ring with a slight lag
   X.save(); X.translate(121, 14); X.rotate(Math.sin(p - .5) * .05); X.translate(0, -Math.abs(Math.sin(p - .6)) * 2);
   X.drawImage(IMG.sd_head, -75, -180);
@@ -1139,7 +1608,9 @@ function drawScene(dt) {
   // depth: scene props, characters and Lehim sorted by where their feet touch the floor
   (FG[sc] || []).forEach(o => DEPTHQ.push({ y: o.y, draw: () => drawOccluder(o.poly) }));
   DEPTHQ.push({ y: L.y, draw: () => drawLehimLit(dt) });
+  if (S.bolum === 2) DEPTHQ.push({ y: L.y + 1, draw: () => drawPirpir(dt) });
   DEPTHQ.sort((a, b) => a.y - b.y).forEach(d => d.draw());
+  drawRoot(dt);
   drawAmbientFront(sc, dt);
   if (S.f.drain > 0) { // the seed gives a piece of its life away
     S.f.drain -= dt; const b = lehimBox(), u = 1 - S.f.drain / 1.6;
@@ -1194,7 +1665,19 @@ const FG = {
   '1d': [{ y: FAR, poly: [[0, 290], [60, 300], [110, 340], [120, 440], [250, 450], [282, 520], [288, 640], [302, 720], [0, 720]] },
          { y: 582, poly: [[820, 300], [960, 300], [962, 582], [822, 582]] },
          { y: 650, poly: [[1080, 370], [1170, 350], [1262, 382], [1266, 600], [1240, 652], [1090, 652], [1080, 560]] },
-         { y: 610, poly: [[955, 528], [1036, 528], [1040, 612], [955, 612]] }]
+         { y: 610, poly: [[955, 528], [1036, 528], [1040, 612], [955, 612]] }],
+  '2a': [{ y: FAR, poly: [[1020, 560], [1060, 520], [1180, 522], [1280, 560], [1280, 668], [1180, 652], [1060, 612]] },
+         { y: FAR, poly: [[0, 600], [130, 600], [150, 640], [120, 700], [0, 720]] },
+         { y: 622, poly: [[160, 535], [320, 540], [330, 622], [160, 622]] }],
+  '2b': [{ y: FAR, poly: [[0, 560], [60, 580], [150, 640], [260, 700], [280, 720], [0, 720]] },
+         { y: FAR, poly: [[1160, 560], [1220, 540], [1280, 520], [1280, 720], [1100, 720], [1140, 650]] },
+         { y: 580, poly: [[915, 445], [1030, 445], [1030, 580], [915, 580]] }],
+  '2c': [{ y: 522, poly: [[838, 405], [920, 400], [922, 522], [840, 522]] },
+         { y: 557, poly: [[945, 412], [1042, 410], [1044, 556], [948, 556]] },
+         { y: 606, poly: [[1050, 378], [1195, 375], [1198, 606], [1052, 606]] },
+         { y: FAR, poly: [[1160, 440], [1280, 430], [1280, 720], [1110, 640]] },
+         { y: FAR, poly: [[0, 440], [80, 470], [160, 520], [230, 552], [0, 562]] }],
+  '2d': [{ y: FAR, poly: [[0, 440], [110, 440], [115, 600], [0, 610]] }]
 };
 function drawOccluder(poly) {
   const bg = BG[S.scene]; if (!bg) return;
@@ -1210,6 +1693,10 @@ function lehimTint() {
   if (sc === '1b') return f.lamba ? 'rgba(255,200,140,.08)' : 'rgba(60,50,40,.1)';
   if (sc === '1c') return 'rgba(170,165,155,.12)';
   if (sc === '1d') return f.soba ? 'rgba(255,160,90,.1)' : 'rgba(170,130,90,.08)';
+  if (sc === '2a') return 'rgba(150,120,90,.1)';
+  if (sc === '2b') return 'rgba(210,150,90,.12)';
+  if (sc === '2c') return 'rgba(140,118,96,.12)';
+  if (sc === '2d') return 'rgba(130,120,110,.1)';
   return null;
 }
 let LC = null;
@@ -1237,7 +1724,19 @@ const EMIT = {
   '1c': [{ x: 219, y: 6, rate: 2, vx: 10, vy: -16, sp: 4, s: 7, g: 18, life: 3.4, rgb: '120,116,112', a: .35 },
          { x: 484, y: 62, rate: 1.6, vx: 9, vy: -15, sp: 4, s: 6, g: 16, life: 3.2, rgb: '120,116,112', a: .3 },
          { x: 1092, y: 4, rate: 1.4, vx: 12, vy: -10, sp: 6, s: 10, g: 20, life: 4, rgb: '140,136,130', a: .25 }],
-  '1d': [{ x: 1222, y: 140, rate: .6, vx: -2, vy: -10, sp: 3, s: 5, g: 8, life: 2.5, rgb: '200,200,196', a: .18 }]
+  '1d': [{ x: 1222, y: 140, rate: .6, vx: -2, vy: -10, sp: 3, s: 5, g: 8, life: 2.5, rgb: '200,200,196', a: .18 }],
+  // valve pipes: 1 chimney, 2 cracked pipe, 3 tower pipe, 4 whistle, 5 exhaust hood; they puff harder when opened
+  '2a': [{ x: 205, y: 105, rate: 1, vx: 6, vy: -18, sp: 4, s: 7, g: 16, life: 3, rgb: '225,225,220', a: .3, on: () => S.f.v[0] },
+         { x: 815, y: 372, rate: 3, vx: 10, vy: -24, sp: 6, s: 6, g: 18, life: 2, rgb: '235,235,232', a: .4 },
+         { x: 1000, y: 150, rate: 2.4, vx: 6, vy: -30, sp: 8, s: 9, g: 20, life: 3, rgb: '235,235,232', a: .4, on: () => S.f.vanalar },
+         { x: 628, y: 50, rate: 1.2, vx: 5, vy: -20, sp: 3, s: 5, g: 12, life: 2.6, rgb: '230,230,226', a: .3 },
+         { x: 497, y: 150, rate: 1.4, vx: 7, vy: -20, sp: 10, s: 8, g: 16, life: 3, rgb: '225,225,220', a: .3 },
+         { x: 990, y: 330, rate: 1.4, vx: -4, vy: -18, sp: 4, s: 5, g: 12, life: 2.4, rgb: '235,235,232', a: .3 },
+         { x: 1040, y: 292, rate: 1.2, vx: 4, vy: -16, sp: 4, s: 5, g: 12, life: 2.4, rgb: '235,235,232', a: .28 }],
+  '2c': [{ x: 662, y: 40, rate: 1.4, vx: 10, vy: -14, sp: 6, s: 9, g: 18, life: 4, rgb: '140,136,130', a: .3 },
+         { x: 720, y: 20, rate: 1, vx: 8, vy: -12, sp: 6, s: 9, g: 18, life: 4, rgb: '140,136,130', a: .25 },
+         { x: 1110, y: 95, rate: 1, vx: -3, vy: -16, sp: 3, s: 5, g: 10, life: 2.4, rgb: '225,225,220', a: .25 }],
+  '2d': [{ x: 70, y: 120, rate: 2.2, vx: 18, vy: -10, sp: 6, s: 8, g: 20, life: 2.6, rgb: '235,235,232', a: .35, on: () => S.f.vanalar }]
 };
 function puffs(sc, dt, list) {
   const P = PART[sc] = PART[sc] || [];
@@ -1283,6 +1782,14 @@ function drawAmbient(sc, dt) {
   if (sc === '1c') { mist(300, 130, 10, .14); mist(250, 100, -6, .08); lamp(236, 210, 50, '255,200,120', .4); lamp(337, 245, 40, '255,200,120', .35); lamp(588, 245, 50, '255,200,120', .4); signal(1222, 425, 22, 3); }
   if (sc === '1d') { windowSnow([[2, 22, 98, 290], [180, 42, 222, 312], [446, 147, 98, 168], [566, 200, 38, 110], [656, 226, 44, 100], [740, 206, 58, 114], [840, 226, 30, 100]], dt);
     lamp(741, 25, 60, '255,200,120', .35); lamp(762, 116, 55, '255,200,120', .35); }
+  if (sc === '2a') { lamp(401, 252, 80, '255,200,120', .4); lamp(240, 335, 45, '255,200,120', .35); lamp(1198, 398, 40, '255,200,120', .3); mist(260, 140, 8, .08);
+    if (S.f.leakT !== undefined && S.f.leakT < 1.6) { S.f.leakT += dt; glowAt(815, 420, 80 + 300 * S.f.leakT, '235,235,232', .5 * (1 - S.f.leakT / 1.6)); } }
+  if (sc === '2b') { lamp(270, 150, 80, '255,200,120', .4); lamp(1140, 256, 90, '255,210,140', .4); motes(1140, 260, 1000, 560, 160, .4);
+    // the grandfather clock's pendulum still swings, and the wall clocks tick
+    if ((S.t % 1) < dt && S.scene === '2b') tone(2400, 0, .03, .012, 'square'); }
+  if (sc === '2c') { lamp(281, 96, 55, '255,200,120', .4); lamp(886, 236, 50, '255,200,120', .35); mist(380, 120, 7, .12); }
+  if (sc === '2d') { lamp(148, 182, 40, '255,200,120', .35); lamp(206, 386, 38, '255,200,120', .35); lamp(386, 382, 38, '255,200,120', .35); lamp(1200, 150, 40, '255,200,120', .3); lamp(1166, 486, 30, '255,200,120', .3);
+    motes(900, 0, 700, 600, 400, .35); }
 }
 function drawAmbientFront(sc, dt) {
   const f = S.f;
@@ -1318,7 +1825,8 @@ function drawTitle(dt) {
   X.save(); X.textAlign = 'center'; X.fillStyle = '#e9e2d4';
   X.font = '700 96px "Cormorant Garamond", Georgia, serif'; X.fillText('KÜL YAĞMURU', W / 2, 300);
   X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('Son Tohumun Yolculuğu · Prolog', W / 2, 350);
-  if (S.saved) { X.font = '600 26px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf'; X.fillText('1. Bölüm: Durmuş Saatler İstasyonu ›', W / 2, 610); }
+  if (S.saved) { X.font = '600 26px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf'; X.fillText('1. Bölüm: Durmuş Saatler İstasyonu ›', W / 2, 605);
+    if (S.saved >= 2) X.fillText('2. Bölüm: Borular Mahallesi ›', W / 2, 652); }
   const p = .7 + .3 * Math.sin(S.t * 3); X.globalAlpha = p;
   const g = X.createRadialGradient(W / 2, 470, 2, W / 2, 470, 60); g.addColorStop(0, 'rgba(180,240,120,.9)'); g.addColorStop(1, 'rgba(120,200,80,0)');
   X.fillStyle = g; X.beginPath(); X.arc(W / 2, 470, 60, 0, 7); X.fill();
@@ -1342,22 +1850,41 @@ function drawCard(dt) {
   const c = S.card; c.t += dt; const t = c.t, a = Math.max(0, Math.min(1, t / .8, (3.6 - t) / .6));
   X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .6);
   X.save(); X.globalAlpha = a; X.textAlign = 'center';
-  X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('1. Bölüm', W / 2, 300);
-  X.font = '700 72px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#e9c98a'; X.fillText('Durmuş Saatler İstasyonu', W / 2, 380);
+  const b2 = c.n === 2; // accent colour per chapter: amber lamp light, then copper
+  X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText(b2 ? '2. Bölüm' : '1. Bölüm', W / 2, 300);
+  X.font = '700 72px "Cormorant Garamond", Georgia, serif'; X.fillStyle = b2 ? '#d49a6a' : '#e9c98a'; X.fillText(b2 ? 'Borular Mahallesi' : 'Durmuş Saatler İstasyonu', W / 2, 380);
   X.restore();
-  if (t > 3.6) { S.mode = 'play'; S.fade = 1; S.fadeTarget = 0; setTimeout(() => say(['saat', 'soru'], 2.6), 900); }
+  if (t > 3.6) { S.mode = 'play'; S.fade = 1; S.fadeTarget = 0; if (b2) ENTER['2a'](); else setTimeout(() => say(['saat', 'soru'], 2.6), 900); }
 }
 function drawFiliz(dt) {
-  // the seed sprouts in Lehim's chest window: Tohum → Filiz
-  const c = S.filiz; c.t += dt; const t = c.t, im = GRAY.cin_filiz;
+  // the seed grows in Lehim's chest window at the end of a chapter (Tohum → Filiz → İki yaprak)
+  const c = S.filiz; c.t += dt; const t = c.t, key = c.img || 'cin_filiz', im = GRAY[key], [cx, cy, cr] = c.c || [378, 300, 105], [sx, sy] = c.s || [384, 335];
   X.fillStyle = '#000'; X.fillRect(0, 0, W, H);
   const a = Math.max(0, Math.min(1, t / 1.2, (8 - t) / 1));
   if (im) { X.save(); X.globalAlpha = a; const z = 1 + t * .01; X.translate(W / 2, H / 2); X.scale(z, z); X.drawImage(im, -320, -320, 640, 640);
     const g = Math.min(1, Math.max(0, (t - 1.5) / 2.5));
-    X.globalAlpha = a * g; X.save(); X.beginPath(); X.arc(378 - 320, 300 - 320, 105, 0, 7); X.clip(); IMG.cin_filiz && X.drawImage(IMG.cin_filiz, -320, -320, 640, 640); X.restore();
-    glowAt(384 - 320, 335 - 320, 70 + 30 * g, '170,235,110', .3 + .4 * g);
+    X.globalAlpha = a * g; X.save(); X.beginPath(); X.arc(cx - 320, cy - 320, cr, 0, 7); X.clip(); IMG[key] && X.drawImage(IMG[key], -320, -320, 640, 640); X.restore();
+    glowAt(sx - 320, sy - 320, 70 + 30 * g, '170,235,110', .3 + .4 * g);
     X.restore(); }
-  if (t > 8) { S.mode = 'end1'; S.t = 0; }
+  if (t > 8) { S.mode = S.bolum === 2 ? 'end2' : 'end1'; S.t = 0; }
+}
+function drawEnd2(dt) {
+  X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .7);
+  const a = Math.min(1, S.t / 1.5), f = S.f; X.save(); X.globalAlpha = a; X.textAlign = 'center';
+  X.fillStyle = '#e9e2d4'; X.font = '700 76px "Cormorant Garamond", Georgia, serif'; X.fillText('KÜL YAĞMURU', W / 2, 210);
+  X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('2. Bölüm tamamlandı. Tohum iki yaprak açtı.', W / 2, 265);
+  X.font = '700 28px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf';
+  gear(W / 2 - 230, 350, 15, '#d8cfbf'); X.fillText('× ' + S.cark, W / 2 - 185, 360);
+  X.fillStyle = 'rgba(160,215,120,.95)'; X.beginPath(); X.arc(W / 2 - 80, 350, 9, 0, 7); X.fill(); X.fillStyle = '#d8cfbf'; X.fillText('× ' + S.isik, W / 2 - 40, 360);
+  for (let i = 0; i < 5; i++) { X.fillStyle = i < S.canlilik ? 'rgba(160,215,120,.95)' : 'rgba(90,85,78,.8)'; X.beginPath(); X.ellipse(W / 2 + 60 + i * 26, 352, 8, 5.5, -.4, 0, 7); X.fill(); }
+  X.strokeStyle = '#d8cfbf'; X.lineWidth = 2; X.strokeRect(W / 2 + 205, 338, 20, 24); X.fillStyle = '#d8cfbf'; X.fillText('× ' + S.hafiza, W / 2 + 255, 360);
+  X.font = '500 25px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#b8b0a2';
+  X.fillText(f.pirpir === 'joined' ? (f.pirpirHow === 'yaprak' ? 'Pırpır sahte yaprakla sessizce kurtuldu ve yanında.' : 'Pırpır kökle kurtuldu ama alarm çaldı.') : 'Pırpır Fırın\'a götürüldü.', W / 2, 425);
+  X.fillText(f.ikiz === 'bacak' ? 'Vida ile Somun ortak bacaklarıyla birlikte yürüyor.' : f.ikiz === 'ayir' ? 'Vida ile Somun ayrıldı; Somun durdu.' : '', W / 2, 462);
+  X.fillText(f.kurma ? 'Nine Saat kurma anahtarını sana verdi.' : '', W / 2, 499);
+  X.font = '500 24px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#6f685e'; X.fillText('3. Bölüm: Kül Gölü yakında.', W / 2, 560);
+  if (S.t > 2.5) { X.font = '500 22px "Cormorant Garamond", Georgia, serif'; X.fillText('Başa dönmek için dokunun', W / 2, 620); }
+  X.restore();
 }
 function drawEnd1(dt) {
   X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .7);
@@ -1371,8 +1898,7 @@ function drawEnd1(dt) {
   X.strokeStyle = '#d8cfbf'; X.lineWidth = 2; X.strokeRect(W / 2 + 205, 348, 20, 24); X.fillStyle = '#d8cfbf'; X.fillText('× ' + S.hafiza, W / 2 + 255, 370);
   X.font = '500 26px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#b8b0a2';
   X.fillText(f.duduk === 'warm' ? (f.dudukHow === 'soba' ? 'Düdük sobanın başında ısındı ve yanında.' : 'Düdük tohumun ışığıyla ısındı ve yanında.') : 'Düdük vagonda uyuyakaldı.', W / 2, 440);
-  X.font = '500 24px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#6f685e'; X.fillText('2. Bölüm: Borular Mahallesi yakında.', W / 2, 490);
-  if (S.t > 2.5) { X.font = '500 22px "Cormorant Garamond", Georgia, serif'; X.fillText('Başa dönmek için dokunun', W / 2, 580); }
+  if (S.t > 2.5) { X.font = '500 24px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf'; X.fillText('2. Bölüm: Borular Mahallesi için dokunun ›', W / 2, 540); }
   X.restore();
 }
 function drawEnd(dt) {
@@ -1407,6 +1933,7 @@ function step(dt) {
   else if (S.mode === 'card') drawCard(dt);
   else if (S.mode === 'filiz') drawFiliz(dt);
   else if (S.mode === 'end1') drawEnd1(dt);
+  else if (S.mode === 'end2') drawEnd2(dt);
   else {
     // movement
     if (L.moving) {
@@ -1429,15 +1956,17 @@ Promise.all(Object.entries(SRC).map(([k, src]) => new Promise(res => { const i =
     BG.pa = { col: canvasOf(IMG.bg_pa), gry: gray(IMG.bg_pa, .12) };
     BG.pb = { col: canvasOf(IMG.bg_pb), gry: gray(IMG.bg_pb, .12) };
     ['1a', '1b', '1c', '1d'].forEach(k => { const im = IMG['bg_' + k]; if (im) BG[k] = { col: canvasOf(im), gry: GRAY['bg_' + k] }; });
-    try { S.saved = !!JSON.parse(localStorage.getItem('ky_bolum') || 'null'); } catch (e) {}
-    if (/[?&]bolum=1\b/.test(location.search)) { S.saved = true; }
+    ['2a', '2b', '2c', '2d'].forEach(k => { const im = IMG['bg_' + k]; if (im) BG[k] = { col: canvasOf(im), gry: GRAY['bg_' + k] }; });
+    // saved: 0 nothing, 1 chapter 1 reachable, 2 chapter 2 reachable
+    try { const s = JSON.parse(localStorage.getItem('ky_bolum') || 'null'); S.saved = !s ? 0 : s.bolum >= 2 || s.bitti ? 2 : 1; } catch (e) { S.saved = 0; }
+    const q = (location.search.match(/[?&]bolum=(\d)/) || [])[1]; if (q) S.saved = Math.max(S.saved, +q);
     colorLayer = document.createElement('canvas'); colorLayer.width = W; colorLayer.height = H;
     maskC = document.createElement('canvas'); maskC.width = W; maskC.height = H;
     if (!X.roundRect) CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) { this.moveTo(x + r, y); this.arcTo(x + w, y, x + w, y + h, r); this.arcTo(x + w, y + h, x, y + h, r); this.arcTo(x, y + h, x, y, r); this.arcTo(x, y, x + w, y, r); this.closePath(); };
     S.mode = 'title';
   });
 // test hook: ?debug exposes the state for automated play-throughs
-if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, goScene, startBolum1 };
+if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, goScene, startBolum1, startBolum2, hintB2, openDefter };
 })();
 </script>
 

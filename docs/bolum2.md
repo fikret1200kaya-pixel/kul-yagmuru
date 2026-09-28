@@ -1,4 +1,4 @@
-# 2. Bölüm — Borular Mahallesi (tasarım)
+# 2. Bölüm — Borular Mahallesi
 
 Tasarım belgesindeki özetin (2.1–2.7, Seçim 2) adım adım hâli. Vurgu rengi **bakır**; bölüm sonunda tohum **İki yaprak** evresine geçer. Yeni güç: **Kök**. Görseller `docs/gorsel_tarifleri_bolum2.md`'de listelidir.
 
@@ -23,11 +23,10 @@ Tek hareket korunur: Lehim'in göğsünden sürüklenen tohum, bırakıldığı 
 
 ## Bulmacalar
 ### 2.1 Buhar Meydanı — Vanalar (mantık)
-- Meydanın ortasında kazan, önünde beş vanalı bir dağıtıcı var. Her vananın borusu bir yere gider ve açılınca borunun ucundan buhar çıkar: 1 ev bacası, 2 asansör borusu, 3 Nine Saat'in evinin yanındaki patlak boru, 4 buhar düdüğü, 5 tahliye.
-- Boruların kalınlığı boru bileziklerindeki çentik sayısıyla gösterilir (1, 2, 3 çentik; yazı yok). Kazan 6 birim buhar üretir. Açık boruların çentik toplamı 6 değilse kazan göstergesi kırmızıya girer ve emniyet supabı fısıldar.
-- 3 numaralı vana açılırsa patlak borudan meydana buhar dolar (komik öksürme). 4 numaralı vana açılırsa düdük öter ve bir Toplayıcı bakmaya gelir (ceza yok, geri çekilir).
-- **Çözüm:** 1 (1 çentik) + 2 (3 çentik) + 5 (2 çentik) açık; 3 ve 4 kapalı. Asansör borusu ısınır, kule kapısındaki gösterge bakıra döner.
-- İpucu sahnede: 3 numaralı boru Nine Saat'in duvarına buhar sızdırır, 4 numaralı borunun ucu düdüktür ve Toplayıcılar ondan yana bakar.
+- Meydanın ortasında kazan, önünde beş vanalı bir dağıtıcı var. Borulardaki bileziklerde çentikler vardır; soldan sağa **1, 2, 3, 1, 2** (yazı yok).
+- Vanalar (soldan sağa): 1 ev bacası, 2 Nine Saat'in kapısının yanındaki patlak boru, 3 asansör kulesi borusu, 4 buhar düdüğü, 5 tahliye. Kazan 6 birim buhar üretir; açık boruların çentik toplamı 6 değilse gösterge kırmızıda titrer.
+- 2 numara açılınca patlak borudan meydana buhar püskürür ve vana kendiliğinden kapanır. 4 numara açılınca düdük öter, Toplayıcı o yana bakar ve vana kapanır (ceza yok).
+- **Çözüm:** 1 + 3 + 5 açık (1 + 3 + 2 = 6). Kazan ve kule borusu buhar vermeye başlar.
 
 ### 2.2 Paslı Kapı — Kök öğretici
 - Nine Saat'in yuvarlak kapısı içeriden paslanıp kilitlenmiştir. Kapının yanındaki duvar, 3 numaralı borunun sızıntısıyla nemlenmiş ve çatlamıştır.
@@ -45,10 +44,10 @@ Tek hareket korunur: Lehim'in göğsünden sürüklenen tohum, bırakıldığı 
 - **Üçüncü yol: Sahte yaprak.** Nine Saat'in tezgâhındaki **mavi** ve **sarı** boyayı envanterde birleştir → **yeşil boya**. Vida & Somun'un verdiği **teneke yaprağı** yeşile boya → **sahte yaprak**. Sahte yaprağı meydanın öbür ucundaki baca başına bırak: Toplayıcı yeşil kokusunu alıp oraya gider, Lehim ağın düğümünü sessizce çözer. Alarm yok, Pırpır katılır, Işık +2.
 
 ### 2.5 Devriye — gizlilik ve zamanlama
-- Hurdacı Sokağı'nın ucundaki kule geçidinde bir Toplayıcı ileri geri devriye gezer; hortumunun ucundaki fener baktığı yönü gösterir.
-- Sokakta üç varil saklanma yeri vardır. Lehim, Toplayıcı sırtını dönünce bir varilden diğerine koşar. Görülürse Toplayıcı onu nazikçe başlangıca üfler (ceza yok).
-- Tohumun ışığı Lehim'i ele verir: sokaktaki **yağlı bez** Lehim'e sürüklenince göğüs penceresini örter. Bez takılıyken ışık ve kök kullanılamaz; Lehim'e dokununca bez çıkar.
-- Seçim 2'de A seçildiyse iki Toplayıcı ters yönlerde yürür; aralarındaki boşluk daha kısadır.
+- Hurdacı Sokağı'nın ucundaki kule geçidinin önünde bir Toplayıcı ileri geri devriye gezer; fenerinin ışık konisi baktığı yönü gösterir.
+- Tohumun ışığı Lehim'i ele verir: sokaktaki **yağlı bez** Lehim'e sürüklenince göğüs penceresini örter (bez takılıyken ışık ve kök kullanılamaz; Lehim'e dokununca bez çıkar, kuleye girince kendiliğinden çıkar). Bezsiz Lehim yakından her yönde fark edilir.
+- Saklanma yerleri: sandık yığını ve ilk varil. Orada duran Lehim gölgeye çekilir. Toplayıcı sırtını dönüp uzaklaşınca geçide koşulur. Görülürse Toplayıcı onu nazikçe sokağın başına üfler (ceza yok).
+- Seçim 2'de ağ kökle yırtıldıysa (alarm) sokakta iki Toplayıcı devriye gezer.
 
 ### 2.6 Vida & Somun (yan görev)
 - Bir kaynak kazasında sırt sırta yapışmış ikiz hurdacı robotlar, biri sola biri sağa yürümeye çalışır.
@@ -57,8 +56,8 @@ Tek hareket korunur: Lehim'in göğsünden sürüklenen tohum, bırakıldığı 
 - Her iki durumda da teşekkür olarak **teneke yaprak**ı verirler (Seçim 2'nin üçüncü yolu için).
 
 ### 2.7 Asansör Kulesi — büyük mekanizma
-- Kulenin dişli duvarında üç boş mil vardır. Duvara kazınmış eski **montaj çizimi**, üç dişlinin hangi mile hangi boyda takılacağını gösterir: altta büyük, ortada küçük, üstte orta (yazı yok, dişli dişleri sayılabilir).
-- Büyük dişli kulenin dibinde, orta dişli Vida & Somun'un hurda yığınındadır. Küçük dişli kulenin tepesinde bir kancaya asılıdır.
+- Kulenin dişli duvarında üç boş mil vardır. Duvara kazınmış eski **montaj çizimi**, üç dişlinin hangi mile hangi boyda takılacağını gösterir: yukarıdan aşağı **orta, küçük, büyük** (yazı yok, dişli dişleri sayılabilir). Yanlış sırada takılan dişliler kilitlenip geri düşer.
+- Büyük dişli kulenin dibindedir ve Lehim kaldıramaz: tohumu dişliye sürükle, kök onu en alttaki mile taşır. Orta dişli Hurdacı Sokağı'ndaki hurda yığınındadır. Küçük dişli kulenin tepesinde bir kancaya asılıdır.
   - Pırpır yanındaysa: Pırpır'a dokun → uçup küçük dişliyi getirir.
   - Pırpır yoksa: tohumu karşı ağırlığın zincirine sürükle → kök zinciri çeker, kanca aşağı iner (daha uzun yol).
 - Dişliler çizimdeki gibi takılıp 2.1'de asansör borusuna buhar verildiyse kafes yukarı çıkar → bölüm sonu.
