@@ -944,7 +944,7 @@ function drawLehim(dt) {
   if (a === 'leave') { L.alpha = 1 - u; }
   const flip = L.face > 0 ? 1 : -1, shrink = a === 'leave' ? 1 - u * .4 : 1;
   X.save(); X.globalAlpha = Math.max(0, L.alpha);
-  X.fillStyle = 'rgba(0,0,0,.28)'; X.beginPath(); X.ellipse(L.x, L.y - 4, 60 * k * (1 - bob / 120), 9 * s, 0, 0, 7); X.fill();
+  X.fillStyle = 'rgba(0,0,0,.28)'; X.beginPath(); X.ellipse(L.x, L.y - 4, 60 * k * Math.max(0, 1 - bob / 120), 9 * s, 0, 0, 7); X.fill();
   X.translate(L.x, L.y - (a === 'leave' ? u * 40 : 0)); X.scale(flip * k * shrink, k * shrink); X.translate(-119, -279);
   const part = (name, dx = 0, dy = 0, ang = 0) => {
     const im = IMG[pre + name]; if (!im) return; const [ox, oy] = RIG[name], pv = PIV[name] || [119, 200];
@@ -1166,7 +1166,16 @@ function drawEnd(dt) {
 // ---------- loop ----------
 let last = performance.now();
 function frame(now) {
+  // schedule first so one bad draw call can never freeze the game
+  requestAnimationFrame(frame);
   const dt = Math.min(.05, (now - last) / 1000); last = now; S.t += dt;
+  try { step(dt); } catch (e) {
+    console.error(e);
+    for (let i = 0; i < 20; i++) X.restore(); // unwind save() calls left open by the failed frame
+    X.setTransform(1, 0, 0, 1, 0, 0); X.globalAlpha = 1; X.globalCompositeOperation = 'source-over'; X.setLineDash([]);
+  }
+}
+function step(dt) {
   if (S.mode === 'loading') { X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); X.fillStyle = '#6f685e'; X.font = '500 26px Georgia, serif'; X.textAlign = 'center'; X.fillText('Yükleniyor…', W / 2, H / 2); }
   else if (S.mode === 'title') drawTitle(dt);
   else if (S.mode === 'cin') drawCin(dt);
@@ -1187,7 +1196,6 @@ function frame(now) {
   }
   S.fade += (S.fadeTarget - S.fade) * Math.min(1, dt * 5);
   if (S.fade > .01) { X.fillStyle = `rgba(0,0,0,${S.fade})`; X.fillRect(0, 0, W, H); }
-  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 
