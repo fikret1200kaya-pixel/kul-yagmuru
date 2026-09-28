@@ -1,4 +1,4 @@
-# 4. Bölüm — Terk Edilmiş Lunapark (tasarım)
+# 4. Bölüm — Terk Edilmiş Lunapark
 
 Tasarım belgesindeki özetin (4.1–4.7, Seçim 4) adım adım hâli. Vurgu rengi **lunapark kırmızısı**; bölüm sonunda tohum **Tomurcuk** evresine geçer. Yeni güç: **Sarmaşık**. Görseller `docs/gorsel_tarifleri_bolum4.md`'de listelidir.
 
@@ -14,10 +14,12 @@ Tasarım belgesindeki özetin (4.1–4.7, Seçim 4) adım adım hâli. Vurgu ren
 ## Sahneler
 | Kod | Sahne | Çıkışlar |
 |---|---|---|
-| 4a | Lunapark Girişi (merkez) | kapı → park içi (4b, 4c, 4d sağda dizili) |
-| 4b | Dönme Dolap | geri → Giriş |
-| 4c | Çarpışan Arabalar ve Aynalı Labirent girişi | geri → Giriş |
-| 4d | Gölge Tiyatrosu | geri → Giriş, arka kapı → bölüm sonu |
+| 4a | Lunapark Girişi | kapı → Dönme Dolap |
+| 4b | Dönme Dolap | sol → Giriş, sağ → Çarpışan Arabalar |
+| 4c | Çarpışan Arabalar ve Aynalı Labirent girişi | sol → Dönme Dolap, sağ alt → Gölge Tiyatrosu |
+| 4d | Gölge Tiyatrosu | sol → Çarpışan Arabalar, arka kapı → bölüm sonu |
+
+Sahneler bir sıra hâlinde bağlıdır; Tamir Defteri başka sahnedeki hedef için o yöndeki çıkışı gösterir.
 
 ## Tohum sürükleme: Işık, Kök, Nilüfer ve Sarmaşık
 Aynı hareket sürer. Sarmaşık, direk, halat ya da boşluk gibi **tırmanılacak veya köprü kurulacak** yerlere bırakılınca açılır: bir yolu kalıcı olarak bağlar ve Lehim üstünden tırmanır ya da geçer.
@@ -35,13 +37,14 @@ Aynı hareket sürer. Sarmaşık, direk, halat ya da boşluk gibi **tırmanılac
 - **Çözüm:** at (1 nokta), ay (2 nokta), çan (3 nokta).
 
 ### 4.2 Dönme Dolap (denge + Sarmaşık öğretici)
-- Dolap bir yana yatmış, kilitlenmiştir. Dört kabinde farklı ağırlıklar vardır (kum torbası, kırık oturak, kova, paslı zincir). Sıkışan dolabın dengesi bozuktur; göbekteki gösterge hangi yana ağır bastığını gösterir.
-- Ağırlıklar kabinler arasında taşınarak (dokun: al; başka kabine dokun: bırak) karşılıklı kabinler eşitlenince dolap serbest kalır ve en alttaki kabin yere iner.
+- Göbekteki gösterge dolabın hangi yana ağır bastığını gösterir. Göstergeye ya da kabinlere dokununca dolabın çizimi açılır: solda A (kum torbası 4) ve C (kova 2), sağda B (zincir 3) ve D (saksı; boş); yerde kırık oturak (1).
+- Bir yere dokun, sonra başka bir yere dokun: ikisinin içindekiler yer değiştirir. Her kabinde en fazla bir ağırlık olur.
+- **Çözüm:** oturağı D'ye koy, sonra kovayla oturağın yerini değiştir (sol 4+1, sağ 3+2). Yerde ağırlık kalmayınca ve iki yan eşitlenince dolap serbest kalır.
 - Kabindeki eski bir saksıda kuru bir sap vardır; tohum ona dokununca **Sarmaşık** gücü açılır.
 - Tohumu dolabın direğine sürükle → sarmaşık direğe sarılır, Lehim tepeye tırmanır; tepedeki kabinde **1. nota** (küçük silindir) vardır.
 
 ### 4.3 Aynalı Labirent (ışık ve yansıma)
-- Labirentin girişi çarpışan arabaların yanındadır; içerisi yukarıdan bakılan bir yakın çekimdir (5x5 ızgara).
+- Labirentin girişi çarpışan arabaların yanındadır; içerisi yukarıdan bakılan bir yakın çekimdir (5x5 ızgara). Çözüm: (2,1), (4,3) ve takılan aynanın (0,3) yönü çevrilir.
 - Izgarada döndürülebilen **eğik aynalar** ve sabit duvarlar vardır. Tohum ışığı girişten bir huzme olarak çıkar; aynalar dokunuldukça 90° döner.
 - Huzme ortadaki kilidin **foto hücresine** ulaşınca kilit açılır ve **2. nota** (orta silindir) alınır.
 - Kırık bir ayna parçası labirentin girişinde yerde durur; dördüncü aynanın boş yuvasına takılmadan çözüm yoktur.
@@ -49,12 +52,12 @@ Aynı hareket sürer. Sarmaşık, direk, halat ya da boşluk gibi **tırmanılac
 ### 4.4 Çarpışan Arabalar (işbirliği, kaydırma)
 - Pist yukarıdan bakılan bir yakın çekimdir (6x6 ızgara). Arabalar yalnızca ileri geri kayar (baktıkları yönde).
 - Ortadaki kırık arabanın koltuğunda **3. nota** (büyük silindir) vardır; onu pistin çıkış kapısına kadar kaydırmak gerekir.
-- **Kepçe varsa:** büyük (3 hücrelik) arabalara dokunulunca Kepçe onları iter. **Kepçe yoksa:** büyük arabalar sabittir; küçük arabalarla daha uzun bir yol bulunur.
-- **Pırpır varsa:** dokunulunca bir sonraki doğru hamleyi gösteren arabanın üstünde bir an döner (ücretsiz ipucu).
+- Arabalar parmakla kendi yönlerinde sürüklenir. **Kepçe varsa:** büyük (3 hücrelik) arabalar da kayar; en kısa çözüm 6 hamle. **Kepçe yoksa:** büyük arabalar kilitlidir; en kısa çözüm 12 hamle.
+- **Pırpır varsa:** pistin yanındaki Pırpır'a dokununca bir sonraki doğru hamlenin arabası parlar (ücretsiz ipucu).
 
 ### 4.5 Gölge Tiyatrosu (sıralama)
-- Tiyatronun duvarlarında soluk **dört resim** vardır (sırayla: sönen ampuller, dev bir fırın, yanan ağaçlar, kömür taşıyan robot sırası).
-- Kuklacı'ya dokununca kollarını açar: sahnede dört kukla (ampul, fırın, ağaç, ateşçi) karışık asılıdır. Kuklalar perdenin önündeki dört çengele duvar resimlerindeki sıraya göre asılır.
+- Tiyatronun duvarlarında soluk **dört resim** vardır (soldan sağa: sönen ampuller, dev bir fırın, yanan ağaçlar, kömür taşıyan robot sırası).
+- Üç nota silindiri toplanmadan Kuklacı perdeyi açmaz. Sonra perdeye ya da Kuklacı'ya dokununca dört kukla (ampul, fırın, ağaç, Lehim'e benzeyen ateşçi) karışık hâlde gelir; kuklaya, sonra çengele dokunarak duvar resimlerindeki sırayla asılır.
 - Doğru sırada gösteri başlar (kısa canlandırma, yazısız). Son kukla Lehim'e benzeyen bir ateşçidir → **hafıza parıltısı** (tam ekran, turuncu, kısa).
 - Işık +1; Lehim'in düşünce balonunda ilk kez **kapak + ateş** simgesi görünür.
 
@@ -65,7 +68,7 @@ Aynı hareket sürer. Sarmaşık, direk, halat ya da boşluk gibi **tırmanılac
 ### 4.7 Nota'nın Yayı — Seçim 4
 - Melodi biterken Nota'nın yayı boşalır, sesi yavaşlar, gözleri söner.
 - **A: Hayat ver.** Tohumu Nota'ya sürükle: −1 Canlılık, Nota yanında kalır; 6. Bölüm'de final kapısını kendisi çalar.
-- **B: Melodiyi ezberle.** Nota susar; oyuncunun defterine melodi çizilir. 6. Bölüm'de oyuncu melodiyi kendisi çalar (daha zor).
+- **B: Melodiyi ezberle.** Nota'ya yardım etmeden tiyatronun arka kapısına gidilirse seçim ekranı çıkar; sağ taraf seçilince Nota susar. 6. Bölüm'de oyuncu melodiyi kendisi çalar (daha zor).
 - **Üçüncü yol: Kurma Anahtarı.** 2. Bölüm'de Nine Saat'ten alınan anahtar Nota'ya verilince yayı kurulur. Canlılık harcanmaz, Işık +2.
 
 ## İsteğe bağlı

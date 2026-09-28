@@ -43,10 +43,16 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 - Alınan boyalı nesneler için arka plana yama basılır (`stamp`): `patch_varil`, `patch_lambalar`.
 - Yardımcılar bölümler arası `S.dost` içinde taşınır (Düdük, Pırpır, kurma anahtarı, Kepçe, su şişesi); Pırpır katıldıysa sonraki bölümlerde de Lehim'i izler.
 
+## 4. Bölüm
+- Oynanabilir: 4a Giriş, 4b Dönme Dolap, 4c Çarpışan Arabalar ve Aynalı Labirent, 4d Gölge Tiyatrosu (sahneler sıralı bağlı). Tasarım `docs/bolum4.md`, görseller `tools_bolum4.py`.
+- Sarmaşık gücü: hedefin `sar()` işleyicisi varsa tohum orada sarmaşık olur.
+- Pist bulmacası `PIST0` (Kepçe ile 6, onsuz 12 hamle; `pistNext` en kısa yolu arar, Pırpır ipucu için). Ayna labirenti `aynaTrace`.
+- Gölge oyununun son kuklası Lehim'in kendi görseliyle çizilir (`drawKukla`).
+
 ## Sıradaki iş
 - Test sürümünde ipuçları sınırsız ve ücretsiz: `IPUCU_SINIRSIZ = true`. Yayından önce `false` yapılacak.
 - Test sürümünde devriyede iki kez yakalanınca Toplayıcı uyuklar (geçiş serbest). Oyuncu devriyeyi geçemedi: telefonda zamanlama ve saklanma yerleri gözden geçirilecek.
-- 4. Bölüm — Terk Edilmiş Lunapark: tasarım `docs/bolum4.md`, ChatGPT tarifleri `docs/gorsel_tarifleri_bolum4.md`. Görseller `assets/raw/`'a gelince kodlanacak (yeni güç Sarmaşık: tırmanma ve köprü).
+- 5. Bölüm — Büyük Fırın: önce adım adım tasarım ve görsel tarifleri.
 - 1. Bölüm prototipini telefonda test etmek (GDD üretim planı aşama 4).
 - Bilinen eksik: körük alındıktan sonra duvardaki körük görseli arka planda kalıyor.
 
