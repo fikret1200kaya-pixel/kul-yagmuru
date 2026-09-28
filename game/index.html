@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Kül Yağmuru Prolog</title>
+<title>Kül Yağmuru</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&display=swap">
 <style>
@@ -39,7 +39,12 @@ const SRC = {
   patch_boru:'img/patch_boru.png', patch_tugla:'img/patch_tugla.png', it_boru:'img/it_boru.png',
   it_tugla:'img/it_tugla.png', it_kol:'img/it_kol.png', l1:'img/lehim_1.png', l1t:'img/lehim_1_tekkol.png',
   l3:'img/lehim_3.png', l5:'img/lehim_5.png', b2:'img/bahcivan_2.png', b3:'img/bahcivan_3.png',
-  b4:'img/bahcivan_4.png', sd_head:'img/side_head.png', sd_body:'img/side_body.png', sd_armN:'img/side_armN.png', sd_armF:'img/side_armF.png', sd_legN:'img/side_legN.png', sd_legF:'img/side_legF.png', sd_scarf:'img/side_scarf.png', ...(() => { const o = {}; ['head','body','armL','armR','scarf','legL','legR'].forEach(p => { o['rA_' + p] = 'img/rig_lehim_1_' + p + '.png'; if (p !== 'armR') o['rB_' + p] = 'img/rig_lehim_1_tekkol_' + p + '.png'; }); return o; })(), avuc:'img/cin_avuc.jpg', kapak:'img/cin_kapak.jpg', b5:'img/b5_panel.jpg', lever:'img/lever.png'
+  b4:'img/bahcivan_4.png',
+  bg_1a:'img/bg_1a.jpg', bg_1b:'img/bg_1b.jpg', bg_1c:'img/bg_1c.jpg', bg_1d:'img/bg_1d.jpg',
+  cu_saat:'img/cu_saat.jpg', cu_tarife:'img/cu_tarife.jpg', cu_makas:'img/cu_makas.jpg', cu_bilet:'img/cu_bilet.jpg',
+  cu_hafiza1:'img/cu_hafiza1.jpg', cin_filiz:'img/cin_filiz.jpg',
+  ...(() => { const o = {}; [['duduk', 4], ['giseci', 3], ['kedi', 4], ['guvercin', 3]].forEach(([n, c]) => { for (let i = 1; i <= c; i++) o[n + i] = 'img/' + n + '_' + i + '.png'; }); return o; })(),
+  sd_head:'img/side_head.png', sd_body:'img/side_body.png', sd_armN:'img/side_armN.png', sd_armF:'img/side_armF.png', sd_legN:'img/side_legN.png', sd_legF:'img/side_legF.png', sd_scarf:'img/side_scarf.png', ...(() => { const o = {}; ['head','body','armL','armR','scarf','legL','legR'].forEach(p => { o['rA_' + p] = 'img/rig_lehim_1_' + p + '.png'; if (p !== 'armR') o['rB_' + p] = 'img/rig_lehim_1_tekkol_' + p + '.png'; }); return o; })(), avuc:'img/cin_avuc.jpg', kapak:'img/cin_kapak.jpg', b5:'img/b5_panel.jpg', lever:'img/lever.png'
 };
 const IMG = {}, GRAY = {};
 function gray(img, tint = 0.10) {
@@ -80,11 +85,33 @@ function chime() { [659, 784, 880].forEach((f, i) => tone(f, i * .12, .9, .08));
 const THEME = [659.3, 784, 880, 987.8, 1318.5];
 function musicBox() { THEME.forEach((f, i) => { tone(f, i * .42, 1.6, .07); tone(f * 2, i * .42, .6, .015); }); }
 function bad() { tone(140, 0, .25, .08, 'sawtooth'); tone(110, .1, .3, .06, 'sawtooth'); }
+// sustained note with a soft attack and release (steam whistle, drezin horn)
+function held(freq, t0, dur, vol, type = 'triangle') {
+  if (!AC) return; const o = AC.createOscillator(), g = AC.createGain(), v = AC.createOscillator(), vg = AC.createGain();
+  const t = AC.currentTime + t0; o.type = type; o.frequency.value = freq;
+  v.frequency.value = 6; vg.gain.value = freq * .012; v.connect(vg).connect(o.frequency);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .03); g.gain.setValueAtTime(vol, t + dur - .05); g.gain.linearRampToValueAtTime(0, t + dur);
+  o.connect(g).connect(AC.destination); o.start(t); v.start(t); o.stop(t + dur + .05); v.stop(t + dur + .05);
+}
+// Düdük's rhythm: 0 = short, 1 = long
+const RIT = [0, 0, 1, 0], RIT_LEN = [.16, .6];
+function whistle(vol = .07, pat = RIT) {
+  let t = 0; pat.forEach(b => { const d = RIT_LEN[b]; held(1175, t, d, vol); held(1568, t, d, vol * .5); t += d + .16; }); return t;
+}
+function bell() { [0, .7, 1.4].forEach(t => { tone(523, t, 1.6, .09); tone(1046, t, .8, .03); tone(784, t + .02, 1.2, .04); }); }
+function purr() { for (let i = 0; i < 6; i++) tone(55 + (i % 2) * 6, i * .22, .2, .05, 'sawtooth'); }
+let horn = null;
+function hornStart() {
+  if (!AC || horn) return; const o = AC.createOscillator(), g = AC.createGain(); o.type = 'triangle'; o.frequency.value = 392;
+  g.gain.setValueAtTime(0, AC.currentTime); g.gain.linearRampToValueAtTime(.08, AC.currentTime + .03); o.connect(g).connect(AC.destination); o.start(); horn = { o, g };
+}
+function hornStop() { if (!horn) return; const { o, g } = horn, t = AC.currentTime; g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.linearRampToValueAtTime(0, t + .05); o.stop(t + .08); horn = null; }
 
 // ---------- state ----------
 const S = {
   mode: 'loading', t: 0, scene: 'pa', isik: 0, cark: 0, canlilik: 4,
-  inv: [], f: {}, halos: { pa: [], pb: [] }, bubble: null, hint: null, overlay: null, cin: null, fade: 0, fadeTarget: 0
+  inv: [], f: {}, halos: { pa: [], pb: [] }, bubble: null, hint: null, overlay: null, cin: null, fade: 0, fadeTarget: 0,
+  bolum: 0, hafiza: 0
 };
 const L = { x: 560, y: 600, tx: 560, ty: 600, face: 1, moving: false, arm: false, anim: null, animT: 0, then: null, alpha: 1 };
 const BG = {};
@@ -95,18 +122,23 @@ function stamp(scene, key, x, y) {
   BG[scene].gry.getContext('2d').drawImage(gray(IMG[key]), x, y);
   colorDirty = true;
 }
-function halo(x, y, r) { S.halos[S.scene].push({ x, y, r, t: 0 }); colorDirty = true; S.isik++; chime(); }
+function halo(x, y, r) { (S.halos[S.scene] = S.halos[S.scene] || []).push({ x, y, r, t: 0 }); colorDirty = true; S.isik++; chime(); }
 
 // ---------- helpers ----------
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const inRect = (p, r) => p.x >= r[0] && p.x <= r[0] + r[2] && p.y >= r[1] && p.y <= r[1] + r[3];
-function say(icons, dur = 2.6) { S.bubble = { icons, t: dur, max: dur }; }
+// at: optional [x, y] anchor for a bubble over someone other than Lehim
+function say(icons, dur = 2.6, at = null) { S.bubble = { icons, t: dur, max: dur, at }; }
 function addItem(id) { if (!S.inv.includes(id)) S.inv.push(id); clank(); }
 function takeItem(id) { S.inv = S.inv.filter(i => i !== id); }
-function walkBounds(x, y) {
-  return S.scene === 'pa' ? { x: clamp(x, 140, 1085), y: clamp(y, 458, 700) } : { x: clamp(x, 250, 1180), y: clamp(y, 505, 690) };
-}
-function scaleAt(y) { return S.scene === 'pa' ? .82 + .38 * (y - 458) / 242 : .82 + .34 * (y - 505) / 185; }
+// walkable floor per scene: x range, y range, and Lehim's scale at the far and near edge
+const GEO = {
+  pa: { x: [140, 1085], y: [458, 700], s: [.82, .38] }, pb: { x: [250, 1180], y: [505, 690], s: [.82, .34] },
+  '1a': { x: [285, 1000], y: [566, 700], s: [.78, .3] }, '1b': { x: [245, 1030], y: [596, 705], s: [.84, .3] },
+  '1c': { x: [130, 1150], y: [572, 705], s: [.78, .32] }, '1d': { x: [330, 1040], y: [578, 705], s: [.84, .34] }
+};
+function walkBounds(x, y) { const g = GEO[S.scene]; return { x: clamp(x, g.x[0], g.x[1]), y: clamp(y, g.y[0], g.y[1]) }; }
+function scaleAt(y) { const g = GEO[S.scene]; return g.s[0] + g.s[1] * (y - g.y[0]) / (g.y[1] - g.y[0]); }
 function walkTo(x, y, then) {
   const p = walkBounds(x, y); L.tx = p.x; L.ty = p.y; L.then = then || null;
   if (Math.hypot(L.tx - L.x, L.ty - L.y) < 4) { L.moving = false; const t = L.then; L.then = null; t && t(); return; }
@@ -152,23 +184,296 @@ const HS = {
     { id: 'gate', r: [600, 120, 340, 370], stand: [770, 520], tap() {
         if (!S.f.gateOpen) { play('strain', 1); say(['kilit']); return; }
         if (!S.f.farewell) return;
-        walkTo(770, 505, () => play('leave', 2.2, () => { S.mode = 'end'; S.t = 0; musicBox(); })); } }
+        walkTo(770, 505, () => play('leave', 2.2, () => { S.fadeTarget = 1; setTimeout(startBolum1, 700); })); } }
   ]
 };
 
-function goScene(id) {
-  S.fadeTarget = 1;
+// spawn: [x, y] where Lehim appears in the new scene
+function goScene(id, spawn) {
+  S.fadeTarget = 1; S.hint = null;
   setTimeout(() => {
-    S.scene = id; colorDirty = true; L.alpha = 1;
-    if (id === 'pb') { L.x = 330; L.y = 610; L.tx = L.x; L.ty = L.y; L.anim = null; }
-    S.fadeTarget = 0;
+    S.scene = id; colorDirty = true; L.alpha = 1; L.anim = null; L.moving = false; L.then = null;
+    if (id === 'pb') spawn = [330, 610];
+    if (spawn) { L.x = spawn[0]; L.y = spawn[1]; L.tx = L.x; L.ty = L.y; }
+    S.fadeTarget = 0; ENTER[id] && ENTER[id]();
   }, 600);
 }
 
+// =====================================================================
+// 1. BÖLÜM — DURMUŞ SAATLER İSTASYONU
+// 1a Peron (merkez) · 1b Bekleme Salonu · 1c Makas Kulübesi · 1d Vagon İçi
+// =====================================================================
+const ENTER = {};
+const COMBO = { 'miknatis+tel': 'olta' };
+// poster: the green seed train leaves at 4:10 (hour index, minutes)
+const SAAT_HEDEF = [4, 10];
+// switch panel: 3x3 tiles, bits N=1 E=2 S=4 W=8; path enters row 2 from the west, leaves row 0 to the east
+const MK = { base: { I: 5, L: 3 }, types: ['I', 'L', 'L', 'L', 'I', 'L', 'L', 'I', 'L'], rot0: [1, 2, 3, 0, 0, 2, 1, 0, 1] };
+const rotMask = (m, r) => { for (let i = 0; i < r; i++) m = ((m << 1) | (m >> 3)) & 15; return m; };
+
+function saveProgress() { try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 1, cark: S.cark, isik: S.isik, canlilik: S.canlilik })); } catch (e) {} }
+function startBolum1(fromSave) {
+  if (fromSave) { try { const s = JSON.parse(localStorage.getItem('ky_bolum') || '{}'); S.cark = s.cark || 0; S.isik = s.isik || 0; S.canlilik = s.canlilik || 4; } catch (e) {} }
+  S.bolum = 1; S.f = { mk: MK.rot0.slice() }; S.inv = ['dal']; S.overlay = null; S.bubble = null; S.hint = null;
+  L.arm = true; L.alpha = 1; L.anim = null; L.moving = false; L.then = null; L.face = 1;
+  S.scene = '1a'; L.x = L.tx = 330; L.y = L.ty = 640; colorDirty = true;
+  saveProgress(); S.mode = 'card'; S.card = { t: 0 }; S.fade = 0; S.fadeTarget = 0;
+}
+function clockRing() {
+  S.f.saat = 1; bell(); halo(317, 220, 300);
+  setTimeout(() => { S.f.duduk = 'cold'; whistle(.03); say(['duduk', 'unlem'], 3); }, 2600);
+}
+function dudukWarm(how) {
+  const f = S.f; if (f.duduk === 'warm') return;
+  f.duduk = 'warm'; f.dudukHow = how; f.dudukT = 0; f.dudukLeft = 0; // coming back for him undoes the choice
+  halo(850, 480, 240); setTimeout(() => whistle(.08), 700);
+  setTimeout(() => { f.dudukGone = 1; say(['duduk', 'ray'], 2.6); }, 4200);
+}
+function seedDrain() { S.canlilik = Math.max(0, S.canlilik - 1); S.f.drain = 1.6; tone(330, 0, .8, .06); tone(247, .3, 1, .05); }
+function inspect(id) {
+  if (id === 'bilet') { S.overlay = { type: 'bilet', t: 0 }; return; }
+  if (id === 'afis') { S.overlay = { type: 'tarife', t: 0, piece: true }; return; }
+  if (id === 'olta') { say(['olta', 'disli']); return; }
+  if (id === 'dal') { say(['kubbe']); return; }
+  say([id, 'soru'], 1.6);
+}
+
+HS['1a'] = [
+  { id: 'toSalon', to: '1b', spawn: [270, 650], r: [0, 230, 150, 270], stand: [290, 600] },
+  { id: 'toKulube', to: '1c', spawn: [180, 650], r: [560, 440, 250, 100], stand: [690, 572] },
+  { id: 'toVagon', to: '1d', spawn: [768, 600], r: [915, 295, 75, 160], stand: [985, 585] },
+  { id: 'saat', r: [270, 170, 95, 95], stand: [320, 590], tap() {
+      if (S.f.saat) { say(['saat', 'duduk']); return; }
+      if (!S.f.disliOn) { say(['saat', 'disli', 'soru']); return; }
+      S.overlay = { type: 'saat', t: 0, h: 6, m: 30, move: true, up: true }; },
+    use: { disli() { takeItem('disli'); S.f.disliOn = 1; clank(); S.overlay = { type: 'saat', t: 0, h: 6, m: 30, move: true, up: true }; } } },
+  { id: 'direk', r: [205, 255, 70, 125], stand: [300, 600], tap() { S.overlay = { type: 'tarife', t: 0 }; },
+    use: { afis() { takeItem('afis'); S.f.afisOn = 1; clank(); halo(240, 320, 170); S.overlay = { type: 'tarife', t: 0 }; } } },
+  { id: 'boru', r: [282, 470, 120, 130], stand: [345, 600], on: () => !S.f.disliTaken, tap() { say(['goz', 'disli']); play('strain', .9); },
+    use: { olta() { S.f.disliTaken = 1; clank(); play('dance', 1.2); addItem('disli'); },
+      miknatis() { say(['tel', 'soru']); bad(); }, tel() { say(['miknatis', 'soru']); bad(); } } },
+  { id: 'bavul', r: [122, 612, 125, 105], stand: [295, 660], on: () => !S.f.tel, tap() { S.f.tel = 1; clank(); addItem('tel'); } },
+  { id: 'kedi', r: [60, 490, 190, 80], stand: [295, 630], on: () => !S.f.kediUp, tap() {
+      S.f.kediUp = 1; S.f.kediT = 0; purr(); play('shrug', 1.2); } },
+  { id: 'jeton', r: [110, 515, 60, 40], stand: [295, 630], on: () => S.f.kediUp && !S.f.jeton, tap() { S.f.jeton = 1; addItem('jeton'); } },
+  { id: 'cark1', r: [185, 515, 50, 40], stand: [295, 630], on: () => S.f.kediUp && !S.f.cark1, tap() { S.f.cark1 = 1; S.cark++; chime(); } },
+  { id: 'afis', r: [790, 585, 80, 55], stand: [830, 640], on: () => !S.f.afisTaken, tap() { S.f.afisTaken = 1; addItem('afis'); } }
+];
+HS['1b'] = [
+  { id: 'toPeron', to: '1a', spawn: [300, 610], r: [15, 180, 185, 400], stand: [255, 625] },
+  { id: 'bench', r: [215, 480, 330, 140], stand: [380, 640], on: () => !S.f.ampul, tap() {
+      if (!S.f.benchLit) { say(['goz', 'karanlik']); S.f.teach = 2.4; S.f.teachTo = [384, 600]; return; }
+      S.f.ampul = 1; addItem('ampul'); },
+    light() { S.f.benchLit = 1; S.f.litT = 0; tone(523, 0, 1.2, .06); tone(784, .15, 1.2, .05); } },
+  { id: 'lamba', r: [470, 0, 130, 130], stand: [540, 605], tap() { say(S.f.lamba ? ['ampul'] : ['ampul', 'soru']); },
+    use: { ampul() { takeItem('ampul'); S.f.lamba = 1; S.f.lambaT = 0; clank(); setTimeout(() => halo(534, 60, 420), 400); } } },
+  { id: 'hopar', r: [245, 210, 130, 120], stand: [330, 600], on: () => !S.f.miknatis, tap() {
+      S.f.miknatis = 1; S.f.hoparT = 0; clank(); setTimeout(() => { clank(); addItem('miknatis'); }, 500); } },
+  { id: 'radyator', r: [590, 460, 205, 135], stand: [690, 610], on: () => !S.f.cark2, tap() {
+      if (!S.f.lamba) { say(['goz', 'karanlik']); return; } S.f.cark2 = 1; S.cark++; chime(); } },
+  { id: 'fresk', r: [565, 90, 355, 350], stand: [740, 600], tap() { say(['tren', 'kubbe'], 2.8); } },
+  { id: 'gise', r: [1040, 250, 175, 250], stand: [1020, 640], tap() {
+      S.f.giseAwake = 1; if (S.f.bilet) { say(['bilet'], 2, [1126, 290]); return; }
+      say(['jeton'], 2.6, [1126, 290]); },
+    use: { jeton() {
+      takeItem('jeton'); S.f.giseAwake = 1; S.f.stampT = 0; clank();
+      setTimeout(() => { tone(200, 0, .1, .1, 'square'); S.f.bilet = 1; addItem('bilet'); halo(1126, 380, 220); S.overlay = { type: 'bilet', t: 0 }; }, 900); } } }
+];
+HS['1c'] = [
+  { id: 'toPeron', to: '1a', spawn: [690, 580], r: [0, 470, 110, 250], stand: [140, 650] },
+  { id: 'koruk', r: [80, 150, 100, 235], stand: [200, 600], on: () => !S.f.koruk, tap() { S.f.koruk = 1; addItem('koruk'); } },
+  { id: 'cuval', r: [105, 400, 140, 125], stand: [230, 610], on: () => !S.f.cark3, tap() { S.f.cark3 = 1; S.cark++; chime(); play('shrug', 1); } },
+  { id: 'panel', r: [268, 268, 100, 185], stand: [330, 600], tap() { S.overlay = { type: 'makas', t: 0 }; } },
+  { id: 'tunel', r: [1065, 185, 190, 195], stand: [1080, 610], tap() { say(S.f.gecit ? ['ray'] : ['kilit', 'duduk']); } },
+  { id: 'dudukK', r: [830, 430, 130, 230], stand: [760, 650], on: () => S.f.dudukGone && !S.f.dudukLeft, tap() {
+      S.f.dudukWhistleT = 0; whistle(.08); } },
+  { id: 'drezin', r: [480, 335, 326, 230], stand: [640, 650], tap() {
+      const f = S.f;
+      if (!f.makas) { say(['ray', 'soru']); return; }
+      if (!f.saat) { say(['kilit', 'soru']); return; }
+      if (f.duduk === 'cold' && !f.dudukLeft) { S.overlay = { type: 'secim', t: 0 }; return; }
+      openRitim(); } }
+];
+HS['1d'] = [
+  { id: 'toPeron', to: '1a', spawn: [985, 590], r: [715, 170, 106, 300], stand: [768, 590] },
+  { id: 'duduk', r: [765, 380, 170, 245], stand: [720, 640], on: () => !S.f.dudukGone, tap() {
+      const f = S.f;
+      if (!f.duduk) { say(['soguk', 'saat', 'soru']); return; }
+      if (f.duduk === 'cold' && f.dudukLeft) { say(['soguk'], 2); return; }
+      if (f.duduk === 'cold') { f.dudukWhistleT = 0; whistle(.035); say(['soguk', 'ates', 'soru'], 2.8); return; }
+      whistle(.08); },
+    light() {
+      const f = S.f;
+      if (!f.duduk) { say(['saat', 'soru']); return; }
+      if (f.duduk !== 'cold') return;
+      seedDrain(); setTimeout(() => dudukWarm('tohum'), 900); } },
+  { id: 'soba', r: [1075, 345, 192, 295], stand: [1030, 640], tap() {
+      const f = S.f; say(f.soba ? ['ates'] : f.kor ? ['koruk', 'soru'] : f.briket ? ['ates', 'soru'] : ['briket', 'soru']); },
+    use: {
+      briket() { takeItem('briket'); S.f.briket = 1; clank(); },
+      koruk() {
+        const f = S.f;
+        if (!f.kor) { f.puff = 1; bad(); say(['ates', 'soru']); return; }
+        takeItem('koruk'); f.soba = 1; f.sobaT = 0; tone(90, 0, 1.4, .08, 'sawtooth'); halo(1170, 480, 260);
+        if (f.duduk === 'cold') setTimeout(() => dudukWarm('soba'), 1300);
+      } },
+    light() {
+      const f = S.f;
+      if (f.kor) return;
+      if (!f.briket) { say(['briket', 'soru']); return; }
+      f.kor = 1; tone(523, 0, 1, .05); } },
+  { id: 'briket', r: [950, 522, 90, 90], stand: [960, 650], on: () => !S.f.briketTaken, tap() { S.f.briketTaken = 1; addItem('briket'); } },
+  { id: 'raf', r: [340, 10, 170, 110], stand: [470, 600], on: () => !S.f.guvercin, tap() { play('strain', 1); say(['guvercin', 'kol', 'x']); },
+    use: { olta() {
+      S.f.guvercin = 1; S.f.guvT = 0; clank(); tone(988, .2, .3, .05); tone(1175, .45, .3, .05);
+      setTimeout(() => { S.hafiza++; halo(425, 90, 260); S.overlay = { type: 'hafiza', t: 0 }; }, 2200); } } },
+  { id: 'tablo', r: [985, 45, 180, 220], stand: [1000, 600], tap() { say(['tren', 'kubbe'], 2.8); } }
+];
+ENTER['1d'] = () => { if (S.f.duduk === 'cold' && !S.f.dudukLeft) setTimeout(() => { whistle(.03); }, 900); };
+
+function openRitim() {
+  S.overlay = { type: 'ritim', t: 0, seq: [], press: null, up: true, lamps: [], ok: false };
+  if (S.f.duduk === 'warm') setTimeout(() => { S.f.dudukWhistleT = 0; whistle(.08); }, 700);
+}
+function bolum1Finish() {
+  S.f.gecit = 1; S.f.gecitT = 0; S.lock = true; musicBox();
+  setTimeout(() => walkTo(640, 650, () => { L.alpha = 0; S.f.ride = 0; tone(98, 0, 3, .08, 'sawtooth'); }), 1600);
+  setTimeout(() => { S.fadeTarget = 1; }, 5200);
+  setTimeout(() => { S.lock = false; S.mode = 'filiz'; S.filiz = { t: 0 }; S.fade = 0; S.fadeTarget = 0; S.overlay = null; musicBox();
+    try { localStorage.setItem('ky_bolum', JSON.stringify({ bolum: 1, bitti: 1, cark: S.cark, isik: S.isik, canlilik: S.canlilik })); } catch (e) {} }, 6200);
+}
+
+// sprite from a character sheet, bottom-centred; colour when the character has been helped
+function spr(key, cx, by, h, col = false, flip = 1, alpha = 1) {
+  const im = col ? IMG[key] : GRAY[key]; if (!im) return;
+  const w = im.width * h / im.height; X.save(); X.globalAlpha *= alpha; X.translate(cx, by); X.scale(flip, 1); X.drawImage(im, -w / 2, -h, w, h); X.restore();
+}
+function glowAt(x, y, r, rgb, a) { const g = X.createRadialGradient(x, y, 2, x, y, r); g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`); X.fillStyle = g; X.beginPath(); X.arc(x, y, r, 0, 7); X.fill(); }
+function chalk(draw) { X.save(); X.strokeStyle = 'rgba(236,232,222,.78)'; X.lineWidth = 2.4; X.lineCap = 'round'; X.lineJoin = 'round'; draw(); X.restore(); }
+
+const DRAW1 = {
+  '1a'(dt) {
+    const f = S.f;
+    if (f.saat) glowAt(317, 220, 70, '240,190,110', .18 + .06 * Math.sin(S.t * 2));
+    // cat on the bench; after petting it sits up and moves aside
+    if (!f.kediUp) { spr('kedi1', 150, 556, 66); if (Math.sin(S.t * 1.3) > .7) { X.fillStyle = 'rgba(230,225,215,.6)'; X.font = '600 18px Georgia'; X.fillText('z', 196, 506 - (S.t % 2) * 6); } }
+    else { f.kediT += dt; spr(f.kediT < 1.6 ? 'kedi3' : 'kedi1', f.kediT < 1.6 ? 110 : 60, 556, f.kediT < 1.6 ? 92 : 60, false, -1); }
+    if (f.kediUp && !f.jeton) { icon('jeton', 140, 536, 26, '#bfb29a'); }
+    if (f.kediUp && !f.cark1) gear(210, 537, 12 + Math.sin(S.t * 4), '#d9c48e');
+    if (!f.tel && Math.sin(S.t * 2.2) > .6) glowAt(190, 650, 26, '240,230,200', .18);
+    if (!f.afisTaken && CROP.afis && GRAY.cu_tarife) { X.save(); X.translate(830, 612); X.rotate(-.35 + Math.sin(S.t * 3) * .05); X.drawImage(GRAY.cu_tarife, 120, 415, 400, 150, -40, -15, 80, 30); X.restore(); }
+    if (!f.disliTaken && f.disliOn === undefined) { const a = .25 + .2 * Math.sin(S.t * 3); glowAt(318, 520, 20, '220,200,150', a); }
+  },
+  '1b'(dt) {
+    const f = S.f;
+    if (!f.lamba) { // unlit hall
+      X.fillStyle = 'rgba(8,7,6,.5)'; X.fillRect(0, 0, W, H);
+      if (!f.benchLit || f.litT < 1.5) { let a = .8; if (f.benchLit) { f.litT += dt; a = .8 * (1 - f.litT / 1.5); }
+        const g = X.createRadialGradient(384, 590, 10, 384, 590, 150); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(1, 'rgba(0,0,0,0)'); X.fillStyle = g; X.fillRect(230, 440, 310, 250); }
+    } else {
+      f.lambaT = (f.lambaT || 0) + dt; const a = Math.min(1, f.lambaT);
+      glowAt(534, 70, 260, '255,196,110', .22 * a); glowAt(534, 60, 50, '255,220,150', .6 * a);
+      // chalk drawings revealed by the light: magnet on a wire fishing a gear out of a pipe; a sleeping cat over a coin
+      X.save(); X.globalAlpha = a; chalk(() => {
+        const ox = 215, oy = 345;
+        X.beginPath(); X.moveTo(ox, oy); X.lineTo(ox + 40, oy - 20); X.lineTo(ox + 40, oy + 30); X.stroke();
+        X.beginPath(); X.moveTo(ox + 34, oy + 30); X.lineTo(ox + 34, oy + 38); X.arc(ox + 40, oy + 38, 6, Math.PI, 0, true); X.lineTo(ox + 46, oy + 30); X.stroke();
+        X.strokeRect(ox + 20, oy + 55, 70, 26); X.beginPath(); X.arc(ox + 40, oy + 68, 8, 0, 7); X.stroke();
+        X.beginPath(); X.moveTo(ox + 40, oy + 46); X.lineTo(ox + 40, oy + 56); X.stroke();
+        const cx = 440, cy = 395;
+        X.beginPath(); X.ellipse(cx, cy, 34, 16, 0, Math.PI, 0); X.lineTo(cx + 34, cy + 6); X.lineTo(cx - 34, cy + 6); X.closePath(); X.stroke();
+        X.beginPath(); X.moveTo(cx + 22, cy - 12); X.lineTo(cx + 26, cy - 24); X.lineTo(cx + 30, cy - 12); X.stroke();
+        X.beginPath(); X.arc(cx, cy + 20, 9, 0, 7); X.stroke(); X.beginPath(); X.moveTo(cx, cy + 8); X.lineTo(cx, cy + 3); X.stroke();
+      }); X.restore();
+      if (!f.cark2) gear(700, 585, 12 + Math.sin(S.t * 4), '#d9c48e');
+    }
+    if (f.benchLit && !f.ampul) { glowAt(384, 600, 50, '150,220,100', .25); icon('ampul', 384, 600, 28, '#d8cfbf'); }
+    // ticket clerk behind the booth window
+    const pose = f.stampT !== undefined && f.stampT < 1.2 ? 'giseci3' : f.giseAwake ? 'giseci2' : 'giseci1';
+    if (f.stampT !== undefined) f.stampT += dt;
+    X.save(); X.beginPath(); X.rect(1060, 280, 132, 170); X.clip(); spr(pose, 1126, 452 + Math.sin(S.t * 1.4) * 1.5, 150, !!f.bilet); X.restore();
+  },
+  '1c'(dt) {
+    const f = S.f;
+    // tunnel gate: bars until Düdük's rhythm opens it
+    let lift = 0; if (f.gecit) { f.gecitT += dt; lift = Math.min(1, f.gecitT / 1.6); }
+    X.save(); X.beginPath(); X.rect(1065, 190, 185, 190); X.clip();
+    X.strokeStyle = 'rgba(40,34,28,.95)'; X.lineWidth = 9;
+    for (let i = 0; i < 7; i++) { const x = 1078 + i * 26; X.beginPath(); X.moveTo(x, 195 - lift * 190); X.lineTo(x, 380 - lift * 190); X.stroke(); }
+    X.lineWidth = 7; [230, 300, 360].forEach(y => { X.beginPath(); X.moveTo(1065, y - lift * 190); X.lineTo(1250, y - lift * 190); X.stroke(); });
+    X.restore();
+    if (f.makas) { glowAt(318, 300, 40, '255,196,110', .35 + .1 * Math.sin(S.t * 3)); }
+    if (f.dudukGone && !f.dudukLeft) {
+      const wh = f.dudukWhistleT !== undefined && f.dudukWhistleT < 2.4; if (wh) f.dudukWhistleT += dt;
+      spr(wh ? 'duduk3' : 'duduk2', 895, 660 + Math.sin(S.t * 2) * 1.5, 215, true, -1);
+    }
+    if (f.ride !== undefined) { f.ride += dt; X.fillStyle = `rgba(0,0,0,${Math.min(.6, f.ride * .2)})`; X.fillRect(0, 0, W, H); }
+  },
+  '1d'(dt) {
+    const f = S.f;
+    // stove: bricks, ember, fire
+    if (f.briket) { X.fillStyle = 'rgba(30,26,22,.9)'; [[1106, 506], [1126, 511], [1144, 504]].forEach(([x, y]) => X.fillRect(x, y, 20, 13)); }
+    if (f.kor) glowAt(1135, 505, f.soba ? 90 : 30, f.soba ? '255,150,60' : '255,110,40', f.soba ? .55 + .15 * Math.sin(S.t * 9) : .5 + .2 * Math.sin(S.t * 5));
+    if (f.soba) { for (let i = 0; i < 5; i++) { const x = 1110 + i * 12, h = 26 + 12 * Math.sin(S.t * 8 + i * 1.7);
+      X.fillStyle = 'rgba(255,170,70,.75)'; X.beginPath(); X.moveTo(x - 7, 508); X.quadraticCurveTo(x, 508 - h * 1.4, x + 7, 508); X.fill(); } glowAt(1135, 480, 260, '255,170,90', .12); }
+    if (f.puff) { f.puff += dt; const u = f.puff - 1; X.fillStyle = `rgba(200,195,185,${Math.max(0, .6 - u * .5)})`; for (let i = 0; i < 8; i++) { X.beginPath(); X.arc(1135 + Math.cos(i) * u * 70, 480 - Math.sin(i * 2) * u * 50, 10 + u * 12, 0, 7); X.fill(); } if (u > 1.2) f.puff = 0; }
+    if (!f.briketTaken) { if (Math.sin(S.t * 2) > .7) glowAt(995, 565, 30, '240,230,200', .15); }
+    // Düdük: frozen by the stove, then shivering, then warm
+    if (!f.dudukGone) {
+      if (f.duduk === 'warm') { f.dudukT += dt; spr(f.dudukT < 2.2 ? 'duduk3' : 'duduk4', 850, 628, 250, true); }
+      else {
+        const sh = f.duduk === 'cold' && !f.dudukLeft ? Math.sin(S.t * 40) * 1.6 : 0;
+        spr('duduk1', 850 + sh, 628, 240);
+        X.fillStyle = 'rgba(235,240,245,.55)'; for (let i = 0; i < 10; i++) { const a = i * 2.4; X.beginPath(); X.arc(850 + Math.cos(a) * 60, 470 + Math.sin(a * 1.3) * 70, 2.5, 0, 7); X.fill(); }
+        if (!f.duduk || f.dudukLeft) { if (Math.sin(S.t * 1.1) > .6) { X.fillStyle = 'rgba(230,225,215,.6)'; X.font = '600 20px Georgia'; X.fillText('z', 900, 395 - (S.t % 2) * 8); } }
+      }
+    }
+    // pigeon stuck in the luggage rack, then flying off
+    if (!f.guvercin) spr('guvercin1', 425 + Math.sin(S.t * 14) * (Math.sin(S.t * .8) > .5 ? 2 : 0), 110, 80);
+    else { f.guvT += dt; const u = f.guvT; if (u < 2.4) spr(u < 1.4 ? 'guvercin2' : 'guvercin3', 425 + u * 120, 110 + Math.sin(u * 6) * 10 - u * 20 + (u > 1.4 ? (u - 1.4) * 250 : 0), 90, true); }
+  }
+};
+// the seed-light drag gesture teaches itself toward a target
+function teachTarget() { return S.f.teachTo || [1180, 620]; }
+
+// ---------- 1. bölüm hints (Tamir Defteri) ----------
+function hintB1() {
+  const f = S.f, has = i => S.inv.includes(i);
+  if (!f.ampul) return ['1b', 'bench'];
+  if (!f.lamba) return ['1b', 'lamba'];
+  if (!f.miknatis) return ['1b', 'hopar'];
+  if (!f.tel) return ['1a', 'bavul'];
+  if (has('miknatis') && has('tel')) return ['inv', 'olta'];
+  if (!f.disliTaken) return ['1a', 'boru'];
+  if (!f.afisTaken) return ['1a', 'afis'];
+  if (!f.afisOn) return ['1a', 'direk'];
+  if (!f.saat) return ['1a', 'saat'];
+  if (!f.jeton) return ['1a', 'kedi'];
+  if (!f.bilet) return ['1b', 'gise'];
+  if (!f.koruk && !f.soba && f.duduk !== 'warm') return ['1c', 'koruk'];
+  if (!f.makas) return ['1c', 'panel'];
+  if (f.duduk === 'cold' && !f.dudukLeft) {
+    if (!f.briketTaken) return ['1d', 'briket'];
+    return ['1d', f.soba ? 'duduk' : 'soba'];
+  }
+  return ['1c', 'drezin'];
+}
+function showHintB1() {
+  const [sc, id] = hintB1();
+  if (sc === 'inv') { say(['miknatis', 'tel', 'olta'], 3); return; }
+  let target = id;
+  if (sc !== S.scene) { const ex = HS[S.scene].find(h => h.to === (S.scene === '1a' ? sc : '1a')); target = ex ? ex.id : null; }
+  if (target) S.hint = { id: target, t: 3.2 };
+  if (id === 'bench' && S.scene === '1b' && !f_benchLit()) say(['goz', 'karanlik']);
+  if (id === 'drezin' && S.f.dudukLeft) say(RIT.map(b => b ? 'uzun' : 'kisa'), 3.4);
+  if (id === 'soba' && S.scene === '1d') say(S.f.briket ? (S.f.kor ? ['koruk'] : ['tohum', 'ates']) : ['briket']);
+}
+function f_benchLit() { return !!S.f.benchLit; }
+
 // ---------- icons for thought bubbles ----------
-function icon(name, x, y, s) {
+function icon(name, x, y, s, col = '#2b2520') {
   const g = X; g.save(); g.translate(x, y); g.scale(s / 40, s / 40);
-  g.lineWidth = 3; g.strokeStyle = '#2b2520'; g.fillStyle = '#2b2520'; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.lineWidth = 3; g.strokeStyle = col; g.fillStyle = col; g.lineCap = 'round'; g.lineJoin = 'round';
   const P = new Path2D();
   switch (name) {
     case 'kubbe': g.beginPath(); g.arc(0, 8, 16, Math.PI, 0); g.stroke(); g.beginPath(); g.moveTo(-16, 8); g.lineTo(16, 8); g.stroke();
@@ -187,27 +492,65 @@ function icon(name, x, y, s) {
     case 'karanlik': g.beginPath(); g.arc(0, 0, 14, 0, 7); g.fill(); break;
     case 'kapak': g.beginPath(); g.arc(0, 0, 13, 0, 7); g.stroke(); g.beginPath(); g.arc(0, 0, 7, 0, 7); g.stroke(); g.fillRect(-17, -3, 5, 6); break;
     case 'kilit': g.beginPath(); g.rect(-11, -2, 22, 17); g.stroke(); g.beginPath(); g.arc(0, -2, 8, Math.PI, 0); g.stroke(); break;
+    case 'ampul': g.beginPath(); g.arc(0, -5, 11, Math.PI * .8, Math.PI * .2); g.lineTo(5, 8); g.lineTo(-5, 8); g.closePath(); g.stroke();
+      g.fillRect(-5, 10, 10, 3); g.fillRect(-4, 15, 8, 3); break;
+    case 'miknatis': g.lineWidth = 7; g.beginPath(); g.moveTo(-10, -14); g.lineTo(-10, 2); g.arc(0, 2, 10, Math.PI, 0, true); g.lineTo(10, -14); g.stroke();
+      g.lineWidth = 3; g.beginPath(); g.moveTo(-15, -12); g.lineTo(-5, -12); g.moveTo(5, -12); g.lineTo(15, -12); g.stroke(); break;
+    case 'tel': g.beginPath(); for (let i = 0; i <= 40; i++) { const a = i / 40 * Math.PI * 6, xx = -16 + i * .8; g.lineTo(xx, Math.sin(a) * 7); } g.stroke(); break;
+    case 'olta': g.beginPath(); g.moveTo(-16, 14); g.lineTo(8, -16); g.moveTo(8, -16); g.lineTo(8, 4); g.stroke();
+      g.lineWidth = 4; g.beginPath(); g.moveTo(3, 4); g.lineTo(3, 12); g.arc(8, 12, 5, Math.PI, 0, true); g.lineTo(13, 4); g.stroke(); break;
+    case 'disli': g.beginPath(); for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2, rr = i % 2 ? 11 : 15; g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } g.closePath(); g.stroke();
+      g.beginPath(); g.arc(0, 0, 4, 0, 7); g.stroke(); break;
+    case 'saat': g.beginPath(); g.arc(0, 0, 15, 0, 7); g.stroke(); g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -10); g.moveTo(0, 0); g.lineTo(7, 4); g.stroke(); break;
+    case 'jeton': g.beginPath(); g.arc(0, 0, 14, 0, 7); g.stroke(); g.beginPath(); g.arc(0, 0, 9, 0, 7); g.stroke(); g.beginPath(); g.arc(0, 0, 3, 0, 7); g.fill(); break;
+    case 'kedi': g.beginPath(); g.arc(0, 4, 12, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-11, -1); g.lineTo(-9, -15); g.lineTo(-3, -8); g.moveTo(11, -1); g.lineTo(9, -15); g.lineTo(3, -8); g.stroke();
+      g.beginPath(); g.moveTo(-7, 3); g.quadraticCurveTo(-4, 0, -1, 3); g.moveTo(1, 3); g.quadraticCurveTo(4, 0, 7, 3); g.stroke(); break;
+    case 'tren': g.strokeRect(-16, -10, 22, 14); g.strokeRect(6, -4, 10, 8); g.fillRect(-12, -16, 5, 6);
+      [-10, 0, 11].forEach(v => { g.beginPath(); g.arc(v, 8, 4, 0, 7); g.stroke(); }); break;
+    case 'duduk': g.beginPath(); g.roundRect(-14, -6, 22, 12, 5); g.stroke(); g.beginPath(); g.moveTo(8, -2); g.lineTo(16, -4); g.moveTo(8, 2); g.lineTo(16, 4); g.stroke();
+      g.beginPath(); g.arc(-6, 0, 3, 0, 7); g.fill(); [[-6, -12], [0, -15], [6, -12]].forEach(([a, b]) => { g.beginPath(); g.arc(a, b, 2, 0, 7); g.fill(); }); break;
+    case 'soguk': for (let i = 0; i < 3; i++) { g.save(); g.rotate(i * Math.PI / 3); g.beginPath(); g.moveTo(0, -15); g.lineTo(0, 15); g.moveTo(-4, -11); g.lineTo(0, -7); g.lineTo(4, -11); g.moveTo(-4, 11); g.lineTo(0, 7); g.lineTo(4, 11); g.stroke(); g.restore(); } break;
+    case 'ates': g.beginPath(); g.moveTo(0, 15); g.bezierCurveTo(-16, 12, -12, -4, -4, -8); g.bezierCurveTo(-4, -2, 0, 0, 2, -3); g.bezierCurveTo(2, -10, 6, -14, 4, -18);
+      g.bezierCurveTo(16, -8, 16, 12, 0, 15); g.closePath(); g.stroke(); break;
+    case 'tohum': g.fillStyle = '#6fae4a'; g.beginPath(); g.ellipse(0, 4, 9, 6, -.4, 0, 7); g.fill(); g.strokeStyle = '#6fae4a'; g.beginPath(); g.moveTo(0, -2); g.quadraticCurveTo(2, -10, 10, -12); g.stroke(); break;
+    case 'ray': g.beginPath(); g.moveTo(-16, -6); g.lineTo(16, -6); g.moveTo(-16, 6); g.lineTo(16, 6); g.stroke(); [-10, 0, 10].forEach(v => { g.beginPath(); g.moveTo(v, -10); g.lineTo(v, 10); g.stroke(); }); break;
+    case 'kisa': g.beginPath(); g.arc(0, 0, 6, 0, 7); g.fill(); break;
+    case 'uzun': g.fillRect(-16, -4, 32, 8); break;
+    case 'briket': [[-12, 2], [2, 2], [-5, -9]].forEach(([a, b]) => g.strokeRect(a, b, 12, 10)); break;
+    case 'koruk': g.beginPath(); g.moveTo(-14, -12); g.lineTo(6, -5); g.lineTo(6, 5); g.lineTo(-14, 12); g.closePath(); g.stroke(); g.beginPath(); g.moveTo(6, 0); g.lineTo(17, 0); g.stroke();
+      g.beginPath(); g.moveTo(-9, -8); g.lineTo(-9, 8); g.moveTo(-3, -6); g.lineTo(-3, 6); g.stroke(); break;
+    case 'afis': g.beginPath(); g.moveTo(-12, -15); g.lineTo(12, -15); g.lineTo(12, 6); g.lineTo(6, 2); g.lineTo(0, 8); g.lineTo(-6, 3); g.lineTo(-12, 7); g.closePath(); g.stroke();
+      g.beginPath(); g.arc(4, -7, 4, 0, 7); g.stroke(); break;
+    case 'bilet': g.strokeRect(-11, -15, 22, 30); g.beginPath(); g.moveTo(-7, 8); g.bezierCurveTo(-2, 8, -2, -6, 7, -6); g.stroke(); break;
+    case 'guvercin': g.beginPath(); g.ellipse(-2, 4, 12, 8, 0, 0, 7); g.stroke(); g.beginPath(); g.arc(9, -6, 6, 0, 7); g.stroke();
+      g.beginPath(); g.moveTo(15, -6); g.lineTo(20, -4); g.lineTo(15, -3); g.fill(); g.beginPath(); g.moveTo(-6, 0); g.lineTo(-16, -12); g.lineTo(2, -3); g.stroke(); break;
   }
   g.restore();
 }
 function drawBubble() {
   const b = S.bubble; if (!b) return;
   const a = Math.min(1, b.t * 3, (b.max - b.t) * 6), box = lehimBox();
-  const n = b.icons.length, w = 20 + n * 46, h = 62, x = clamp(L.x - w / 2 + 40, 10, W - w - 10), y = Math.max(10, box[1] - h - 30);
+  const ax = b.at ? b.at[0] : L.x, top = b.at ? b.at[1] : box[1];
+  const n = b.icons.length, w = 20 + n * 46, h = 62, x = clamp(ax - w / 2 + 40, 10, W - w - 10), y = clamp(top - h - 30, 96, H - h - 40);
   X.save(); X.globalAlpha = a;
   X.fillStyle = 'rgba(236,228,212,.95)'; X.strokeStyle = 'rgba(60,50,40,.9)'; X.lineWidth = 2;
   X.beginPath(); X.roundRect(x, y, w, h, 26); X.fill(); X.stroke();
-  [[L.x + 6, y + h + 10, 7], [L.x - 4, y + h + 24, 4.5]].forEach(([cx, cy, r]) => { X.beginPath(); X.arc(cx, cy, r, 0, 7); X.fill(); X.stroke(); });
+  [[ax + 6, y + h + 10, 7], [ax - 4, y + h + 24, 4.5]].forEach(([cx, cy, r]) => { X.beginPath(); X.arc(cx, cy, r, 0, 7); X.fill(); X.stroke(); });
   b.icons.forEach((ic, i) => icon(ic, x + 33 + i * 46, y + h / 2, 34));
   X.restore();
 }
 
 // ---------- inventory ----------
-const SLOT = { x: 712, y: 10, s: 78, gap: 8 };
+const SLOT = { x: 700, y: 10, s: 66, gap: 6, n: 8 };
 function slotRect(i) { return [SLOT.x + i * (SLOT.s + SLOT.gap), SLOT.y, SLOT.s, SLOT.s]; }
+// items cut from a close-up image: [image, sx, sy, sw, sh]
+const CROP = { bilet: ['cu_bilet', 22, 90, 280, 440], afis: ['cu_tarife', 120, 415, 400, 150] };
 function drawItem(id, cx, cy, size) {
   const im = { boru: 'it_boru', tugla: 'it_tugla', kol: 'it_kol' }[id];
   if (im) { const g = GRAY[im], k = size / Math.max(g.width, g.height); X.drawImage(g, cx - g.width * k / 2, cy - g.height * k / 2, g.width * k, g.height * k); return; }
+  const cr = CROP[id];
+  if (cr && GRAY[cr[0]]) { const [k0, sx, sy, sw, sh] = cr, k = size / Math.max(sw, sh); X.drawImage(GRAY[k0], sx, sy, sw, sh, cx - sw * k / 2, cy - sh * k / 2, sw * k, sh * k); return; }
+  if (['ampul', 'tel', 'miknatis', 'olta', 'disli', 'jeton', 'koruk', 'briket', 'afis', 'bilet'].includes(id)) { icon(id, cx, cy, size * .72, '#cfc6b6'); return; }
   X.save(); X.translate(cx, cy); X.strokeStyle = '#cfc6b6'; X.fillStyle = '#cfc6b6'; X.lineWidth = 3; X.lineCap = 'round';
   if (id === 'vida') { X.beginPath(); X.moveTo(-9, -14); X.lineTo(9, -14); X.moveTo(0, -14); X.lineTo(0, 16); X.stroke(); for (let i = -8; i < 14; i += 5) { X.beginPath(); X.moveTo(-5, i); X.lineTo(5, i + 3); X.stroke(); } }
   if (id === 'makas') { X.fillStyle = '#9d968a'; X.beginPath(); X.moveTo(-18, 14); X.lineTo(12, -16); X.lineTo(17, -11); X.lineTo(-13, 19); X.closePath(); X.fill(); X.stroke(); }
@@ -222,10 +565,14 @@ function drawInv() {
   X.font = '700 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf'; X.textBaseline = 'middle';
   gear(114, 49, 13, '#d8cfbf'); X.fillText('×' + S.cark, 132, 50);
   X.fillStyle = 'rgba(160,215,120,.95)'; X.beginPath(); X.arc(190, 49, 7 + Math.sin(S.t * 3) * 1.2, 0, 7); X.fill(); X.fillStyle = '#d8cfbf'; X.fillText('×' + S.isik, 204, 50);
-  for (let i = 0; i < 6; i++) {
+  if (S.bolum > 0) { // hafıza çizimleri
+    X.strokeStyle = '#d8cfbf'; X.lineWidth = 2; X.strokeRect(246, 38, 20, 24); X.beginPath(); X.moveTo(250, 56); X.lineTo(256, 46); X.lineTo(262, 56); X.stroke();
+    X.fillText('×' + S.hafiza, 272, 50);
+  }
+  for (let i = 0; i < SLOT.n; i++) {
     const r = slotRect(i); X.fillStyle = 'rgba(20,18,16,.5)'; X.beginPath(); X.roundRect(r[0], r[1], r[2], r[3], 12); X.fill();
     X.strokeStyle = 'rgba(216,207,191,.25)'; X.lineWidth = 1.5; X.stroke();
-    const id = S.inv[i]; if (id && !(drag && drag.item === id)) drawItem(id, r[0] + r[2] / 2, r[1] + r[3] / 2, 58);
+    const id = S.inv[i]; if (id && !(drag && drag.item === id && drag.moved)) drawItem(id, r[0] + r[2] / 2, r[1] + r[3] / 2, 50);
   }
   X.restore();
 }
@@ -247,6 +594,7 @@ function currentHint() {
   if (!f.pitSeen) return 'pit'; if (!f.gateOpen) return 'panel'; return 'gate';
 }
 function showHint() {
+  if (S.bolum === 1) { showHintB1(); return; }
   const id = currentHint(); S.hint = { id, t: 3.2 };
   if (id === 'corner' || (id === 'lehim' && !S.f.vidaTaken)) say(['goz', 'karanlik']);
 }
@@ -257,20 +605,30 @@ function pt(e) { const r = C.getBoundingClientRect(); return { x: (e.clientX - r
 function hsAt(p) { return (HS[S.scene] || []).find(h => (!h.on || h.on()) && inRect(p, h.r)); }
 C.addEventListener('pointerdown', e => {
   e.preventDefault(); const p = pt(e); audioStart();
-  if (S.mode === 'title') { S.mode = 'cin'; S.cin = { t: 0 }; musicBox(); return; }
+  if (S.mode === 'title') {
+    if (S.saved && p.y > 555 && p.y < 640) { startBolum1(true); return; }
+    S.mode = 'cin'; S.cin = { t: 0 }; musicBox(); return;
+  }
   if (S.mode === 'cin') { S.cin.t = Math.max(S.cin.t, 9.2); return; }
-  if (S.mode === 'end') { if (S.t > 2.5) location.reload(); return; }
+  if (S.mode === 'card') { S.card.t = Math.max(S.card.t, 3.2); return; }
+  if (S.mode === 'filiz') { S.filiz.t = Math.max(S.filiz.t, 7); return; }
+  if (S.mode === 'end' || S.mode === 'end1') { if (S.t > 2.5) location.href = location.pathname; return; }
   if (S.mode !== 'play' || S.fade > .2) return;
   if (S.overlay) { overlayDown(p); return; }
   if (inRect(p, [10, 10, 78, 78])) { showHint(); return; }
-  for (let i = 0; i < S.inv.length; i++) if (inRect(p, slotRect(i))) { drag = { item: S.inv[i], x: p.x, y: p.y }; return; }
-  if (L.anim) return;
+  for (let i = 0; i < S.inv.length; i++) if (inRect(p, slotRect(i))) { drag = { item: S.inv[i], x: p.x, y: p.y, x0: p.x, y0: p.y }; return; }
+  if (L.anim || S.lock) return;
   if (inRect(p, lehimBox())) { drag = { light: true, x: p.x, y: p.y, x0: p.x, y0: p.y }; return; }
   down = p;
 });
-C.addEventListener('pointermove', e => { if (drag) { const p = pt(e); drag.x = p.x; drag.y = p.y; } });
+C.addEventListener('pointermove', e => {
+  const p = pt(e);
+  if (S.overlay && S.overlay.move) { overlayMove(p); return; }
+  if (drag) { drag.x = p.x; drag.y = p.y; if (Math.hypot(p.x - drag.x0, p.y - drag.y0) > 14) drag.moved = true; }
+});
 C.addEventListener('pointerup', e => {
   const p = pt(e);
+  if (S.overlay && S.overlay.up) { overlayUp(p); return; }
   if (drag) {
     const d = drag; drag = null;
     if (d.light) {
@@ -280,8 +638,14 @@ C.addEventListener('pointerup', e => {
       else { say(['goz', 'soru'], 1.6); }
       return;
     }
-    // item dropped
-    for (let i = 0; i < S.inv.length; i++) if (inRect(p, slotRect(i)) && S.inv[i] !== d.item) { say(['x'], 1.2); bad(); return; }
+    // item tapped without dragging: look at it
+    if (!d.moved) { inspect(d.item); return; }
+    // item dropped on another item: try to combine
+    for (let i = 0; i < S.inv.length; i++) if (inRect(p, slotRect(i)) && S.inv[i] !== d.item) {
+      const other = S.inv[i], k = [d.item, other].sort().join('+');
+      if (COMBO[k]) { takeItem(d.item); takeItem(other); addItem(COMBO[k]); chime(); return; }
+      say(['x'], 1.2); bad(); return;
+    }
     if (inRect(p, lehimBox())) { useOnLehim(d.item); return; }
     const h = hsAt(p);
     if (h && h.use && h.use[d.item]) { walkTo(h.stand[0], h.stand[1], () => h.use[d.item]()); return; }
@@ -290,9 +654,10 @@ C.addEventListener('pointerup', e => {
   }
   if (!down) return; down = null;
   const h = hsAt(p);
-  if (h) walkTo(h.stand[0], h.stand[1], () => h.tap());
+  if (h) walkTo(h.stand[0], h.stand[1], () => h.to ? goScene(h.to, h.spawn) : h.tap());
   else walkTo(p.x, p.y);
 });
+C.addEventListener('pointercancel', () => { drag = null; down = null; if (S.overlay && S.overlay.up) overlayUp(null); });
 function useOnLehim(item) {
   const f = S.f;
   if (item === 'kol' && !L.arm) {
@@ -308,8 +673,155 @@ function useOnLehim(item) {
 
 // ---------- overlays ----------
 const PAN = { x: 340, y: 60, s: 600, hubs: [[160, 412], [314, 412], [468, 412]], order: [1, 2, 0] };
+// ---------- 1. bölüm overlays ----------
+const CU = { x: 340, y: 60, s: 600 };                       // square close-up frame
+const DIAL = { x: CU.x + 298, y: CU.y + 279, r: 216 };        // clock face centre and radius
+const GRID = { cx: [208, 317, 427], cy: [205, 307, 408], cell: 96, lamps: [174, 231, 294, 358, 420], ly: 102 };
+const inCU = p => p.x >= CU.x && p.y >= CU.y && p.x <= CU.x + CU.s && p.y <= CU.y + CU.s;
+const angOf = p => Math.atan2(p.x - DIAL.x, -(p.y - DIAL.y));  // 0 at 12 o'clock, clockwise
+function mkTrace() { // follow the rails from the west edge of the bottom-left tile
+  let r = 2, c = 0, from = 8, n = 0;
+  const opp = { 1: 4, 2: 8, 4: 1, 8: 2 }, step = { 1: [-1, 0], 2: [0, 1], 4: [1, 0], 8: [0, -1] };
+  while (r >= 0 && r < 3 && c >= 0 && c < 3) {
+    const i = r * 3 + c, m = rotMask(MK.base[MK.types[i]], S.f.mk[i]); if (!(m & from)) break;
+    n++; const out = m & ~from; if (r === 0 && c === 2 && out === 2) return { n, done: true };
+    const [dr, dc] = step[out]; r += dr; c += dc; from = opp[out];
+  }
+  return { n, done: false };
+}
+function overlayDownB1(p) {
+  const o = S.overlay;
+  if (o.type === 'saat') {
+    if (o.solved) return;
+    if (!inCU(p)) { S.overlay = null; return; }
+    const d = Math.hypot(p.x - DIAL.x, p.y - DIAL.y); if (d > DIAL.r) return;
+    // inner disc turns the short hand, the outer ring the long one
+    o.grab = d < 125 ? 'h' : 'm'; overlayMove(p); return;
+  }
+  if (o.type === 'makas') {
+    if (o.solved) return;
+    if (!inCU(p)) { S.overlay = null; return; }
+    const rx = p.x - CU.x, ry = p.y - CU.y;
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) if (Math.abs(rx - GRID.cx[c]) < GRID.cell / 2 && Math.abs(ry - GRID.cy[r]) < GRID.cell / 2) {
+      const i = r * 3 + c; S.f.mk[i] = (S.f.mk[i] + 1) % 4; clank();
+      const tr = mkTrace(); if (tr.done) { o.solved = true; o.solveT = 0; chime(); setTimeout(() => { S.overlay = null; S.f.makas = 1; halo(318, 330, 240); say(['ray', 'unlem']); }, 1700); }
+    }
+    return;
+  }
+  if (o.type === 'secim') {
+    if (p.x < W / 2) { S.overlay = null; say(['duduk', 'soguk'], 2.4); }        // go back to help him
+    else { S.f.dudukLeft = 1; S.overlay = null; tone(196, 0, 1.4, .06); setTimeout(openRitim, 500); } // leave him sleeping
+    return;
+  }
+  if (o.type === 'ritim') {
+    if (o.ok) return;
+    if (p.x > W - 130 && p.y < 130) { S.overlay = null; hornStop(); return; }
+    if (S.f.duduk === 'warm' && Math.hypot(p.x - 250, p.y - 560) < 70) { S.f.dudukWhistleT = 0; whistle(.08); return; }
+    o.press = S.t; hornStart(); clank();
+    return;
+  }
+  S.overlay = null; // tarife, bilet, hafiza: tap to close
+}
+function overlayMove(p) {
+  const o = S.overlay;
+  if (o.type === 'saat' && o.grab && !o.solved) {
+    let a = angOf(p); if (a < 0) a += Math.PI * 2;
+    if (o.grab === 'h') o.h = a / (Math.PI * 2) * 12; else o.m = a / (Math.PI * 2) * 60;
+  }
+}
+function overlayUp(p) {
+  const o = S.overlay;
+  if (o.type === 'saat' && o.grab) {
+    if (o.grab === 'h') o.h = Math.round(o.h) % 12; else o.m = (Math.round(o.m / 5) * 5) % 60;
+    o.grab = null; clank();
+    if (o.h === SAAT_HEDEF[0] % 12 && o.m === SAAT_HEDEF[1]) { o.solved = true; o.solveT = 0; setTimeout(() => { S.overlay = null; clockRing(); }, 1400); }
+  }
+  if (o.type === 'ritim' && o.press !== null) {
+    const d = S.t - o.press; o.press = null; hornStop();
+    const b = d < .32 ? 0 : 1, i = o.seq.length; o.seq.push(b);
+    if (b !== RIT[i]) { o.lamps = o.seq.slice(); o.fail = .6; setTimeout(() => { bad(); o.seq = []; o.lamps = []; }, 350); return; }
+    o.lamps = o.seq.slice();
+    if (o.seq.length === RIT.length) { o.ok = true; chime(); setTimeout(() => { S.overlay = null; bolum1Finish(); }, 1300); }
+  }
+}
+function drawOverlayB1(o, dt) {
+  const img = k => GRAY[k];
+  if (o.type === 'saat') {
+    img('cu_saat') && X.drawImage(img('cu_saat'), CU.x, CU.y, CU.s, CU.s);
+    if (o.solved) { o.solveT += dt; X.globalAlpha = Math.min(1, o.solveT); IMG.cu_saat && X.drawImage(IMG.cu_saat, CU.x, CU.y, CU.s, CU.s); X.globalAlpha = 1; }
+    const hand = (v, n, len, w) => { X.save(); X.translate(DIAL.x, DIAL.y); X.rotate(v / n * Math.PI * 2); X.fillStyle = '#231d18';
+      X.beginPath(); X.moveTo(-w / 2, 18); X.lineTo(-w * .35, -len + 10); X.lineTo(0, -len); X.lineTo(w * .35, -len + 10); X.lineTo(w / 2, 18); X.closePath(); X.fill(); X.restore(); };
+    if (S.f.disliOn) { hand(o.h + (o.grab === 'h' ? 0 : 0), 12, 118, 16); hand(o.m, 60, 178, 10); }
+    X.fillStyle = '#8a6a3a'; X.beginPath(); X.arc(DIAL.x, DIAL.y, 16, 0, 7); X.fill();
+    if (!o.solved) { X.font = '600 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.textAlign = 'center'; X.fillText('×', CU.x + CU.s + 30, CU.y + 20); }
+  }
+  if (o.type === 'tarife') {
+    const im = img('cu_tarife'); if (!im) return;
+    if (S.f.afisOn || o.piece) {
+      if (o.piece) { X.drawImage(im, 120, 415, 400, 150, W / 2 - 300, H / 2 - 112, 600, 225); }
+      else { X.drawImage(im, CU.x, CU.y, CU.s, CU.s); const g = IMG.cu_tarife; if (g) { X.globalAlpha = .9; X.drawImage(g, 120, 415, 400, 150, CU.x + 120, CU.y + 415, 400, 150); X.globalAlpha = 1; } }
+    } else {
+      // only the top half hangs on the pillar: cut along a torn edge
+      X.save(); X.beginPath(); X.moveTo(CU.x, CU.y); X.lineTo(CU.x + CU.s, CU.y); X.lineTo(CU.x + CU.s, CU.y + 420);
+      for (let i = 12; i >= 0; i--) X.lineTo(CU.x + i * CU.s / 12, CU.y + 408 + (i % 2 ? 16 : -6) + (i % 3) * 5);
+      X.closePath(); X.clip(); X.drawImage(im, CU.x, CU.y, CU.s, CU.s); X.restore();
+    }
+  }
+  if (o.type === 'bilet') { const im = S.f.bilet ? IMG.cu_bilet : img('cu_bilet'); im && X.drawImage(im, W / 2 - 320, H / 2 - 320, 640, 640); }
+  if (o.type === 'hafiza') { const im = IMG.cu_hafiza1; if (im) { X.globalAlpha = Math.min(1, o.t); X.drawImage(im, CU.x, CU.y, CU.s, CU.s); X.globalAlpha = 1; } }
+  if (o.type === 'makas') {
+    img('cu_makas') && X.drawImage(img('cu_makas'), CU.x, CU.y, CU.s, CU.s);
+    const tr = mkTrace();
+    // fixed rail stubs: in from the west on the bottom row, out to the east on the top row
+    X.lineCap = 'round';
+    [[GRID.cx[0] - 48, GRID.cy[2], -44], [GRID.cx[2] + 48, GRID.cy[0], 44]].forEach(([x, y, d]) => [[16, '#1c1712'], [6, '#e0b060']].forEach(([lw, col]) => {
+      X.lineWidth = lw; X.strokeStyle = col; X.beginPath(); X.moveTo(CU.x + x + d, CU.y + y); X.lineTo(CU.x + x, CU.y + y); X.stroke(); }));
+    GRID.lamps.forEach((lx, i) => { const on = o.solved || i < tr.n; if (on) glowAt(CU.x + lx, CU.y + GRID.ly, 30, '255,190,90', .85); });
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+      const i = r * 3 + c, m = rotMask(MK.base[MK.types[i]], S.f.mk[i]), cx = CU.x + GRID.cx[c], cy = CU.y + GRID.cy[r], h = GRID.cell / 2;
+      const pts = { 1: [0, -h], 2: [h, 0], 4: [0, h], 8: [-h, 0] }, ends = [1, 2, 4, 8].filter(b => m & b);
+      X.save(); X.translate(cx, cy); X.lineCap = 'round';
+      [[16, '#1c1712'], [6, o.solved ? '#e0b060' : '#8f7b5c']].forEach(([lw, col]) => {
+        X.lineWidth = lw; X.strokeStyle = col; X.beginPath();
+        const [a, b] = ends.map(e => pts[e]);
+        if (a[0] === -b[0] && a[1] === -b[1]) { X.moveTo(a[0], a[1]); X.lineTo(b[0], b[1]); }
+        else { X.moveTo(a[0], a[1]); X.quadraticCurveTo(0, 0, b[0], b[1]); }
+        X.stroke(); });
+      X.restore();
+    }
+    if (o.solved) { o.solveT += dt; glowAt(CU.x + 210, CU.y + 500, 60, '255,190,90', .5 * Math.min(1, o.solveT)); }
+    X.font = '600 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.textAlign = 'center'; X.fillText('×', CU.x + CU.s + 30, CU.y + 20);
+  }
+  if (o.type === 'secim') {
+    // left: stay and help the freezing conductor · right: take the drezin and leave him
+    const pulse = .5 + .5 * Math.sin(S.t * 2);
+    X.strokeStyle = 'rgba(216,207,191,.5)'; X.lineWidth = 3;
+    [[W / 2 - 250, 'rgba(120,150,190,'], [W / 2 + 250, 'rgba(200,160,100,']].forEach(([cx, c]) => {
+      X.fillStyle = c + (.12 + .08 * pulse) + ')'; X.beginPath(); X.arc(cx, H / 2, 190, 0, 7); X.fill(); X.stroke(); });
+    spr('duduk1', W / 2 - 250, H / 2 + 140, 270, false, 1, 1);
+    icon('soguk', W / 2 - 150, H / 2 - 120, 50, '#dfe6ec');
+    icon('ray', W / 2 + 250, H / 2 + 40, 110, '#d8cfbf'); icon('tren', W / 2 + 250, H / 2 - 50, 90, '#d8cfbf');
+    X.globalAlpha = .9; icon('soru', W / 2, H / 2, 60, '#d8cfbf'); X.globalAlpha = 1;
+  }
+  if (o.type === 'ritim') {
+    // close-up of the drezin pump lever; the signal lamps count Düdük's rhythm
+    X.fillStyle = 'rgba(30,26,22,.9)'; X.beginPath(); X.roundRect(W / 2 - 330, 80, 660, 580, 30); X.fill();
+    RIT.forEach((b, i) => { const x = W / 2 - 150 + i * 100, y = 160, v = o.lamps[i], wrong = o.fail > 0 && i === o.lamps.length - 1;
+      X.fillStyle = 'rgba(60,52,44,1)'; X.beginPath(); X.arc(x, y, 26, 0, 7); X.fill();
+      if (v !== undefined) glowAt(x, y, 40, wrong ? '220,80,60' : '255,190,90', .95);
+      if (v !== undefined) icon(v ? 'uzun' : 'kisa', x, y, 30, '#2b2520'); });
+    if (o.fail > 0) o.fail -= dt;
+    const down = o.press !== null ? Math.min(1, (S.t - o.press) * 8) : 0, lev = GRAY.lever;
+    if (lev) { const len = 330, k = len / 627; X.save(); X.translate(W / 2, 560); X.rotate(-.5 + down * 1.0); X.drawImage(lev, -80 * k, -627 * k, lev.width * k, lev.height * k); X.restore(); }
+    if (o.press !== null) { const held = S.t - o.press; X.fillStyle = held < .32 ? 'rgba(216,207,191,.5)' : 'rgba(255,190,90,.8)'; X.fillRect(W / 2 - 60, 620, Math.min(120, held * 200), 8); }
+    if (S.f.duduk === 'warm') { X.fillStyle = 'rgba(216,207,191,.12)'; X.beginPath(); X.arc(250, 560, 70, 0, 7); X.fill(); spr('duduk3', 250, 620, 150, true); }
+    if (o.ok) glowAt(W / 2, 300, 300, '255,190,90', .25);
+    X.font = '600 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.textAlign = 'center'; X.fillText('×', W - 70, 60);
+  }
+}
 function overlayDown(p) {
   const o = S.overlay;
+  if (!['pit', 'panel'].includes(o.type)) { overlayDownB1(p); return; }
   if (o.type === 'pit') { if (o.farewell) return; S.overlay = null; return; }
   if (o.type === 'panel') {
     if (o.lock) return;
@@ -339,6 +851,7 @@ function openGate() {
 function drawOverlay(dt) {
   const o = S.overlay; if (!o) return; o.t += dt;
   X.save(); X.fillStyle = 'rgba(8,7,6,.82)'; X.fillRect(0, 0, W, H);
+  if (!['pit', 'panel'].includes(o.type)) drawOverlayB1(o, dt);
   if (o.type === 'panel') {
     let sx = 0; if (o.shake) { o.shake -= dt; sx = Math.sin(o.t * 60) * 8 * Math.max(0, o.shake); }
     X.translate(sx, 0);
@@ -395,7 +908,7 @@ function drawAsh(dt, alpha = 1) {
 
 // ---------- colour layer ----------
 function buildColor(dt) {
-  const hs = S.halos[S.scene]; let anim = false;
+  const hs = S.halos[S.scene] = S.halos[S.scene] || []; let anim = false;
   hs.forEach(h => { if (h.t < 1) { h.t = Math.min(1, h.t + dt / 2.2); anim = true; } });
   if (!colorDirty && !anim) return;
   colorDirty = false;
@@ -444,7 +957,7 @@ function drawLehim(dt) {
   X.save(); X.translate(119, 250); X.rotate(sway + lean); X.scale(1, 1 + breathe); X.translate(-119, -250);
   part('scarf', 0, 0, scarf); part('armL', 0, 0, armL); part('body');
   // seed in the chest window
-  const wx = 165, wy = 187, wr = 20, pulse = .75 + Math.sin(t * 2.6) * .25;
+  const wx = 165, wy = 187, wr = 20, pulse = (.75 + Math.sin(t * 2.6) * .25) * vitality();
   X.fillStyle = 'rgba(23,18,14,.85)'; X.beginPath(); X.arc(wx, wy, wr * .92, 0, 7); X.fill();
   const gl = X.createRadialGradient(wx, wy + 6, 1, wx, wy + 6, wr * 1.5 * pulse);
   gl.addColorStop(0, 'rgba(170,235,110,.75)'); gl.addColorStop(.4, 'rgba(120,200,80,.25)'); gl.addColorStop(1, 'rgba(90,160,60,0)');
@@ -463,6 +976,8 @@ function drawLehim(dt) {
   X.restore();
 }
 
+// Canlılık is never shown as a number: the seed's glow grows or fades with it (4 is the starting value)
+function vitality() { return .55 + .1 * S.canlilik + (S.f.drain > 0 ? Math.sin(S.t * 30) * .15 : 0); }
 // side-view walk: jointed profile parts (character faces right, mirrored for left)
 function drawLehimSide(s) {
   const t = S.t, p = L.phase, st = Math.sin(p), ct = Math.cos(p);
@@ -482,7 +997,7 @@ function drawLehimSide(s) {
   X.save(); X.translate(121, 22); X.rotate(-.05 + Math.sin(p * 2) * .07); X.drawImage(IMG.sd_scarf, -205, -12); X.restore();
   X.drawImage(IMG.sd_body, 0, 0);
   // seed in the chest porthole
-  const wx = 166, wy = 95, wr = 15, pulse = .75 + Math.sin(t * 2.6) * .25;
+  const wx = 166, wy = 95, wr = 15, pulse = (.75 + Math.sin(t * 2.6) * .25) * vitality();
   X.fillStyle = 'rgba(23,18,14,.85)'; X.beginPath(); X.arc(wx, wy, wr, 0, 7); X.fill();
   const gl = X.createRadialGradient(wx, wy + 4, 1, wx, wy + 4, wr * 1.5 * pulse);
   gl.addColorStop(0, 'rgba(170,235,110,.75)'); gl.addColorStop(.4, 'rgba(120,200,80,.25)'); gl.addColorStop(1, 'rgba(90,160,60,0)');
@@ -534,9 +1049,14 @@ function drawScene(dt) {
     X.fillStyle = g; X.fillRect(770 - gw / 2, 128, gw, 360);
     X.fillStyle = 'rgba(120,150,150,.5)'; X.beginPath(); X.arc(770, 300, Math.min(40, gw * .25), Math.PI, 0); X.fill();
   }
+  if (DRAW1[sc]) { DRAW1[sc](dt); drawExits(); }
   drawLehim(dt);
+  if (S.f.drain > 0) { // the seed gives a piece of its life away
+    S.f.drain -= dt; const b = lehimBox(), u = 1 - S.f.drain / 1.6;
+    X.fillStyle = `rgba(170,235,110,${.7 * (1 - u)})`; for (let i = 0; i < 6; i++) { X.beginPath(); X.arc(L.x + Math.cos(i) * 30 * u + u * 80, b[1] + b[3] * .5 - u * 70 + Math.sin(i * 2) * 20 * u, 4, 0, 7); X.fill(); }
+  }
   if (S.f.teach > 0) { // ghost gesture: drag the seed's light from the chest into the dark corner
-    S.f.teach -= dt; const u = 1 - S.f.teach / 2.4, b = lehimBox(), sx = L.x, sy = b[1] + b[3] * .62, gx = sx + (1180 - sx) * u, gy = sy + (620 - sy) * u;
+    S.f.teach -= dt; const [tx, ty] = teachTarget(), u = 1 - S.f.teach / 2.4, b = lehimBox(), sx = L.x, sy = b[1] + b[3] * .62, gx = sx + (tx - sx) * u, gy = sy + (ty - sy) * u;
     const g = X.createRadialGradient(gx, gy, 3, gx, gy, 50); g.addColorStop(0, 'rgba(190,245,130,.8)'); g.addColorStop(1, 'rgba(120,200,80,0)');
     X.fillStyle = g; X.beginPath(); X.arc(gx, gy, 50, 0, 7); X.fill();
   }
@@ -560,11 +1080,21 @@ function drawScene(dt) {
   }
   drawOverlay(dt);
 }
+// faint chevrons on scene exits
+function drawExits() {
+  (HS[S.scene] || []).forEach(h => {
+    if (!h.to) return; const r = h.r, cx = r[0] + r[2] / 2, cy = r[1] + r[3] / 2, a = .22 + .14 * Math.sin(S.t * 2.4);
+    const dir = r[0] < 20 ? Math.PI : (h.to === '1a' && S.scene === '1d') || h.to === '1d' || h.to === '1c' ? -Math.PI / 2 : 0;
+    X.save(); X.translate(cx, cy); X.rotate(dir); X.strokeStyle = `rgba(236,228,212,${a})`; X.lineWidth = 4; X.lineCap = 'round';
+    [0, 14].forEach(o => { X.beginPath(); X.moveTo(-6 + o, -12); X.lineTo(6 + o, 0); X.lineTo(-6 + o, 12); X.stroke(); }); X.restore();
+  });
+}
 function drawTitle(dt) {
   X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .8);
   X.save(); X.textAlign = 'center'; X.fillStyle = '#e9e2d4';
   X.font = '700 96px "Cormorant Garamond", Georgia, serif'; X.fillText('KÜL YAĞMURU', W / 2, 300);
   X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('Son Tohumun Yolculuğu · Prolog', W / 2, 350);
+  if (S.saved) { X.font = '600 26px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf'; X.fillText('1. Bölüm: Durmuş Saatler İstasyonu ›', W / 2, 610); }
   const p = .7 + .3 * Math.sin(S.t * 3); X.globalAlpha = p;
   const g = X.createRadialGradient(W / 2, 470, 2, W / 2, 470, 60); g.addColorStop(0, 'rgba(180,240,120,.9)'); g.addColorStop(1, 'rgba(120,200,80,0)');
   X.fillStyle = g; X.beginPath(); X.arc(W / 2, 470, 60, 0, 7); X.fill();
@@ -583,6 +1113,43 @@ function drawCin(dt) {
   if (a > 0) { X.save(); X.globalAlpha = a; X.drawImage(GRAY.kapak, 320, 40, 640, 640); glow(710, 392, 70); X.restore(); }
   if (t > 9.4) { S.mode = 'play'; S.fade = 1; S.fadeTarget = 0; say(['kol', 'soru'], 3); }
   function glow(x, y, r) { const p = .8 + .2 * Math.sin(t * 3), g = X.createRadialGradient(x, y, 2, x, y, r * p); g.addColorStop(0, 'rgba(190,245,130,.85)'); g.addColorStop(.3, 'rgba(140,215,90,.4)'); g.addColorStop(1, 'rgba(100,180,70,0)'); X.fillStyle = g; X.beginPath(); X.arc(x, y, r, 0, 7); X.fill(); }
+}
+function drawCard(dt) {
+  const c = S.card; c.t += dt; const t = c.t, a = Math.max(0, Math.min(1, t / .8, (3.6 - t) / .6));
+  X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .6);
+  X.save(); X.globalAlpha = a; X.textAlign = 'center';
+  X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('1. Bölüm', W / 2, 300);
+  X.font = '700 72px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#e9c98a'; X.fillText('Durmuş Saatler İstasyonu', W / 2, 380);
+  X.restore();
+  if (t > 3.6) { S.mode = 'play'; S.fade = 1; S.fadeTarget = 0; setTimeout(() => say(['saat', 'soru'], 2.6), 900); }
+}
+function drawFiliz(dt) {
+  // the seed sprouts in Lehim's chest window: Tohum → Filiz
+  const c = S.filiz; c.t += dt; const t = c.t, im = GRAY.cin_filiz;
+  X.fillStyle = '#000'; X.fillRect(0, 0, W, H);
+  const a = Math.max(0, Math.min(1, t / 1.2, (8 - t) / 1));
+  if (im) { X.save(); X.globalAlpha = a; const z = 1 + t * .01; X.translate(W / 2, H / 2); X.scale(z, z); X.drawImage(im, -320, -320, 640, 640);
+    const g = Math.min(1, Math.max(0, (t - 1.5) / 2.5));
+    X.globalAlpha = a * g; X.save(); X.beginPath(); X.arc(378 - 320, 300 - 320, 105, 0, 7); X.clip(); IMG.cin_filiz && X.drawImage(IMG.cin_filiz, -320, -320, 640, 640); X.restore();
+    glowAt(384 - 320, 335 - 320, 70 + 30 * g, '170,235,110', .3 + .4 * g);
+    X.restore(); }
+  if (t > 8) { S.mode = 'end1'; S.t = 0; }
+}
+function drawEnd1(dt) {
+  X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .7);
+  const a = Math.min(1, S.t / 1.5), f = S.f; X.save(); X.globalAlpha = a; X.textAlign = 'center';
+  X.fillStyle = '#e9e2d4'; X.font = '700 76px "Cormorant Garamond", Georgia, serif'; X.fillText('KÜL YAĞMURU', W / 2, 220);
+  X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('1. Bölüm tamamlandı. Tohum filizlendi.', W / 2, 275);
+  X.font = '700 28px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#d8cfbf';
+  gear(W / 2 - 230, 360, 15, '#d8cfbf'); X.fillText('× ' + S.cark, W / 2 - 185, 370);
+  X.fillStyle = 'rgba(160,215,120,.95)'; X.beginPath(); X.arc(W / 2 - 80, 360, 9, 0, 7); X.fill(); X.fillStyle = '#d8cfbf'; X.fillText('× ' + S.isik, W / 2 - 40, 370);
+  for (let i = 0; i < 5; i++) { X.fillStyle = i < S.canlilik ? 'rgba(160,215,120,.95)' : 'rgba(90,85,78,.8)'; X.beginPath(); X.ellipse(W / 2 + 60 + i * 26, 362, 8, 5.5, -.4, 0, 7); X.fill(); }
+  X.strokeStyle = '#d8cfbf'; X.lineWidth = 2; X.strokeRect(W / 2 + 205, 348, 20, 24); X.fillStyle = '#d8cfbf'; X.fillText('× ' + S.hafiza, W / 2 + 255, 370);
+  X.font = '500 26px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#b8b0a2';
+  X.fillText(f.duduk === 'warm' ? (f.dudukHow === 'soba' ? 'Düdük sobanın başında ısındı ve yanında.' : 'Düdük tohumun ışığıyla ısındı ve yanında.') : 'Düdük vagonda uyuyakaldı.', W / 2, 440);
+  X.font = '500 24px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#6f685e'; X.fillText('2. Bölüm: Borular Mahallesi yakında.', W / 2, 490);
+  if (S.t > 2.5) { X.font = '500 22px "Cormorant Garamond", Georgia, serif'; X.fillText('Başa dönmek için dokunun', W / 2, 580); }
+  X.restore();
 }
 function drawEnd(dt) {
   X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .7);
@@ -604,6 +1171,9 @@ function frame(now) {
   else if (S.mode === 'title') drawTitle(dt);
   else if (S.mode === 'cin') drawCin(dt);
   else if (S.mode === 'end') drawEnd(dt);
+  else if (S.mode === 'card') drawCard(dt);
+  else if (S.mode === 'filiz') drawFiliz(dt);
+  else if (S.mode === 'end1') drawEnd1(dt);
   else {
     // movement
     if (L.moving) {
@@ -626,11 +1196,16 @@ Promise.all(Object.entries(SRC).map(([k, src]) => new Promise(res => { const i =
     Object.keys(IMG).forEach(k => { GRAY[k] = gray(IMG[k], k.startsWith('bg') ? .12 : .08); });
     BG.pa = { col: canvasOf(IMG.bg_pa), gry: gray(IMG.bg_pa, .12) };
     BG.pb = { col: canvasOf(IMG.bg_pb), gry: gray(IMG.bg_pb, .12) };
+    ['1a', '1b', '1c', '1d'].forEach(k => { const im = IMG['bg_' + k]; if (im) BG[k] = { col: canvasOf(im), gry: GRAY['bg_' + k] }; });
+    try { S.saved = !!JSON.parse(localStorage.getItem('ky_bolum') || 'null'); } catch (e) {}
+    if (/[?&]bolum=1\b/.test(location.search)) { S.saved = true; }
     colorLayer = document.createElement('canvas'); colorLayer.width = W; colorLayer.height = H;
     maskC = document.createElement('canvas'); maskC.width = W; maskC.height = H;
     if (!X.roundRect) CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) { this.moveTo(x + r, y); this.arcTo(x + w, y, x + w, y + h, r); this.arcTo(x + w, y + h, x, y + h, r); this.arcTo(x, y + h, x, y, r); this.arcTo(x, y, x + w, y, r); this.closePath(); };
     S.mode = 'title';
   });
+// test hook: ?debug exposes the state for automated play-throughs
+if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, goScene, startBolum1 };
 })();
 </script>
 
