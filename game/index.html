@@ -24,7 +24,8 @@
 
 <script>
 (() => {
-const C = document.getElementById('c'), X = C.getContext('2d'), rot = document.getElementById('rot');
+const C = document.getElementById('c'), rot = document.getElementById('rot');
+let X = C.getContext('2d'); // swapped to an offscreen context while Lehim is drawn, so he can take the scene's light
 const W = 1280, H = 720;
 function fit() {
   const w = innerWidth, h = innerHeight; let cw = w, ch = w * 9 / 16;
@@ -152,9 +153,9 @@ const HS = {
   pa: [
     { id: 'bahcivan', r: [90, 110, 250, 330], stand: [335, 485], tap() {
         S.f.bahPoint = 3; say(['kubbe']); setTimeout(() => { if (!L.arm) say(['kol', 'soru']); }, 2800); } },
-    { id: 'boru', r: [222, 532, 128, 66], stand: [290, 612], on: () => !S.f.boru, tap() {
+    { id: 'boru', r: [222, 532, 128, 66], stand: [400, 622], on: () => !S.f.boru, tap() {
         S.f.boru = 1; stamp('pa', 'patch_boru', 214, 524); addItem('boru'); } },
-    { id: 'tugla', r: [22, 560, 116, 76], stand: [160, 640], on: () => !S.f.tugla, tap() {
+    { id: 'tugla', r: [22, 560, 116, 76], stand: [230, 655], on: () => !S.f.tugla, tap() {
         S.f.tugla = 1; stamp('pa', 'patch_tugla', 14, 552); addItem('tugla'); } },
     { id: 'plate', r: [205, 428, 460, 96], stand: [440, 562], on: () => !S.f.lifted, tap() {
         if (!L.arm) { play('strain', 1.2); say(['kol', 'x']); } else say(['ucgen', 'soru']); },
@@ -165,11 +166,11 @@ const HS = {
           S.f.lifted = 1; S.f.liftT = 0; stamp('pa', 'patch_plate', 188, 413); clank();
           setTimeout(() => { S.f.kolOut = 1; S.f.makasOut = 1; halo(430, 480, 260); }, 900);
         } } },
-    { id: 'kol', r: [370, 450, 90, 55], stand: [420, 560], on: () => S.f.kolOut && !S.f.kolTaken, tap() { S.f.kolTaken = 1; addItem('kol'); } },
-    { id: 'makas', r: [495, 455, 70, 45], stand: [520, 560], on: () => S.f.makasOut && !S.f.makasTaken, tap() { S.f.makasTaken = 1; addItem('makas'); } },
+    { id: 'kol', r: [370, 450, 90, 55], stand: [490, 575], on: () => S.f.kolOut && !S.f.kolTaken, tap() { S.f.kolTaken = 1; addItem('kol'); } },
+    { id: 'makas', r: [495, 455, 70, 45], stand: [600, 580], on: () => S.f.makasOut && !S.f.makasTaken, tap() { S.f.makasTaken = 1; addItem('makas'); } },
     { id: 'corner', r: [1085, 470, 195, 250], stand: [1060, 650], on: () => !S.f.cornerLit, tap() { say(['goz', 'karanlik']); if (S.f.loose) S.f.teach = 2.4; },
       light() { S.f.cornerLit = 1; S.f.litT = 0; tone(523, 0, 1.2, .06); tone(784, .15, 1.2, .05); } },
-    { id: 'vida', r: [1100, 585, 70, 55], stand: [1060, 650], on: () => S.f.cornerLit && !S.f.vidaTaken, tap() { S.f.vidaTaken = 1; addItem('vida'); } },
+    { id: 'vida', r: [1100, 585, 70, 55], stand: [1010, 668], on: () => S.f.cornerLit && !S.f.vidaTaken, tap() { S.f.vidaTaken = 1; addItem('vida'); } },
     { id: 'cark', r: [1165, 630, 70, 60], stand: [1060, 660], on: () => S.f.cornerLit && !S.f.carkTaken, tap() { S.f.carkTaken = 1; S.cark++; chime(); } },
     { id: 'kapak47', r: [868, 492, 204, 66], stand: [960, 600], tap() { play('shrug', 1.4); say(['kapak', 'soru']); } },
     { id: 'ladder', r: [1040, 30, 150, 440], stand: [1075, 470], tap() {
@@ -249,7 +250,7 @@ HS['1a'] = [
     use: { disli() { takeItem('disli'); S.f.disliOn = 1; clank(); S.overlay = { type: 'saat', t: 0, h: 6, m: 30, move: true, up: true }; } } },
   { id: 'direk', r: [205, 255, 70, 125], stand: [300, 600], tap() { S.overlay = { type: 'tarife', t: 0 }; },
     use: { afis() { takeItem('afis'); S.f.afisOn = 1; clank(); halo(240, 320, 170); S.overlay = { type: 'tarife', t: 0 }; } } },
-  { id: 'boru', r: [282, 470, 120, 130], stand: [345, 600], on: () => !S.f.disliTaken, tap() { say(['goz', 'disli']); play('strain', .9); },
+  { id: 'boru', r: [282, 470, 120, 130], stand: [440, 612], on: () => !S.f.disliTaken, tap() { say(['goz', 'disli']); play('strain', .9); },
     use: { olta() { S.f.disliTaken = 1; clank(); play('dance', 1.2); addItem('disli'); },
       miknatis() { say(['tel', 'soru']); bad(); }, tel() { say(['miknatis', 'soru']); bad(); } } },
   { id: 'bavul', r: [122, 612, 125, 105], stand: [295, 660], on: () => !S.f.tel, tap() { S.f.tel = 1; clank(); addItem('tel'); } },
@@ -257,11 +258,11 @@ HS['1a'] = [
       S.f.kediUp = 1; S.f.kediT = 0; purr(); play('shrug', 1.2); } },
   { id: 'jeton', r: [110, 515, 60, 40], stand: [295, 630], on: () => S.f.kediUp && !S.f.jeton, tap() { S.f.jeton = 1; addItem('jeton'); } },
   { id: 'cark1', r: [185, 515, 50, 40], stand: [295, 630], on: () => S.f.kediUp && !S.f.cark1, tap() { S.f.cark1 = 1; S.cark++; chime(); } },
-  { id: 'afis', r: [790, 585, 80, 55], stand: [830, 640], on: () => !S.f.afisTaken, tap() { S.f.afisTaken = 1; addItem('afis'); } }
+  { id: 'afis', r: [790, 585, 80, 55], stand: [735, 642], on: () => !S.f.afisTaken, tap() { S.f.afisTaken = 1; addItem('afis'); } }
 ];
 HS['1b'] = [
   { id: 'toPeron', to: '1a', spawn: [300, 610], r: [15, 180, 185, 400], stand: [255, 625] },
-  { id: 'bench', r: [215, 480, 330, 140], stand: [380, 640], on: () => !S.f.ampul, tap() {
+  { id: 'bench', r: [215, 480, 330, 140], stand: [575, 640], on: () => !S.f.ampul, tap() {
       if (!S.f.benchLit) { say(['goz', 'karanlik']); S.f.teach = 2.4; S.f.teachTo = [384, 600]; return; }
       S.f.ampul = 1; addItem('ampul'); },
     light() { S.f.benchLit = 1; S.f.litT = 0; tone(523, 0, 1.2, .06); tone(784, .15, 1.2, .05); } },
@@ -269,7 +270,7 @@ HS['1b'] = [
     use: { ampul() { takeItem('ampul'); S.f.lamba = 1; S.f.lambaT = 0; clank(); setTimeout(() => halo(534, 60, 420), 400); } } },
   { id: 'hopar', r: [245, 210, 130, 120], stand: [330, 600], on: () => !S.f.miknatis, tap() {
       S.f.miknatis = 1; S.f.hoparT = 0; clank(); setTimeout(() => { clank(); addItem('miknatis'); }, 500); } },
-  { id: 'radyator', r: [590, 460, 205, 135], stand: [690, 610], on: () => !S.f.cark2, tap() {
+  { id: 'radyator', r: [590, 460, 205, 135], stand: [850, 630], on: () => !S.f.cark2, tap() {
       if (!S.f.lamba) { say(['goz', 'karanlik']); return; } S.f.cark2 = 1; S.cark++; chime(); } },
   { id: 'fresk', r: [565, 90, 355, 350], stand: [740, 600], tap() { say(['tren', 'kubbe'], 2.8); } },
   { id: 'gise', r: [1040, 250, 175, 250], stand: [1020, 640], tap() {
@@ -282,8 +283,8 @@ HS['1b'] = [
 HS['1c'] = [
   { id: 'toPeron', to: '1a', spawn: [690, 580], r: [0, 470, 110, 250], stand: [140, 650] },
   { id: 'koruk', r: [80, 150, 100, 235], stand: [200, 600], on: () => !S.f.koruk, tap() { S.f.koruk = 1; addItem('koruk'); } },
-  { id: 'cuval', r: [105, 400, 140, 125], stand: [230, 610], on: () => !S.f.cark3, tap() { S.f.cark3 = 1; S.cark++; chime(); play('shrug', 1); } },
-  { id: 'panel', r: [268, 268, 100, 185], stand: [330, 600], tap() { S.overlay = { type: 'makas', t: 0 }; } },
+  { id: 'cuval', r: [105, 400, 140, 125], stand: [330, 625], on: () => !S.f.cark3, tap() { S.f.cark3 = 1; S.cark++; chime(); play('shrug', 1); } },
+  { id: 'panel', r: [268, 268, 100, 185], stand: [430, 612], tap() { S.overlay = { type: 'makas', t: 0 }; } },
   { id: 'tunel', r: [1065, 185, 190, 195], stand: [1080, 610], tap() { say(S.f.gecit ? ['ray'] : ['kilit', 'duduk']); } },
   { id: 'dudukK', r: [830, 430, 130, 230], stand: [760, 650], on: () => S.f.dudukGone && !S.f.dudukLeft, tap() {
       S.f.dudukWhistleT = 0; whistle(.08); } },
@@ -307,7 +308,7 @@ HS['1d'] = [
       if (!f.duduk) { say(['saat', 'soru']); return; }
       if (f.duduk !== 'cold') return;
       seedDrain(); setTimeout(() => dudukWarm('tohum'), 900); } },
-  { id: 'soba', r: [1075, 345, 192, 295], stand: [1030, 640], tap() {
+  { id: 'soba', r: [1075, 345, 192, 295], stand: [1000, 665], tap() {
       const f = S.f; say(f.soba ? ['ates'] : f.kor ? ['koruk', 'soru'] : f.briket ? ['ates', 'soru'] : ['briket', 'soru']); },
     use: {
       briket() { takeItem('briket'); S.f.briket = 1; clank(); },
@@ -322,7 +323,7 @@ HS['1d'] = [
       if (f.kor) return;
       if (!f.briket) { say(['briket', 'soru']); return; }
       f.kor = 1; tone(523, 0, 1, .05); } },
-  { id: 'briket', r: [950, 522, 90, 90], stand: [960, 650], on: () => !S.f.briketTaken, tap() { S.f.briketTaken = 1; addItem('briket'); } },
+  { id: 'briket', r: [950, 522, 90, 90], stand: [880, 700], on: () => !S.f.briketTaken, tap() { S.f.briketTaken = 1; addItem('briket'); } },
   { id: 'raf', r: [340, 10, 170, 110], stand: [470, 600], on: () => !S.f.guvercin, tap() { play('strain', 1); say(['guvercin', 'kol', 'x']); },
     use: { olta() {
       S.f.guvercin = 1; S.f.guvT = 0; clank(); tone(988, .2, .3, .05); tone(1175, .45, .3, .05);
@@ -366,11 +367,7 @@ const DRAW1 = {
   },
   '1b'(dt) {
     const f = S.f;
-    if (!f.lamba) { // unlit hall
-      X.fillStyle = 'rgba(8,7,6,.5)'; X.fillRect(0, 0, W, H);
-      if (!f.benchLit || f.litT < 1.5) { let a = .8; if (f.benchLit) { f.litT += dt; a = .8 * (1 - f.litT / 1.5); }
-        const g = X.createRadialGradient(384, 590, 10, 384, 590, 150); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(1, 'rgba(0,0,0,0)'); X.fillStyle = g; X.fillRect(230, 440, 310, 250); }
-    } else {
+    if (f.lamba) {
       f.lambaT = (f.lambaT || 0) + dt; const a = Math.min(1, f.lambaT);
       glowAt(534, 70, 260, '255,196,110', .22 * a); glowAt(534, 60, 50, '255,220,150', .6 * a);
       // chalk drawings revealed by the light: magnet on a wire fishing a gear out of a pipe; a sleeping cat over a coin
@@ -385,9 +382,8 @@ const DRAW1 = {
         X.beginPath(); X.moveTo(cx + 22, cy - 12); X.lineTo(cx + 26, cy - 24); X.lineTo(cx + 30, cy - 12); X.stroke();
         X.beginPath(); X.arc(cx, cy + 20, 9, 0, 7); X.stroke(); X.beginPath(); X.moveTo(cx, cy + 8); X.lineTo(cx, cy + 3); X.stroke();
       }); X.restore();
-      if (!f.cark2) gear(700, 585, 12 + Math.sin(S.t * 4), '#d9c48e');
+      if (!f.cark2) dq(601, () => gear(700, 585, 12 + Math.sin(S.t * 4), '#d9c48e'));
     }
-    if (f.benchLit && !f.ampul) { glowAt(384, 600, 50, '150,220,100', .25); icon('ampul', 384, 600, 28, '#d8cfbf'); }
     // ticket clerk behind the booth window
     const pose = f.stampT !== undefined && f.stampT < 1.2 ? 'giseci3' : f.giseAwake ? 'giseci2' : 'giseci1';
     if (f.stampT !== undefined) f.stampT += dt;
@@ -405,21 +401,23 @@ const DRAW1 = {
     if (f.makas) { glowAt(318, 300, 40, '255,196,110', .35 + .1 * Math.sin(S.t * 3)); }
     if (f.dudukGone && !f.dudukLeft) {
       const wh = f.dudukWhistleT !== undefined && f.dudukWhistleT < 2.4; if (wh) f.dudukWhistleT += dt;
-      spr(wh ? 'duduk3' : 'duduk2', 895, 660 + Math.sin(S.t * 2) * 1.5, 215, true, -1);
+      dq(660, () => spr(wh ? 'duduk3' : 'duduk2', 895, 660 + Math.sin(S.t * 2) * 1.5, 215, true, -1));
     }
     if (f.ride !== undefined) { f.ride += dt; X.fillStyle = `rgba(0,0,0,${Math.min(.6, f.ride * .2)})`; X.fillRect(0, 0, W, H); }
   },
   '1d'(dt) {
     const f = S.f;
-    // stove: bricks, ember, fire
+    // stove: bricks, ember, fire (queued just in front of the stove body)
+    dq(651, () => {
     if (f.briket) { X.fillStyle = 'rgba(30,26,22,.9)'; [[1106, 506], [1126, 511], [1144, 504]].forEach(([x, y]) => X.fillRect(x, y, 20, 13)); }
     if (f.kor) glowAt(1135, 505, f.soba ? 90 : 30, f.soba ? '255,150,60' : '255,110,40', f.soba ? .55 + .15 * Math.sin(S.t * 9) : .5 + .2 * Math.sin(S.t * 5));
     if (f.soba) { for (let i = 0; i < 5; i++) { const x = 1110 + i * 12, h = 26 + 12 * Math.sin(S.t * 8 + i * 1.7);
       X.fillStyle = 'rgba(255,170,70,.75)'; X.beginPath(); X.moveTo(x - 7, 508); X.quadraticCurveTo(x, 508 - h * 1.4, x + 7, 508); X.fill(); } glowAt(1135, 480, 260, '255,170,90', .12); }
     if (f.puff) { f.puff += dt; const u = f.puff - 1; X.fillStyle = `rgba(200,195,185,${Math.max(0, .6 - u * .5)})`; for (let i = 0; i < 8; i++) { X.beginPath(); X.arc(1135 + Math.cos(i) * u * 70, 480 - Math.sin(i * 2) * u * 50, 10 + u * 12, 0, 7); X.fill(); } if (u > 1.2) f.puff = 0; }
+    });
     if (!f.briketTaken) { if (Math.sin(S.t * 2) > .7) glowAt(995, 565, 30, '240,230,200', .15); }
     // Düdük: frozen by the stove, then shivering, then warm
-    if (!f.dudukGone) {
+    if (!f.dudukGone) dq(628, () => {
       if (f.duduk === 'warm') { f.dudukT += dt; spr(f.dudukT < 2.2 ? 'duduk3' : 'duduk4', 850, 628, 250, true); }
       else {
         const sh = f.duduk === 'cold' && !f.dudukLeft ? Math.sin(S.t * 40) * 1.6 : 0;
@@ -427,7 +425,7 @@ const DRAW1 = {
         X.fillStyle = 'rgba(235,240,245,.55)'; for (let i = 0; i < 10; i++) { const a = i * 2.4; X.beginPath(); X.arc(850 + Math.cos(a) * 60, 470 + Math.sin(a * 1.3) * 70, 2.5, 0, 7); X.fill(); }
         if (!f.duduk || f.dudukLeft) { if (Math.sin(S.t * 1.1) > .6) { X.fillStyle = 'rgba(230,225,215,.6)'; X.font = '600 20px Georgia'; X.fillText('z', 900, 395 - (S.t % 2) * 8); } }
       }
-    }
+    });
     // pigeon stuck in the luggage rack, then flying off
     if (!f.guvercin) spr('guvercin1', 425 + Math.sin(S.t * 14) * (Math.sin(S.t * .8) > .5 ? 2 : 0), 110, 80);
     else { f.guvT += dt; const u = f.guvT; if (u < 2.4) spr(u < 1.4 ? 'guvercin2' : 'guvercin3', 425 + u * 120, 110 + Math.sin(u * 6) * 10 - u * 20 + (u > 1.4 ? (u - 1.4) * 250 : 0), 90, true); }
@@ -678,7 +676,7 @@ C.addEventListener('pointerup', e => {
     if (d.light) {
       if (Math.hypot(p.x - d.x0, p.y - d.y0) < 24) { say(['kubbe']); return; }
       const h = hsAt(p);
-      if (h && h.light) walkTo(h.stand[0], h.stand[1], () => h.light());
+      if (h && h.light) walkTo(h.stand[0], h.stand[1], () => { faceTo(h); h.light(); });
       else { say(['goz', 'soru'], 1.6); }
       return;
     }
@@ -692,16 +690,19 @@ C.addEventListener('pointerup', e => {
     }
     if (inRect(p, lehimBox())) { useOnLehim(d.item); return; }
     const h = hsAt(p);
-    if (h && h.use && h.use[d.item]) { walkTo(h.stand[0], h.stand[1], () => h.use[d.item]()); return; }
-    if (h) { walkTo(h.stand[0], h.stand[1], () => { say(['x'], 1.3); bad(); }); }
+    if (h && h.use && h.use[d.item]) { walkTo(h.stand[0], h.stand[1], () => reach(h, () => h.use[d.item]())); return; }
+    if (h) { walkTo(h.stand[0], h.stand[1], () => { faceTo(h); say(['x'], 1.3); bad(); }); }
     return;
   }
   if (!down) return; down = null;
   const h = hsAt(p);
-  if (h) walkTo(h.stand[0], h.stand[1], () => h.to ? goScene(h.to, h.spawn) : h.tap());
+  if (h) walkTo(h.stand[0], h.stand[1], () => h.to ? goScene(h.to, h.spawn) : reach(h, () => h.tap()));
   else walkTo(p.x, p.y);
 });
 C.addEventListener('pointercancel', () => { drag = null; down = null; if (S.overlay && S.overlay.up) overlayUp(null); });
+// turn toward a hotspot, stretch an arm to it, then act
+function faceTo(h) { const cx = h.r[0] + h.r[2] / 2; if (Math.abs(cx - L.x) > 20) L.face = cx > L.x ? 1 : -1; }
+function reach(h, then) { faceTo(h); play('reach', .38, then); }
 function useOnLehim(item) {
   const f = S.f;
   if (item === 'kol' && !L.arm) {
@@ -1029,6 +1030,7 @@ function drawLehim(dt) {
   if (a === 'shrug') { armL = .6 * Math.sin(u * Math.PI); armR = -.6 * Math.sin(u * Math.PI); headR = .12 * Math.sin(u * Math.PI); bob = 3 * Math.sin(u * Math.PI); }
   if (a === 'climb') { const c = Math.sin(u * 22); bob = u * 300; armL = 2.6 + c * .4; armR = -2.6 + c * .4; legL = Math.max(0, c) * 10; legR = Math.max(0, -c) * 10; L.alpha = 1 - Math.max(0, u - .6) * 2.5; }
   if (a === 'leave') { L.alpha = 1 - u; }
+  if (a === 'reach') { const k = Math.sin(u * Math.PI); armR = -1.35 * k; armL = .15 * k; lean = .07 * k; headR = .08 * k; bob = 2 * k; }
   const flip = L.face > 0 ? 1 : -1, shrink = a === 'leave' ? 1 - u * .4 : 1;
   X.save(); X.globalAlpha = Math.max(0, L.alpha);
   X.fillStyle = 'rgba(0,0,0,.28)'; X.beginPath(); X.ellipse(L.x, L.y - 4, 60 * k * Math.max(0, 1 - bob / 120), 9 * s, 0, 0, 7); X.fill();
@@ -1118,11 +1120,6 @@ function drawScene(dt) {
     }
     if (S.f.kolOut && !S.f.kolTaken) X.drawImage(GRAY.it_kol, 392, 452, 36, 100 * .52);
     if (S.f.makasOut && !S.f.makasTaken) drawItem('makas', 528, 478, 30);
-    if (!S.f.cornerLit || (S.f.litT !== undefined && S.f.litT < 1.5)) {
-      let a = .88; if (S.f.cornerLit) { S.f.litT += dt; a = .88 * (1 - S.f.litT / 1.5); }
-      const g = X.createRadialGradient(1190, 620, 20, 1190, 620, 190); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(1, 'rgba(0,0,0,0)');
-      X.fillStyle = g; X.fillRect(1000, 430, 280, 290);
-    }
     if (S.f.cornerLit) {
       const g = X.createRadialGradient(1170, 630, 5, 1170, 630, 120); g.addColorStop(0, 'rgba(150,220,100,.25)'); g.addColorStop(1, 'rgba(150,220,100,0)');
       X.fillStyle = g; X.fillRect(1040, 510, 240, 210);
@@ -1136,8 +1133,14 @@ function drawScene(dt) {
     X.fillStyle = g; X.fillRect(770 - gw / 2, 128, gw, 360);
     X.fillStyle = 'rgba(120,150,150,.5)'; X.beginPath(); X.arc(770, 300, Math.min(40, gw * .25), Math.PI, 0); X.fill();
   }
+  drawAmbient(sc, dt);
+  DEPTHQ = [];
   if (DRAW1[sc]) { DRAW1[sc](dt); drawExits(); }
-  drawLehim(dt);
+  // depth: scene props, characters and Lehim sorted by where their feet touch the floor
+  (FG[sc] || []).forEach(o => DEPTHQ.push({ y: o.y, draw: () => drawOccluder(o.poly) }));
+  DEPTHQ.push({ y: L.y, draw: () => drawLehimLit(dt) });
+  DEPTHQ.sort((a, b) => a.y - b.y).forEach(d => d.draw());
+  drawAmbientFront(sc, dt);
   if (S.f.drain > 0) { // the seed gives a piece of its life away
     S.f.drain -= dt; const b = lehimBox(), u = 1 - S.f.drain / 1.6;
     X.fillStyle = `rgba(170,235,110,${.7 * (1 - u)})`; for (let i = 0; i < 6; i++) { X.beginPath(); X.arc(L.x + Math.cos(i) * 30 * u + u * 80, b[1] + b[3] * .5 - u * 70 + Math.sin(i * 2) * 20 * u, 4, 0, 7); X.fill(); }
@@ -1167,6 +1170,140 @@ function drawScene(dt) {
   }
   drawOverlay(dt);
 }
+// =====================================================================
+// SCENE LIFE: depth, light on Lehim, ambient motion
+// =====================================================================
+let DEPTHQ = [];
+// queue something that stands on the floor at y (drawn in depth order with Lehim)
+function dq(y, draw) { DEPTHQ.push({ y, draw }); }
+// foreground props cut from the background: drawn over Lehim when their base (y) is nearer the camera than his feet
+const FAR = 1e4;
+const FG = {
+  pa: [{ y: FAR, poly: [[820, 720], [845, 655], [905, 640], [960, 612], [1005, 600], [1090, 560], [1105, 485], [1180, 440], [1230, 385], [1280, 360], [1280, 720]] }],
+  pb: [{ y: FAR, poly: [[0, 720], [0, 570], [60, 575], [120, 598], [185, 618], [245, 630], [330, 642], [420, 652], [520, 664], [600, 692], [620, 720]] },
+       { y: FAR, poly: [[940, 720], [1000, 682], [1080, 642], [1160, 592], [1220, 576], [1280, 580], [1280, 720]] },
+       { y: 612, poly: [[458, 568], [520, 558], [562, 572], [560, 610], [470, 612]] }],
+  '1a': [{ y: FAR, poly: [[238, 540], [290, 562], [292, 720], [238, 720]] },
+         { y: FAR, poly: [[860, 720], [900, 690], [960, 652], [1002, 622], [1060, 582], [1100, 562], [1140, 560], [1200, 520], [1240, 432], [1280, 432], [1280, 720]] },
+         { y: 606, poly: [[280, 516], [322, 508], [362, 556], [402, 588], [398, 612], [358, 612], [298, 572]] }],
+  '1b': [{ y: 612, poly: [[215, 480], [252, 480], [300, 490], [440, 500], [532, 510], [556, 555], [556, 606], [530, 612], [440, 592], [420, 616], [300, 602], [272, 626], [225, 612]] },
+         { y: FAR, poly: [[0, 480], [100, 485], [162, 560], [210, 610], [242, 640], [242, 720], [0, 720]] },
+         { y: FAR, poly: [[1040, 520], [1100, 500], [1190, 490], [1280, 480], [1280, 720], [1060, 720], [1036, 640]] },
+         { y: 600, poly: [[590, 465], [796, 462], [800, 600], [590, 600]] }],
+  '1c': [],
+  '1d': [{ y: FAR, poly: [[0, 290], [60, 300], [110, 340], [120, 440], [250, 450], [282, 520], [288, 640], [302, 720], [0, 720]] },
+         { y: 582, poly: [[820, 300], [960, 300], [962, 582], [822, 582]] },
+         { y: 650, poly: [[1080, 370], [1170, 350], [1262, 382], [1266, 600], [1240, 652], [1090, 652], [1080, 560]] },
+         { y: 610, poly: [[955, 528], [1036, 528], [1040, 612], [955, 612]] }]
+};
+function drawOccluder(poly) {
+  const bg = BG[S.scene]; if (!bg) return;
+  X.save(); X.beginPath(); poly.forEach(([x, y], i) => i ? X.lineTo(x, y) : X.moveTo(x, y)); X.closePath(); X.clip();
+  X.drawImage(bg.gry, 0, 0); X.drawImage(colorLayer, 0, 0); X.restore();
+}
+// scene light falling on Lehim (a colour laid over his pixels only)
+function lehimTint() {
+  const sc = S.scene, f = S.f;
+  if (sc === 'pa') return 'rgba(60,50,40,.14)';
+  if (sc === 'pb') return 'rgba(90,100,110,.12)';
+  if (sc === '1a') return 'rgba(110,125,150,.14)';
+  if (sc === '1b') return f.lamba ? 'rgba(255,200,140,.08)' : 'rgba(60,50,40,.1)';
+  if (sc === '1c') return 'rgba(170,165,155,.12)';
+  if (sc === '1d') return f.soba ? 'rgba(255,160,90,.1)' : 'rgba(170,130,90,.08)';
+  return null;
+}
+let LC = null;
+function drawLehimLit(dt) {
+  const tint = lehimTint(); if (!tint || !L.alpha) { drawLehim(dt); return; }
+  if (!LC) { LC = document.createElement('canvas'); LC.width = W; LC.height = H; }
+  const b = lehimBox(), x0 = Math.max(0, Math.floor(b[0] - 140)), y0 = Math.max(0, Math.floor(b[1] - 140)), bw = Math.min(W - x0, Math.ceil(b[2] + 280)), bh = Math.min(H - y0, Math.ceil(b[3] + 160));
+  if (bw <= 0 || bh <= 0) return;
+  const g = LC.getContext('2d'), main = X; g.clearRect(x0, y0, bw, bh);
+  X = g; try { drawLehim(dt); } finally { X = main; }
+  g.save(); g.globalCompositeOperation = 'source-atop'; g.fillStyle = tint; g.fillRect(x0, y0, bw, bh); g.restore();
+  X.drawImage(LC, x0, y0, bw, bh, x0, y0, bw, bh);
+}
+// ---- ambient motion ----
+const PART = {};
+// emitters: x, y, rate (per s), velocity, spread, size, growth, life (s), colour, alpha
+const EMIT = {
+  pa: [{ x: 655, y: 95, rate: 1.2, vx: 6, vy: -9, sp: 6, s: 10, g: 14, life: 7, rgb: '150,145,140', a: .25 },
+       { x: 868, y: 70, rate: 1, vx: 5, vy: -8, sp: 6, s: 9, g: 12, life: 7, rgb: '150,145,140', a: .22 }],
+  pb: [{ x: 1238, y: 330, rate: 2, vx: -4, vy: -22, sp: 4, s: 6, g: 16, life: 3, rgb: '225,225,220', a: .3 },
+       { x: 300, y: 250, rate: .8, vx: 7, vy: -6, sp: 10, s: 14, g: 14, life: 8, rgb: '170,170,168', a: .18 }],
+  '1a': [{ x: 1146, y: 40, rate: 2.2, vx: -8, vy: -26, sp: 5, s: 7, g: 18, life: 3.2, rgb: '230,230,226', a: .35 },
+         { x: 978, y: 118, rate: 1.4, vx: 6, vy: -20, sp: 4, s: 6, g: 16, life: 3, rgb: '230,230,226', a: .3 },
+         { x: 1262, y: 440, rate: 1.2, vx: -3, vy: -18, sp: 3, s: 5, g: 12, life: 2.6, rgb: '220,220,215', a: .3 }],
+  '1c': [{ x: 219, y: 6, rate: 2, vx: 10, vy: -16, sp: 4, s: 7, g: 18, life: 3.4, rgb: '120,116,112', a: .35 },
+         { x: 484, y: 62, rate: 1.6, vx: 9, vy: -15, sp: 4, s: 6, g: 16, life: 3.2, rgb: '120,116,112', a: .3 },
+         { x: 1092, y: 4, rate: 1.4, vx: 12, vy: -10, sp: 6, s: 10, g: 20, life: 4, rgb: '140,136,130', a: .25 }],
+  '1d': [{ x: 1222, y: 140, rate: .6, vx: -2, vy: -10, sp: 3, s: 5, g: 8, life: 2.5, rgb: '200,200,196', a: .18 }]
+};
+function puffs(sc, dt, list) {
+  const P = PART[sc] = PART[sc] || [];
+  list.forEach(e => { if (e.on && !e.on()) return; e.acc = (e.acc || 0) + dt * e.rate;
+    while (e.acc >= 1) { e.acc--; P.push({ x: e.x + (Math.random() - .5) * e.sp, y: e.y, vx: e.vx * (.7 + Math.random() * .6), vy: e.vy * (.7 + Math.random() * .6), s: e.s, g: e.g, t: 0, life: e.life, rgb: e.rgb, a: e.a }); } });
+  for (let i = P.length - 1; i >= 0; i--) { const p = P[i]; p.t += dt; if (p.t > p.life) { P.splice(i, 1); continue; }
+    p.x += (p.vx + Math.sin(S.t * .8 + i) * 3) * dt; p.y += p.vy * dt; const u = p.t / p.life, r = p.s + p.g * p.t, a = p.a * Math.sin(u * Math.PI);
+    const gr = X.createRadialGradient(p.x, p.y, 0, p.x, p.y, r); gr.addColorStop(0, `rgba(${p.rgb},${a})`); gr.addColorStop(1, `rgba(${p.rgb},0)`);
+    X.fillStyle = gr; X.beginPath(); X.arc(p.x, p.y, r, 0, 7); X.fill(); }
+}
+// a lamp that breathes and flickers
+function lamp(x, y, r, rgb, a) { const n = .82 + .1 * Math.sin(S.t * 2.1 + x) + .08 * Math.sin(S.t * 13.7 + y) * Math.sin(S.t * 5.3); glowAt(x, y, r * (0.95 + .05 * n), rgb, a * n); }
+// slow fog band drifting sideways
+function mist(y, h, speed, a) {
+  const x = ((S.t * speed) % (W + 800)) - 400;
+  [x, x - W - 800].forEach(cx => { const g = X.createRadialGradient(cx, y, 10, cx, y, h * 2.4); g.addColorStop(0, `rgba(210,208,202,${a})`); g.addColorStop(1, 'rgba(210,208,202,0)');
+    X.save(); X.translate(cx, y); X.scale(2.4, .42); X.translate(-cx, -y); X.fillStyle = g; X.beginPath(); X.arc(cx, y, h * 2.4, 0, 7); X.fill(); X.restore(); });
+}
+// motes that drift in a slanted beam of light
+const MOTES = Array.from({ length: 40 }, () => ({ u: Math.random(), v: Math.random(), p: Math.random() * 6, s: Math.random() * 1.6 + .6 }));
+function motes(x0, y0, x1, y1, w, a) {
+  X.save(); MOTES.forEach(m => { m.u = (m.u + .004 * (1 + Math.sin(S.t + m.p) * .5) / 6) % 1;
+    const t = m.u, px = x0 + (x1 - x0) * t + (m.v - .5) * w + Math.sin(S.t * .7 + m.p) * 8, py = y0 + (y1 - y0) * t;
+    X.fillStyle = `rgba(255,236,200,${a * (.5 + .5 * Math.sin(S.t * 2 + m.p))})`; X.beginPath(); X.arc(px, py, m.s, 0, 7); X.fill(); }); X.restore();
+}
+// snow seen through window panes
+const SNOW = Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random(), s: Math.random() * 1.6 + .7, v: Math.random() * .08 + .05, p: Math.random() * 6 }));
+function windowSnow(rects, dt) {
+  X.save(); X.beginPath(); rects.forEach(r => X.rect(...r)); X.clip();
+  const x0 = Math.min(...rects.map(r => r[0])), x1 = Math.max(...rects.map(r => r[0] + r[2])), y0 = Math.min(...rects.map(r => r[1])), y1 = Math.max(...rects.map(r => r[1] + r[3]));
+  X.fillStyle = 'rgba(245,245,250,.8)';
+  SNOW.forEach(s => { s.y = (s.y + s.v * dt) % 1; const px = x0 + ((s.x + Math.sin(S.t * .6 + s.p) * .01) % 1) * (x1 - x0), py = y0 + s.y * (y1 - y0);
+    X.beginPath(); X.arc(px, py, s.s, 0, 7); X.fill(); }); X.restore();
+}
+function signal(x, y, r, period) { if ((S.t % period) < period * .5) glowAt(x, y, r, '235,190,140', .45); }
+function drawAmbient(sc, dt) {
+  const f = S.f;
+  if (EMIT[sc]) puffs(sc, dt, EMIT[sc]);
+  if (sc === 'pa') { mist(360, 120, 9, .1); }
+  if (sc === 'pb') { mist(330, 140, -7, .12); lamp(1100, 150, 60, '255,200,120', .35); }
+  if (sc === '1a') { lamp(440, 196, 90, '255,200,120', .4); lamp(1186, 305, 55, '255,200,120', .3); signal(832, 376, 18, 2.2); mist(420, 110, 12, .08); }
+  if (sc === '1b') { motes(300, 20, 520, 520, 120, .5); if (f.lamba) lamp(1035, 60, 70, '255,200,120', .3); }
+  if (sc === '1c') { mist(300, 130, 10, .14); mist(250, 100, -6, .08); lamp(236, 210, 50, '255,200,120', .4); lamp(337, 245, 40, '255,200,120', .35); lamp(588, 245, 50, '255,200,120', .4); signal(1222, 425, 22, 3); }
+  if (sc === '1d') { windowSnow([[2, 22, 98, 290], [180, 42, 222, 312], [446, 147, 98, 168], [566, 200, 38, 110], [656, 226, 44, 100], [740, 206, 58, 114], [840, 226, 30, 100]], dt);
+    lamp(741, 25, 60, '255,200,120', .35); lamp(762, 116, 55, '255,200,120', .35); }
+}
+function drawAmbientFront(sc, dt) {
+  const f = S.f;
+  // darkness is laid over everything, Lehim included; the seed keeps shining through it
+  let dark = false;
+  if (sc === 'pa' && (!f.cornerLit || (f.litT !== undefined && f.litT < 1.5))) {
+    let a = .88; if (f.cornerLit) { f.litT += dt; a = .88 * (1 - f.litT / 1.5); }
+    const g = X.createRadialGradient(1190, 620, 20, 1190, 620, 190); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+    X.fillStyle = g; X.fillRect(1000, 430, 280, 290); dark = L.x > 1000;
+  }
+  if (sc === '1b' && !f.lamba) {
+    X.fillStyle = 'rgba(8,7,6,.5)'; X.fillRect(0, 0, W, H); dark = true;
+    if (!f.benchLit || f.litT < 1.5) { let a = .8; if (f.benchLit) { f.litT += dt; a = .8 * (1 - f.litT / 1.5); }
+      const g = X.createRadialGradient(384, 590, 10, 384, 590, 150); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(1, 'rgba(0,0,0,0)'); X.fillStyle = g; X.fillRect(230, 440, 310, 250); }
+    if (f.benchLit && !f.ampul) { glowAt(384, 600, 40, '150,220,100', .3); icon('ampul', 384, 600, 28, '#d8cfbf'); }
+  }
+  if (dark && L.alpha > 0) { const k = 190 * scaleAt(L.y) / 279; glowAt(L.x + L.face * (165 - 119) * k, L.y - (279 - 187) * k, 60 * k, '170,235,110', .35); }
+  // Düdük's frosty breath while he is cold
+  if (sc === '1d' && !f.dudukGone && f.duduk !== 'warm') { const u = (S.t % 3) / 3; if (u < .6) glowAt(872 + u * 30, 452 - u * 40, 8 + u * 22, '235,238,242', .35 * (1 - u / .6)); }
+}
+
 // faint chevrons on scene exits
 function drawExits() {
   (HS[S.scene] || []).forEach(h => {

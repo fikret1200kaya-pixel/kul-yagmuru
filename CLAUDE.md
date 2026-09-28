@@ -15,6 +15,15 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 - Kahraman: Lehim (düğme gözlü teneke tamirci, gri atkı, sönük fener). Tohum: Filiz. Değerler: Canlılık (0-5, sayı olarak gösterilmez; tohumun parlaklığıyla hissedilir), Işık, Çark.
 - Tohum gücünü bulmacada kullanmak bedavadır; bir canlıya hayat vermek 1 Canlılık harcar.
 
+## Sahne hissi (her yeni sahnede uygulanır)
+- **Arka plan durağan kalmaz:** Her sahneye ortam hareketi eklenir: baca dumanı ve buhar (`EMIT`), titreşen fenerler (`lamp`), sürüklenen sis (`mist`), ışık huzmesinde toz (`motes`), pencere dışında kar (`windowSnow`), yanıp sönen sinyaller (`signal`). Kod `drawAmbient` / `drawAmbientFront` içinde durur.
+- **Lehim fotoğrafın üstünde gezmez:**
+  - Öndeki nesneler `FG[sahne]` çokgenleriyle arka plandan kesilip taban çizgilerine (`y`) göre Lehim'in önüne çizilir.
+  - Karakterler ve sahne eşyaları `dq(y, çiz)` ile aynı derinlik sırasına girer.
+  - Karanlık, derinlik sırasından sonra en üste serilir; tohumun ışığı karanlığın içinden parlar.
+  - Lehim sahnenin ışığını alır (`lehimTint`).
+- **Nesneyi kapatmaz:** Etkin alanların `stand` noktası nesnenin yanında seçilir, üstünde değil. Lehim nesneye döner ve elini uzatır (`reach`).
+
 ## Kod yapısı (index.html)
 - Sahneler `HS[sahne]` dizisindeki etkin alanlardır: `r` dokunma dikdörtgeni, `stand` Lehim'in durduğu nokta, `tap`/`use[eşya]`/`light` işleyicileri, `to` sahne çıkışı.
 - `GEO` her sahnenin yürünebilir zeminini ve Lehim'in ölçeğini, `DRAW1` 1. Bölüm sahnelerinin kodla çizilen katmanlarını, `drawOverlayB1` yakın çekimleri tutar.
