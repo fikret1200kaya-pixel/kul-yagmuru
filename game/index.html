@@ -984,7 +984,7 @@ HS['3a'] = [
       next(); } }
 ];
 HS['3b'] = [
-  { id: 'toIskele', to: '3a', spawn: [1150, 522], r: [0, 250, 190, 470], stand: [250, 650] },
+  { id: 'toIskele', to: '3a', spawn: [1150, 522], r: [0, 560, 190, 160], stand: [230, 660] }, // down the spiral stairs
   { id: 'lens', r: [490, 15, 320, 310], stand: [640, 600], tap() { S.overlay = { type: 'lens', t: 0 }; },
     use: { lens1: () => lensPut(0, 'lens1'), lens2: () => lensPut(1, 'lens2'), lens3: () => lensPut(2, 'lens3') } },
   { id: 'toz', r: [180, 330, 110, 50], stand: [330, 600], on: () => !S.f.lens1Alindi, tap() { S.f.lens1Alindi = 1; addItem('lens1'); clank(); } },
@@ -2980,7 +2980,8 @@ function showHint() {
 // ---------- input ----------
 let drag = null, down = null;
 function pt(e) { const r = C.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height }; }
-function hsAt(p) { return (HS[S.scene] || []).find(h => (!h.on || h.on()) && inRect(p, h.r)); }
+// where an exit overlaps something to pick up or use, the thing wins: exits only catch taps nothing else wants
+function hsAt(p) { const hit = (HS[S.scene] || []).filter(h => (!h.on || h.on()) && inRect(p, h.r)); return hit.find(h => !h.to) || hit[0]; }
 C.addEventListener('pointerdown', e => {
   e.preventDefault(); const p = pt(e); audioStart();
   if (S.mode === 'title') {
