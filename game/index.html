@@ -2982,6 +2982,27 @@ function showHint() {
   if (id === 'corner' || (id === 'lehim' && !S.f.vidaTaken)) say(['goz', 'karanlik']);
 }
 
+// ---------- mid-chapter save ----------
+// every few seconds, while Lehim stands quietly, the chapter's whole state is written down; "Devam et" brings it back
+function durumKaydet() {
+  if (!S.bolum || S.mode !== 'play' || S.overlay || S.lock || L.hop || L.climb || L.onLake || L.moving || S.root || S.fade > .2) return;
+  try { localStorage.setItem('ky_durum', JSON.stringify({ bolum: S.bolum, scene: S.scene, f: S.f, inv: S.inv, halos: S.halos, x: L.x, y: L.y, arm: L.arm,
+    dost: S.dost, isik: S.isik, cark: S.cark, canlilik: S.canlilik, hafiza: S.hafiza, bought: S.bought })); } catch (e) {}
+}
+function devamEt() {
+  let s = null, d = null; try { s = JSON.parse(localStorage.getItem('ky_bolum') || 'null'); d = JSON.parse(localStorage.getItem('ky_durum') || 'null'); } catch (e) {}
+  const n = !s ? 0 : Math.min(6, s.bitti ? s.bolum + 1 : s.bolum);
+  if (!n) { S.mode = 'cin'; S.cin = { t: 0 }; musicBox(); return; }
+  [null, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5, startBolum6][n](true);
+  if (!d || d.bolum !== n || !d.f) return;
+  S.f = d.f; S.inv = d.inv || S.inv; S.halos = d.halos || S.halos; S.scene = d.scene; L.x = L.tx = d.x; L.y = L.ty = d.y; L.arm = d.arm !== false;
+  S.dost = d.dost || S.dost; S.isik = d.isik; S.cark = d.cark; S.canlilik = d.canlilik; S.hafiza = d.hafiza; S.bought = d.bought || {};
+  L.climb = 0; L.climbS = null; L.onLake = 0; S.card.resume = 1; colorDirty = true;
+  // painted things already taken are patched over again
+  if (S.f.varil) stamp('3a', 'patch_varil', 186, 588); if (S.f.lambalarAlindi) stamp('3b', 'patch_lambalar', 106, 168);
+}
+function durumSil() { try { localStorage.removeItem('ky_durum'); } catch (e) {} }
+
 // ---------- input ----------
 let drag = null, down = null;
 function pt(e) { const r = C.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height }; }
@@ -2990,7 +3011,9 @@ function hsAt(p) { const hit = (HS[S.scene] || []).filter(h => (!h.on || h.on())
 C.addEventListener('pointerdown', e => {
   e.preventDefault(); const p = pt(e); audioStart();
   if (S.mode === 'title') {
-    if (S.saved) { const [top, step] = titleRows(); if (p.y > top - 20) { const n = clamp(Math.floor((p.y - (top - 20)) / step) + 1, 1, S.saved); [null, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5, startBolum6][n](true); return; } }
+    if (S.saved) { const [top, step] = titleRows(); if (p.y > top - 20) { const n = clamp(Math.floor((p.y - (top - 20)) / step) + 1, 1, S.saved); durumSil(); [null, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5, startBolum6][n](true); return; } }
+    if (S.saved && p.x > W - 260 && p.y < 90) { durumSil(); S.mode = 'cin'; S.cin = { t: 0 }; musicBox(); return; } // Yeni oyun
+    if (S.saved) { devamEt(); return; }
     S.mode = 'cin'; S.cin = { t: 0 }; musicBox(); return;
   }
   if (S.mode === 'cin') { S.cin.t = Math.max(S.cin.t, 9.2); return; }
@@ -3890,14 +3913,15 @@ function drawTitle(dt) {
   X.fillStyle = '#0e0d0c'; X.fillRect(0, 0, W, H); drawAsh(dt, .8);
   X.save(); X.textAlign = 'center'; X.fillStyle = '#e9e2d4';
   X.font = '700 96px "Cormorant Garamond", Georgia, serif'; X.fillText('KÜL YAĞMURU', W / 2, 300);
-  X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('Son Tohumun Yolculuğu · Prolog', W / 2, 350);
+  X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText('Son Tohumun Yolculuğu', W / 2, 350);
   if (S.saved) { const [top, step] = titleRows(); X.font = `600 ${S.saved > 4 ? 22 : 24}px "Cormorant Garamond", Georgia, serif`; X.fillStyle = '#d8cfbf';
     ['1. Bölüm: Durmuş Saatler İstasyonu ›', '2. Bölüm: Borular Mahallesi ›', '3. Bölüm: Kül Gölü ›', '4. Bölüm: Terk Edilmiş Lunapark ›', '5. Bölüm: Büyük Fırın ›', '6. Bölüm: Seranın Kalbi ›'].slice(0, S.saved).forEach((t, i) => X.fillText(t, W / 2, top + i * step)); }
   const p = .7 + .3 * Math.sin(S.t * 3); X.globalAlpha = p;
   const g = X.createRadialGradient(W / 2, 470, 2, W / 2, 470, 60); g.addColorStop(0, 'rgba(180,240,120,.9)'); g.addColorStop(1, 'rgba(120,200,80,0)');
   X.fillStyle = g; X.beginPath(); X.arc(W / 2, 470, 60, 0, 7); X.fill();
   X.fillStyle = '#17120e'; X.beginPath(); X.moveTo(W / 2 - 12, 452); X.lineTo(W / 2 + 18, 470); X.lineTo(W / 2 - 12, 488); X.closePath(); X.fill();
-  X.globalAlpha = 1; X.font = '500 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#6f685e'; X.fillText('Sesi açın · Dokunarak başlayın', W / 2, S.saved ? titleRows()[0] - 38 : 580);
+  X.globalAlpha = 1; X.font = '500 22px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#6f685e'; X.fillText(S.saved ? 'Kaldığın yerden devam etmek için dokun' : 'Sesi açın · Dokunarak başlayın', W / 2, S.saved ? titleRows()[0] - 38 : 580);
+  if (S.saved) { X.font = '600 24px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.textAlign = 'right'; X.fillText('Yeni oyun ›', W - 36, 52); }
   X.restore();
 }
 function drawCin(dt) {
@@ -3921,7 +3945,7 @@ function drawCard(dt) {
   X.font = '500 30px "Cormorant Garamond", Georgia, serif'; X.fillStyle = '#9b9387'; X.fillText(n + '. Bölüm', W / 2, 300);
   X.font = '700 72px "Cormorant Garamond", Georgia, serif'; X.fillStyle = CARD[1]; X.fillText(CARD[0], W / 2, 380);
   X.restore();
-  if (t > 3.6) { S.mode = 'play'; S.fade = 1; S.fadeTarget = 0; if (n > 1) ENTER[n + 'a'](); else setTimeout(() => say(['saat', 'soru'], 2.6), 900); }
+  if (t > 3.6) { S.mode = 'play'; S.fade = 1; S.fadeTarget = 0; if (c.resume) { ENTER[S.scene] && ENTER[S.scene](); } else if (n > 1) ENTER[n + 'a'](); else setTimeout(() => say(['saat', 'soru'], 2.6), 900); }
 }
 function drawFiliz(dt) {
   // the seed grows in Lehim's chest window at the end of a chapter (Tohum → Filiz → İki yaprak)
@@ -4074,6 +4098,7 @@ function step(dt) {
       if (u >= 1) { L.hop = null; tone(330, 0, .12, .04, 'triangle'); h.then && h.then(); } }
     if (L.anim) { L.animT -= dt; if (L.animT <= 0) { const t = L.animThen; L.anim = null; L.animThen = null; if (L.alpha > 0 && S.scene !== 'pb') L.alpha = 1; t && t(); } }
     if (S.bubble) { S.bubble.t -= dt; if (S.bubble.t <= 0) S.bubble = null; }
+    S.saveT = (S.saveT || 0) + dt; if (S.saveT > 4) { S.saveT = 0; durumKaydet(); }
     if (!S.overlay && !L.moving && !L.anim && !L.hop && !S.lock && !drag && !S.root) { L.idleT = (L.idleT || 0) + dt; if (L.idleT > 9) { L.idleT = -Math.random() * 6; idleAnim(); } }
     drawScene(dt);
   }
@@ -4101,7 +4126,7 @@ function ready() {
 Object.entries(SRC).forEach(([k, src]) => { const i = new Image(); i.onload = () => { IMG[k] = i; if (++loaded >= total) ready(); }; i.onerror = () => { if (++loaded >= total) ready(); }; i.src = src; });
 setTimeout(ready, 20000); // a stuck download must never keep the game on the loading screen
 // test hook: ?debug exposes the state for automated play-throughs
-if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, goScene, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5, startBolum6, hintB6, aynaYol, oluk, KUBBE, panAng, sonHesap, dostlar, climbUp, hintB5, boruTrace, hintB2, hintB3, hintB4, openDefter, TOPS, pistNext, aynaTrace };
+if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, devamEt, durumKaydet, goScene, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5, startBolum6, hintB6, aynaYol, oluk, KUBBE, panAng, sonHesap, dostlar, climbUp, hintB5, boruTrace, hintB2, hintB3, hintB4, openDefter, TOPS, pistNext, aynaTrace };
 })();
 </script>
 
