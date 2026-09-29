@@ -2166,7 +2166,7 @@ const DEFTER5 = {
 // way: [x, y, scale] of the footholds (0 is the roof walk); pan: hinge point, size and swing of each panel
 const KUBBE = {
   way: [[470, 600, .62], [600, 452, .44], [760, 352, .38], [935, 262, .33]],
-  pan: [{ x: 535, y: 440, w: 70, h: 110, sp: 1.25, amp: .75 }, { x: 690, y: 330, w: 64, h: 100, sp: 1.7, amp: .85 }, { x: 855, y: 240, w: 58, h: 92, sp: 2.7, amp: 1 }]
+  pan: [{ x: 535, y: 440, w: 70, h: 110, sp: .95, amp: .6 }, { x: 690, y: 330, w: 64, h: 100, sp: 1.2, amp: .7 }, { x: 855, y: 240, w: 58, h: 92, sp: 2.7, amp: 1 }]
 };
 // the door's five bell-pipes, left to right (very long .. very short), in the close-up's coordinates; the song is
 // Nota's two opening notes then the fair's bells: medium, small, medium, small, large
@@ -2208,6 +2208,9 @@ function panAng(i) {
   if (i === 2 && (S.t % 4.4) > 3.1) return .04 * Math.sin(S.t * 3);
   return p.amp * Math.sin(S.t * p.sp + i * 1.3);
 }
+// a panel can be tied while it hangs (nearly) straight down
+function panHazir(i) { return Math.abs(panAng(i)) < (i === 2 ? .12 : .28); }
+function panYakin(i) { return panHazir(i) || S.t - ((S.f.panOk || [])[i] || -9) < .7; }
 function climbHop(i, then) {
   const [x, y, s] = KUBBE.way[i], s0 = L.climbS || scaleAt(L.y);
   L.hop = { x0: L.x, y0: L.y, x1: x, y1: y, t: 0, s0, s1: s, then: () => { L.climb = i; if (!i) L.climbS = null; then && then(); } };
@@ -2219,7 +2222,7 @@ function climbDown(then) { const i = (L.climb || 0) - 1; if (i < 0) { then && th
 function panTie(i) {
   const f = S.f, p = KUBBE.pan[i];
   S.vine = { x0: KUBBE.way[i][0], y0: KUBBE.way[i][1] - 40 * KUBBE.way[i][2] / .4, x1: p.x, y1: p.y + p.h * .8, t: 0 };
-  if (Math.abs(panAng(i)) > .14) { setTimeout(() => { bad(); say(['sarmasik', 'x'], 1.4); }, 500); S.vine.miss = 1; return; }
+  if (!panYakin(i)) { setTimeout(() => { bad(); say(['panel', 'saat'], 1.6); }, 500); S.vine.miss = 1; return; }
   f.pan[i] = 1; tone(523, .2, .6, .05); tone(659, .4, .7, .05); clank();
   setTimeout(() => { halo(p.x, p.y + p.h / 2, 150); climbHop(i + 1); }, 700);
 }
@@ -2326,11 +2329,13 @@ function orchestra() {
 }
 
 HS['6a'] = [
-  { id: 'kaburga', r: [420, 470, 130, 130], stand: [470, 600], on: () => !L.climb, tap() {
+  { id: 'kaburga', r: [400, 520, 130, 90], stand: [470, 600], on: () => !L.climb, tap() {
       const f = S.f;
       if (f.pan[0]) { climbUp(3); return; }
-      say(['sarmasik', 'ok', 'kubbe'], 2.2); f.teach = 2.4; f.teachTo = [535, 500]; } },
-  ...[0, 1, 2].map(i => ({ id: 'pan' + i, r: [KUBBE.pan[i].x - 55, KUBBE.pan[i].y - 10, 110, KUBBE.pan[i].h + 30], stand: KUBBE.way[0].slice(0, 2), noWalk: i > 0, high: true,
+      say(['sarmasik', 'ok', 'panel'], 2.2); f.teach = 2.4; f.teachTo = [535, 500]; },
+    // the seed dropped at the rib's foot ties the lowest panel just the same
+    sar() { if (!S.f.pan[0]) panTie(0); } },
+  ...[0, 1, 2].map(i => ({ id: 'pan' + i, r: [KUBBE.pan[i].x - 55, KUBBE.pan[i].y - 10, 110, KUBBE.pan[i].h + 30], stand: KUBBE.way[0].slice(0, 2), noWalk: true, high: true,
     on: () => !S.f.pan[i],
     tap() {
       const f = S.f;
@@ -2390,7 +2395,7 @@ HS['6b'] = [
 DRAW1['6a'] = function (dt) {
   const f = S.f;
   // the glass panels swing on their hinges; a tied one is held to the rib by the vine
-  KUBBE.pan.forEach((p, i) => { const a = panAng(i);
+  KUBBE.pan.forEach((p, i) => { const a = panAng(i); if (panHazir(i)) (f.panOk = f.panOk || [])[i] = S.t;
     dq(i ? 0 : 440, () => {
     X.save(); X.translate(p.x, p.y); X.rotate(a * .5);
     X.fillStyle = 'rgba(205,215,220,.35)'; X.fillRect(-p.w / 2, 0, p.w, p.h); X.strokeStyle = '#5a4030'; X.lineWidth = 5; X.strokeRect(-p.w / 2, 0, p.w, p.h);
@@ -2398,7 +2403,7 @@ DRAW1['6a'] = function (dt) {
     X.fillStyle = '#3b2a1e'; X.beginPath(); X.arc(0, 0, 5, 0, 7); X.fill();
     if (f.pan[i]) { X.strokeStyle = '#6f9a4a'; X.lineWidth = 3; X.beginPath(); for (let y = 0; y <= p.h; y += 6) X.lineTo(-p.w / 2 - 4 + Math.sin(y * .3) * 4, y); X.stroke(); X.fillStyle = '#8fc36a'; for (let y = 8; y < p.h; y += 18) { X.beginPath(); X.ellipse(-p.w / 2 + 4, y, 5, 3, .5, 0, 7); X.fill(); } }
     X.restore(); }); });
-  if (!f.pan[2] && (S.t % 4.4) > 3.1 && L.climb === 2) glowAt(KUBBE.pan[2].x, KUBBE.pan[2].y + 40, 50, '220,235,240', .2);
+  { const i = L.climb || 0, p = KUBBE.pan[i]; if (p && !f.pan[i] && !L.hop) { if (panHazir(i)) glowAt(p.x, p.y + p.h / 2, 70, '170,235,120', .55); else glowAt(p.x, p.y + p.h / 2, 40, '240,235,220', .12); } }
   // the door, once the song has opened it
   if (f.kapi6) { f.kapiT += dt; const u = Math.min(1, f.kapiT / 1.8); X.save(); X.globalAlpha = u; X.fillStyle = 'rgba(30,26,20,.85)'; X.beginPath(); X.ellipse(1105, 455, 98, 110 * u, 0, 0, 7); X.fill(); X.restore();
     glowAt(1105, 470, 160, '200,235,170', .25 * u); }
