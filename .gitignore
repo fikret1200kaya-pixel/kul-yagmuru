@@ -1,2 +1,5 @@
 __pycache__/
 assets/proc/
+android/app/build/
+android/.gradle/
+android/app/src/main/assets/
