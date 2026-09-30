@@ -282,9 +282,11 @@ C.addEventListener('pointerup', e => {
     }
     // item dropped
     for (let i = 0; i < S.inv.length; i++) if (inRect(p, slotRect(i)) && S.inv[i] !== d.item) { say(['x'], 1.2); bad(); return; }
-    if (inRect(p, lehimBox())) { useOnLehim(d.item); return; }
+    // Prefer a matching world target over Lehim when their hit areas overlap.
+    // This lets an item dropped on an object work even when Lehim stands in front of it.
     const h = hsAt(p);
     if (h && h.use && h.use[d.item]) { walkTo(h.stand[0], h.stand[1], () => h.use[d.item]()); return; }
+    if (inRect(p, lehimBox())) { useOnLehim(d.item); return; }
     if (h) { walkTo(h.stand[0], h.stand[1], () => { say(['x'], 1.3); bad(); }); }
     return;
   }
