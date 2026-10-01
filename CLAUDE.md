@@ -68,6 +68,16 @@ Machinarium tarzı, diyalogsuz, el çizimi görünümlü point-and-click mobil o
 - **Boşta kalma:** Oyuncu 9 saniye dokunmazsa Lehim kendi kendine bir şey yapar (`IDLE`: etrafa bakar, ıslık çalar, gerinir, ayağını vurur, camını siler). Her dokunuş bunu keser.
 - **Dokunma halkası:** Her dokunuşta küçük bir halka belirir; etkileşimli bir şeye dokunulduysa halka daha parlaktır.
 
+## APK
+- `android/`: oyunu WebView içinde açan küçük Android projesi. Oyun `https://appassets.androidplatform.net/assets/game/index.html` adresinden yüklenir (`WebViewAssetLoader`), böylece tuval görselleri okuyabilir ve kayıt uygulamada kalır.
+- `.github/workflows/apk.yml`: `game/` ya da `android/` değişince GitHub'da APK üretir ve `apk-son` sürüm sayfasına koyar (https://github.com/fikret1200kaya-pixel/kul-yagmuru/releases/tag/apk-son). Bu ortamda Android SDK indirilemediği için APK burada değil GitHub'da üretilir.
+
+## Görsel sistem (GFX)
+- Bulmacalar kodla çizilen parçalarla kurulur: `metalPanel` (perçinli demir levha), `tileWell` (gömme hücre), `pipeTile` / `pipePath` (gölgeli bakır boru), `drawGear` (keskin pirinç ya da demir dişli, boyuta göre önbellekli), `carTop`, `mirrorAt`, `brickWall`.
+- Çıkışlar ve açılan kapılar parlak pirinç okla gösterilir (`drawExits`, kapılar `KAPILAR` tablosunda).
+- Alınabilir şeyler sahne kesimlerinin (`FG`) arkasında kalmaz: `drawOccluder` alınabilir hotspot'ların alanını keser (`isPick`).
+- Başlık: pirinç levhalı menü (`plaque`), giriş: üç sayfalık resimli kitap (`bookPage`).
+
 ## Sıradaki iş
 - Test sürümünde ipuçları sınırsız ve ücretsiz: `IPUCU_SINIRSIZ = true`. Yayından önce `false` yapılacak.
 - Test sürümünde devriyede iki kez yakalanınca Toplayıcı uyuklar (geçiş serbest). Oyuncu devriyeyi geçemedi: telefonda zamanlama ve saklanma yerleri gözden geçirilecek.
