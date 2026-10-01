@@ -163,7 +163,7 @@ function takeItem(id) { S.inv = S.inv.filter(i => i !== id); }
 // walkable floor per scene: x range, y range, and Lehim's scale at the far and near edge
 const GEO = {
   pa: { x: [140, 1085], y: [458, 700], s: [.82, .38] }, pb: { x: [250, 1180], y: [505, 690], s: [.82, .34] },
-  '1a': { x: [285, 1000], y: [566, 700], s: [.78, .3] }, '1b': { x: [245, 1030], y: [596, 705], s: [.84, .3] },
+  '1a': { x: [285, 1000], y: [566, 700], s: [.78, .3] }, '1b': { x: [245, 1030], y: [614, 705], s: [.86, .28] },
   '1c': { x: [130, 1150], y: [572, 705], s: [.78, .32] }, '1d': { x: [330, 1040], y: [578, 705], s: [.84, .34] },
   '2a': { x: [250, 1150], y: [585, 700], s: [.8, .3] }, '2b': { x: [230, 1110], y: [545, 700], s: [.85, .35] },
   '2c': { x: [150, 1150], y: [548, 705], s: [.72, .36] }, '2d': { x: [150, 1150], y: [612, 705], s: [.9, .28] },
@@ -3729,6 +3729,9 @@ function drawScene(dt) {
   DEPTHQ.push({ y: L.y, draw: () => drawLehimLit(dt) });
   if (S.bolum >= 2) DEPTHQ.push({ y: L.y + 1, draw: () => drawPirpir(dt) });
   DEPTHQ.sort((a, b) => a.y - b.y).forEach(d => d.draw());
+  // Lehim is never lost: where a cut-out stands in front of him, he shows through it faintly
+  if (L.alpha > 0) { const b = lehimBox(), over = (FG[sc] || []).filter(o => o.y > L.y && o.poly.some(([x]) => x > b[0] - 60) && o.poly.some(([x]) => x < b[0] + b[2] + 60) && o.poly.some(([, y]) => y > b[1]) && o.poly.some(([, y]) => y < b[1] + b[3]));
+    if (over.length) { X.save(); X.beginPath(); over.forEach(o => { o.poly.forEach(([x, y], i) => i ? X.lineTo(x, y) : X.moveTo(x, y)); X.closePath(); }); X.clip(); X.globalAlpha = .55; drawLehimLit(0); X.restore(); } }
   drawRoot(dt);
   drawAmbientFront(sc, dt);
   if (DRAW1[sc] && !S.overlay) drawExits();
@@ -4023,6 +4026,18 @@ const KAPILAR = { pb: [['gate', () => S.f.gateOpen && S.f.farewell, 'yukari']], 
   '3a': [['merdiven', () => S.f.sal, 'asagi']], '4a': [['kapi', () => S.f.kapi, 'yukari']], '4d': [['kapi4', () => S.f.sir, 'yukari']],
   '5a': [['kapi5a', () => S.f.kapi && S.f.guard5 !== 'kapi', 'yukari']], '5b': [['toKoruk', () => true, 'sag']], '5c': [['kapi5c', () => S.f.korukGecti, 'yukari']], '5d': [['cati', () => !!S.f.firin, 'yukari']],
   '4c': [['toTiyatro', () => true, 'sag']], '6a': [['kapi6', () => S.f.kapi6, 'yukari'], ['kaburga', () => !L.climb && !S.f.kapi6, 'yukari']] };
+// spots where Lehim stands to act are moved off anything that would hide him, to the nearest open floor
+function standlariDuzelt() {
+  const inPoly = (x, y, poly) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+  Object.keys(HS).forEach(sc => { const g = GEO[sc], fg = FG[sc] || []; if (!g || !fg.length) return;
+    const gizli = (sx, sy) => { const s = g.s[0] + g.s[1] * (sy - g.y[0]) / (g.y[1] - g.y[0]), hh = 190 * s, w = hh * .5; let hit = 0;
+      for (let i = 0; i <= 6; i++) for (let j = 0; j <= 8; j++) if (fg.some(o => o.y > sy && inPoly(sx - w / 2 + w * i / 6, sy - hh * j / 8, o.poly))) hit++; return hit / 63; };
+    HS[sc].forEach(h => { if (!h.stand || h.noWalk) return; const sx = h.stand[0], sy = clamp(h.stand[1], g.y[0], g.y[1]); if (gizli(sx, sy) <= .12) return;
+      let best = null;
+      for (let dy = 0; dy <= 100; dy += 10) for (let dx = 0; dx <= 260; dx += 10) for (const sg of [1, -1]) { const x = clamp(sx + sg * dx, g.x[0], g.x[1]), y = clamp(sy + dy, g.y[0], g.y[1]);
+        if (gizli(x, y) <= .06) { const d = Math.hypot(x - sx, (y - sy) * 1.5); if (!best || d < best[2]) best = [x, y, d]; } }
+      if (best) h.stand = [best[0], best[1]]; }); });
+}
 function kapilariIsaretle() { Object.entries(KAPILAR).forEach(([sc, list]) => list.forEach(([id, fn, dir]) => { const h = (HS[sc] || []).find(x => x.id === id); if (h) { h.exit = fn; h.dir = dir; } })); }
 // where Lehim can go next: a bobbing brass arrow in the direction of the way out (doors once they are open)
 function exitDir(h) { const r = h.r; if (h.dir) return h.dir; if (r[0] < 40) return 'sol'; if (r[0] + r[2] > W - 40) return 'sag'; if (r[1] > 540) return 'asagi'; return 'yukari'; }
@@ -4286,7 +4301,7 @@ function step(dt) {
   S.fade += (S.fadeTarget - S.fade) * Math.min(1, dt * 5);
   if (S.fade > .01) { X.fillStyle = `rgba(0,0,0,${S.fade})`; X.fillRect(0, 0, W, H); }
 }
-kapilariIsaretle();
+kapilariIsaretle(); standlariDuzelt();
 requestAnimationFrame(frame);
 
 // every image is loaded up front, but grey copies and scene canvases are made only when first drawn
@@ -4308,7 +4323,7 @@ function ready() {
 Object.entries(SRC).forEach(([k, src]) => { const i = new Image(); i.onload = () => { IMG[k] = i; if (++loaded >= total) ready(); }; i.onerror = () => { if (++loaded >= total) ready(); }; i.src = src; });
 setTimeout(ready, 20000); // a stuck download must never keep the game on the loading screen
 // test hook: ?debug exposes the state for automated play-throughs
-if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, devamEt, durumKaydet, goScene, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5, startBolum6, hintB6, aynaYol, oluk, KUBBE, panAng, sonHesap, dostlar, climbUp, hintB5, boruTrace, hintB2, hintB3, hintB4, openDefter, TOPS, pistNext, aynaTrace };
+if (/[?&]debug\b/.test(location.search)) window.KY = { S, L, HS, FG, GEO, devamEt, durumKaydet, goScene, startBolum1, startBolum2, startBolum3, startBolum4, startBolum5, startBolum6, hintB6, aynaYol, oluk, KUBBE, panAng, sonHesap, dostlar, climbUp, hintB5, boruTrace, hintB2, hintB3, hintB4, openDefter, TOPS, pistNext, aynaTrace };
 })();
 </script>
 
